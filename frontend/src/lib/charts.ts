@@ -44,12 +44,12 @@ export const CHART_COLORS = {
  */
 export const PRICE_DIVERGING_COLORS = {
   high: {
-    near: { light: '#e9a1a1', dark: '#f0a6a3' },
-    far: { light: '#b53232', dark: '#d03b3b' },
+    near: { light: '#e05c5c', dark: '#ec6a60' },
+    far: { light: '#a02525', dark: '#c73535' },
   },
   low: {
-    near: { light: '#9ccf9b', dark: '#a4d8a4' },
-    far: { light: '#0a8a0a', dark: '#0ca30c' },
+    near: { light: '#48b148', dark: '#54c05a' },
+    far: { light: '#0a7d0a', dark: '#0c9a0c' },
   },
 } as const
 
