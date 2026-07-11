@@ -140,6 +140,19 @@ export function formatCtValue(value: number): string {
   return ctValueFormat.format(value)
 }
 
+const ctSummaryFormat = new Intl.NumberFormat('de-DE', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+/**
+ * Gerundeter ct/kWh-Wert für Überschriften und Beschriftungen: `38.9155` →
+ * `"38,92"`. Exakte Werte stehen weiterhin im Tooltip und in den Tabellen.
+ */
+export function formatCtSummary(value: number): string {
+  return ctSummaryFormat.format(value)
+}
+
 const kwhValueFormat = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 3,
   maximumFractionDigits: 3,

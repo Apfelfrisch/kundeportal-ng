@@ -22,6 +22,7 @@ import {
   PRICE_DIVERGING_COLORS,
   buildQuarterHourSeries,
   chartDateSearchSchema,
+  formatCtSummary,
   formatCtValue,
   formatDayHeading,
   formatUhrzeit,
@@ -111,7 +112,7 @@ function MarketPricesPage() {
                   {withTariffCosts ? ' (inkl. Tarifkosten)' : ''}
                 </span>
                 <span className="block text-2xl font-semibold tabular-nums">
-                  {formatCtValue(averagePrice)} ct/kWh
+                  {formatCtSummary(averagePrice)} ct/kWh
                 </span>
               </p>
             ) : null}
@@ -125,14 +126,14 @@ function MarketPricesPage() {
                   />
                   <Label htmlFor="tariff-costs">
                     Tarifkosten aufschlagen (
-                    {formatCtValue(tariffCosts.total_ct)} ct/kWh)
+                    {formatCtSummary(tariffCosts.total_ct)} ct/kWh)
                   </Label>
                 </div>
                 {withTariffCosts ? (
                   <p className="text-muted-foreground mt-1 text-sm">
                     {Object.entries(tariffCosts.components)
                       .map(
-                        ([label, ct]) => `${label} ${formatCtValue(ct)}`,
+                        ([label, ct]) => `${label} ${formatCtSummary(ct)}`,
                       )
                       .join(' · ')}{' '}
                     ct/kWh, netto
@@ -174,7 +175,7 @@ function MarketPricesPage() {
                           baseline: averagePrice,
                           high: PRICE_DIVERGING_COLORS.high,
                           low: PRICE_DIVERGING_COLORS.low,
-                          label: `Ø ${formatCtValue(averagePrice)} ct/kWh`,
+                          label: `Ø ${formatCtSummary(averagePrice)} ct/kWh`,
                         },
                       }
                     : {}),

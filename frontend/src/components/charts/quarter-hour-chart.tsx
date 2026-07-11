@@ -65,6 +65,35 @@ function baselineOffset(baseline: number, top: number, bottom: number): number {
   return Math.min(Math.max((top - baseline) / span, 0), 1)
 }
 
+/**
+ * Beschriftung der Basislinie: rechtsbündig knapp über der Linie, mit Halo
+ * in Kartenfarbe, damit sie über der Kurve lesbar bleibt (statt des rohen
+ * Recharts-Textes, der mit der Linie kollidiert). `viewBox` liefert Recharts.
+ */
+function BaselineLabel(props: {
+  viewBox?: { x?: number; y?: number; width?: number }
+  value: string
+}) {
+  const { x = 0, y = 0, width = 0 } = props.viewBox ?? {}
+
+  return (
+    <text
+      x={x + width - 4}
+      y={y - 7}
+      textAnchor="end"
+      fontSize={12}
+      fontWeight={600}
+      fill="var(--foreground)"
+      stroke="var(--card)"
+      strokeWidth={4}
+      paintOrder="stroke"
+      style={{ fontVariantNumeric: 'tabular-nums' }}
+    >
+      {props.value}
+    </text>
+  )
+}
+
 interface QuarterHourChartProps {
   data: Array<QuarterHourPoint>
   /** Fenstergrenzen (`yyyy-mm-dd`) aus der API-Antwort. */
@@ -235,13 +264,13 @@ export function QuarterHourChart({
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          fontSize={11}
+          fontSize={12}
           // Eigene Zeile unter den Ticks für die Achsenbeschriftung.
           height={44}
           label={{
             value: 'Uhrzeit',
             position: 'insideBottomRight',
-            fontSize: 11,
+            fontSize: 12,
             fill: 'var(--muted-foreground)',
           }}
         />
@@ -254,14 +283,14 @@ export function QuarterHourChart({
           tickLine={false}
           axisLine={false}
           tickMargin={4}
-          fontSize={11}
+          fontSize={12}
           tickFormatter={(value: number) => value.toLocaleString('de-DE')}
           label={{
             value: unit,
             angle: -90,
             position: 'insideLeft',
             style: { textAnchor: 'middle' },
-            fontSize: 11,
+            fontSize: 12,
             fill: 'var(--muted-foreground)',
           }}
         />
@@ -274,7 +303,7 @@ export function QuarterHourChart({
             label={{
               value: formatTimeTick(boundary),
               position: 'insideTopLeft',
-              fontSize: 11,
+              fontSize: 12,
               fill: 'var(--muted-foreground)',
             }}
           />
@@ -286,12 +315,7 @@ export function QuarterHourChart({
               y={entry.diverging.baseline}
               stroke="var(--muted-foreground)"
               strokeDasharray="6 4"
-              label={{
-                value: entry.diverging.label,
-                position: 'insideBottomLeft',
-                fontSize: 11,
-                fill: 'var(--muted-foreground)',
-              }}
+              label={<BaselineLabel value={entry.diverging.label} />}
             />
           ),
         )}
@@ -303,7 +327,7 @@ export function QuarterHourChart({
             label={{
               value: 'Jetzt',
               position: 'insideTopRight',
-              fontSize: 11,
+              fontSize: 12,
               fill: 'var(--destructive)',
             }}
           />
