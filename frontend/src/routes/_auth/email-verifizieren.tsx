@@ -43,7 +43,7 @@ function VerifyEmailPage() {
     mutationFn: () => {
       const signedQuery = new URLSearchParams(
         Object.fromEntries(
-          Object.entries(search).filter(
+          Object.entries<string | undefined>(search).filter(
             (entry): entry is [string, string] => entry[1] !== undefined,
           ),
         ),

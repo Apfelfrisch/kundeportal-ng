@@ -29,10 +29,11 @@ export const Route = createFileRoute('/_auth/kunde/$customerId')({
   component: CustomerLayout,
 })
 
-interface NavItem {
-  label: string
-  available: boolean
-}
+const navItems = [
+  { label: 'Postfach', to: '/kunde/$customerId/postfach' },
+  { label: 'Profil', to: '/kunde/$customerId/profil' },
+  { label: 'Kontakt', to: '/kunde/$customerId/kontakt' },
+] as const
 
 function CustomerLayout() {
   const { session } = Route.useRouteContext()
@@ -40,15 +41,10 @@ function CustomerLayout() {
   const { data: tenant } = useQuery(tenantQuery)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
-  // „Vertrag“ ist die Index-Seite; die übrigen Bereiche folgen in Phase 9.
-  const upcomingItems: Array<NavItem> = [
-    { label: 'Postfach', available: false },
-    { label: 'Profil', available: false },
-    { label: 'Kontakt', available: false },
-    ...(tenant?.features.dynamic_electric_prices
-      ? [{ label: 'Börsenpreise', available: false }]
-      : []),
-  ]
+  // Börsenpreise folgen in Phase 11 (nur bei aktiviertem Feature-Flag).
+  const upcomingItems = tenant?.features.dynamic_electric_prices
+    ? ['Börsenpreise']
+    : []
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -72,14 +68,25 @@ function CustomerLayout() {
                 Vertrag
               </Link>
             </Button>
-            {upcomingItems.map((item) => (
+            {navItems.map((item) => (
+              <Button key={item.label} variant="ghost" asChild>
+                <Link
+                  to={item.to}
+                  params={{ customerId }}
+                  activeProps={{ className: 'text-primary font-semibold' }}
+                >
+                  {item.label}
+                </Link>
+              </Button>
+            ))}
+            {upcomingItems.map((label) => (
               <span
-                key={item.label}
+                key={label}
                 aria-disabled="true"
                 title="Bald verfügbar"
                 className="text-muted-foreground/60 cursor-not-allowed px-4 py-2 text-sm font-medium"
               >
-                {item.label}
+                {label}
               </span>
             ))}
           </nav>
@@ -109,14 +116,25 @@ function CustomerLayout() {
                   >
                     Vertrag
                   </Link>
-                  {upcomingItems.map((item) => (
-                    <span
+                  {navItems.map((item) => (
+                    <Link
                       key={item.label}
+                      to={item.to}
+                      params={{ customerId }}
+                      onClick={() => setMobileNavOpen(false)}
+                      className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  {upcomingItems.map((label) => (
+                    <span
+                      key={label}
                       aria-disabled="true"
                       title="Bald verfügbar"
                       className="text-muted-foreground/60 cursor-not-allowed px-3 py-2 text-sm font-medium"
                     >
-                      {item.label}
+                      {label}
                     </span>
                   ))}
                 </nav>

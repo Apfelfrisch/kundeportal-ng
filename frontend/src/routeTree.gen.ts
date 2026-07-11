@@ -23,6 +23,12 @@ import { Route as AuthInternIndexRouteImport } from './routes/_auth/intern.index
 import { Route as GuestAccountEinrichtenRouteImport } from './routes/_guest/account.einrichten'
 import { Route as AuthKundeCustomerIdRouteImport } from './routes/_auth/kunde.$customerId'
 import { Route as AuthKundeCustomerIdIndexRouteImport } from './routes/_auth/kunde.$customerId.index'
+import { Route as AuthKundeCustomerIdProfilRouteImport } from './routes/_auth/kunde.$customerId.profil'
+import { Route as AuthKundeCustomerIdPostfachRouteImport } from './routes/_auth/kunde.$customerId.postfach'
+import { Route as AuthKundeCustomerIdKontaktRouteImport } from './routes/_auth/kunde.$customerId.kontakt'
+import { Route as AuthKundeCustomerIdVertragContractIdRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId'
+import { Route as AuthKundeCustomerIdVertragContractIdIndexRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.index'
+import { Route as AuthKundeCustomerIdVertragContractIdAendernFormTypeRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.aendern.$formType'
 
 const VertragBestaetigenRoute = VertragBestaetigenRouteImport.update({
   id: '/vertrag-bestaetigen',
@@ -94,6 +100,42 @@ const AuthKundeCustomerIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthKundeCustomerIdRoute,
   } as any)
+const AuthKundeCustomerIdProfilRoute =
+  AuthKundeCustomerIdProfilRouteImport.update({
+    id: '/profil',
+    path: '/profil',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
+const AuthKundeCustomerIdPostfachRoute =
+  AuthKundeCustomerIdPostfachRouteImport.update({
+    id: '/postfach',
+    path: '/postfach',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
+const AuthKundeCustomerIdKontaktRoute =
+  AuthKundeCustomerIdKontaktRouteImport.update({
+    id: '/kontakt',
+    path: '/kontakt',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
+const AuthKundeCustomerIdVertragContractIdRoute =
+  AuthKundeCustomerIdVertragContractIdRouteImport.update({
+    id: '/vertrag/$contractId',
+    path: '/vertrag/$contractId',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
+const AuthKundeCustomerIdVertragContractIdIndexRoute =
+  AuthKundeCustomerIdVertragContractIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthKundeCustomerIdVertragContractIdRoute,
+  } as any)
+const AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute =
+  AuthKundeCustomerIdVertragContractIdAendernFormTypeRouteImport.update({
+    id: '/aendern/$formType',
+    path: '/aendern/$formType',
+    getParentRoute: () => AuthKundeCustomerIdVertragContractIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,7 +149,13 @@ export interface FileRoutesByFullPath {
   '/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern/': typeof AuthInternIndexRoute
+  '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
+  '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
+  '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
+  '/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
+  '/kunde/$customerId/vertrag/$contractId/': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
+  '/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -119,7 +167,12 @@ export interface FileRoutesByTo {
   '/passwort-zuruecksetzen': typeof GuestPasswortZuruecksetzenRoute
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern': typeof AuthInternIndexRoute
+  '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
+  '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
+  '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/kunde/$customerId': typeof AuthKundeCustomerIdIndexRoute
+  '/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
+  '/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,7 +189,13 @@ export interface FileRoutesById {
   '/_auth/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/_guest/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/_auth/intern/': typeof AuthInternIndexRoute
+  '/_auth/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
+  '/_auth/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
+  '/_auth/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/_auth/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
+  '/_auth/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
+  '/_auth/kunde/$customerId/vertrag/$contractId/': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
+  '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,7 +211,13 @@ export interface FileRouteTypes {
     | '/kunde/$customerId'
     | '/account/einrichten'
     | '/intern/'
+    | '/kunde/$customerId/kontakt'
+    | '/kunde/$customerId/postfach'
+    | '/kunde/$customerId/profil'
     | '/kunde/$customerId/'
+    | '/kunde/$customerId/vertrag/$contractId'
+    | '/kunde/$customerId/vertrag/$contractId/'
+    | '/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -164,7 +229,12 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/account/einrichten'
     | '/intern'
+    | '/kunde/$customerId/kontakt'
+    | '/kunde/$customerId/postfach'
+    | '/kunde/$customerId/profil'
     | '/kunde/$customerId'
+    | '/kunde/$customerId/vertrag/$contractId'
+    | '/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   id:
     | '__root__'
     | '/'
@@ -180,7 +250,13 @@ export interface FileRouteTypes {
     | '/_auth/kunde/$customerId'
     | '/_guest/account/einrichten'
     | '/_auth/intern/'
+    | '/_auth/kunde/$customerId/kontakt'
+    | '/_auth/kunde/$customerId/postfach'
+    | '/_auth/kunde/$customerId/profil'
     | '/_auth/kunde/$customerId/'
+    | '/_auth/kunde/$customerId/vertrag/$contractId'
+    | '/_auth/kunde/$customerId/vertrag/$contractId/'
+    | '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -290,6 +366,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthKundeCustomerIdIndexRouteImport
       parentRoute: typeof AuthKundeCustomerIdRoute
     }
+    '/_auth/kunde/$customerId/profil': {
+      id: '/_auth/kunde/$customerId/profil'
+      path: '/profil'
+      fullPath: '/kunde/$customerId/profil'
+      preLoaderRoute: typeof AuthKundeCustomerIdProfilRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
+    '/_auth/kunde/$customerId/postfach': {
+      id: '/_auth/kunde/$customerId/postfach'
+      path: '/postfach'
+      fullPath: '/kunde/$customerId/postfach'
+      preLoaderRoute: typeof AuthKundeCustomerIdPostfachRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
+    '/_auth/kunde/$customerId/kontakt': {
+      id: '/_auth/kunde/$customerId/kontakt'
+      path: '/kontakt'
+      fullPath: '/kunde/$customerId/kontakt'
+      preLoaderRoute: typeof AuthKundeCustomerIdKontaktRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
+    '/_auth/kunde/$customerId/vertrag/$contractId': {
+      id: '/_auth/kunde/$customerId/vertrag/$contractId'
+      path: '/vertrag/$contractId'
+      fullPath: '/kunde/$customerId/vertrag/$contractId'
+      preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
+    '/_auth/kunde/$customerId/vertrag/$contractId/': {
+      id: '/_auth/kunde/$customerId/vertrag/$contractId/'
+      path: '/'
+      fullPath: '/kunde/$customerId/vertrag/$contractId/'
+      preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdIndexRouteImport
+      parentRoute: typeof AuthKundeCustomerIdVertragContractIdRoute
+    }
+    '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType': {
+      id: '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType'
+      path: '/aendern/$formType'
+      fullPath: '/kunde/$customerId/vertrag/$contractId/aendern/$formType'
+      preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRouteImport
+      parentRoute: typeof AuthKundeCustomerIdVertragContractIdRoute
+    }
   }
 }
 
@@ -305,12 +423,39 @@ const AuthInternRouteWithChildren = AuthInternRoute._addFileChildren(
   AuthInternRouteChildren,
 )
 
+interface AuthKundeCustomerIdVertragContractIdRouteChildren {
+  AuthKundeCustomerIdVertragContractIdIndexRoute: typeof AuthKundeCustomerIdVertragContractIdIndexRoute
+  AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute: typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
+}
+
+const AuthKundeCustomerIdVertragContractIdRouteChildren: AuthKundeCustomerIdVertragContractIdRouteChildren =
+  {
+    AuthKundeCustomerIdVertragContractIdIndexRoute:
+      AuthKundeCustomerIdVertragContractIdIndexRoute,
+    AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute:
+      AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute,
+  }
+
+const AuthKundeCustomerIdVertragContractIdRouteWithChildren =
+  AuthKundeCustomerIdVertragContractIdRoute._addFileChildren(
+    AuthKundeCustomerIdVertragContractIdRouteChildren,
+  )
+
 interface AuthKundeCustomerIdRouteChildren {
+  AuthKundeCustomerIdKontaktRoute: typeof AuthKundeCustomerIdKontaktRoute
+  AuthKundeCustomerIdPostfachRoute: typeof AuthKundeCustomerIdPostfachRoute
+  AuthKundeCustomerIdProfilRoute: typeof AuthKundeCustomerIdProfilRoute
   AuthKundeCustomerIdIndexRoute: typeof AuthKundeCustomerIdIndexRoute
+  AuthKundeCustomerIdVertragContractIdRoute: typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
 }
 
 const AuthKundeCustomerIdRouteChildren: AuthKundeCustomerIdRouteChildren = {
+  AuthKundeCustomerIdKontaktRoute: AuthKundeCustomerIdKontaktRoute,
+  AuthKundeCustomerIdPostfachRoute: AuthKundeCustomerIdPostfachRoute,
+  AuthKundeCustomerIdProfilRoute: AuthKundeCustomerIdProfilRoute,
   AuthKundeCustomerIdIndexRoute: AuthKundeCustomerIdIndexRoute,
+  AuthKundeCustomerIdVertragContractIdRoute:
+    AuthKundeCustomerIdVertragContractIdRouteWithChildren,
 }
 
 const AuthKundeCustomerIdRouteWithChildren =

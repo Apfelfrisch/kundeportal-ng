@@ -46,6 +46,11 @@ export function formatKwh(value: number): string {
   return `${kwhFormat.format(value)} kWh`
 }
 
+/** `1234.5` → `"1.234,5"` (de-DE, max. 2 Nachkommastellen) */
+export function formatNumber(value: number): string {
+  return kwhFormat.format(value)
+}
+
 /** ISO-Datum/Date → `"dd.MM.yyyy"` */
 export function formatDate(value: string | number | Date): string {
   return dateFormat.format(toDate(value))
