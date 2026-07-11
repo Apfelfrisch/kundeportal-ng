@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Menu } from 'lucide-react'
@@ -41,6 +41,14 @@ function CustomerLayout() {
   const { data: tenant } = useQuery(tenantQuery)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
+  // Nur der Kundenbereich trägt das volle Tenant-Portal-Theme (bei
+  // FriesenWerk dunkel); Login und Adminbereich bleiben neutral — wie im
+  // alten App-Split zwischen layout/main und layout/guest|company.
+  useEffect(() => {
+    document.documentElement.classList.add('portal')
+    return () => document.documentElement.classList.remove('portal')
+  }, [])
+
   // Börsenpreise nur bei aktiviertem Feature-Flag.
   const featureNavItems = tenant?.features.dynamic_electric_prices
     ? ([
@@ -57,7 +65,7 @@ function CustomerLayout() {
             params={{ customerId }}
             aria-label="Zur Übersicht"
           >
-            <TenantLogo className="h-8" />
+            <TenantLogo className="h-8" onDark />
           </Link>
           <nav className="ml-6 hidden items-center gap-1 md:flex">
             <Button variant="ghost" asChild>

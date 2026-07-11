@@ -97,6 +97,173 @@
   --sidebar-primary-foreground: #1d1d1b;
 }
 
+/*
+ * Voltaik-Check-Kundenbereich: helles Schwarz-Weiß-Design wie im alten
+ * public/css/kundenportal.css (voltaik-check.css war leer). Signatur:
+ * schwarze Buttons, die beim Hover invertieren, und dunkelblaue Textlinks.
+ */
+.theme-voltaik-check.portal {
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --ring: #000000;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+}
+
+/* Primäre Aktionen: schwarz, invertiert beim Hover (alte .customer-button). */
+.theme-voltaik-check.portal [data-variant='default'][data-size] {
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0.5rem;
+}
+
+.theme-voltaik-check.portal [data-variant='default'][data-size]:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Sekundäre Aktionen: weiß mit schwarzem Rand, fett, invertiert beim Hover
+   (alte .toggle-offcanvas-button). */
+.theme-voltaik-check.portal [data-variant='outline'][data-size] {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+  font-weight: 700;
+}
+
+.theme-voltaik-check.portal [data-variant='outline'][data-size]:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Hauptnavigation: Weiß auf Schwarz beim Hover (altes #main-nav). */
+.theme-voltaik-check.portal header [data-variant='ghost'][data-size]:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Textlinks im Inhalt: dunkelblau, beim Hover weiß auf blau (altes a:hover);
+   Buttons/Nav-Links tragen data-size und bleiben außen vor. */
+.theme-voltaik-check.portal main a:not([data-size]) {
+  color: #00397a;
+}
+
+.theme-voltaik-check.portal main a:not([data-size]):hover,
+.theme-voltaik-check.portal main a:not([data-size]):focus {
+  background-color: #00397a;
+  color: #ffffff;
+}
+
+/*
+ * FriesenWerk-Kundenbereich: dunkles Portal wie im alten
+ * public/css/friesen-werk.css. Die Klasse `portal` setzt das Kunden-Layout
+ * auf <html> (siehe routes/_auth/kunde.$customerId.tsx); Login- und
+ * Adminbereich bleiben neutral hell — wie im alten App-Split zwischen
+ * layout/main.blade.php (Client-CSS) und layout/guest|company.blade.php.
+ */
+.theme-friesen-werk.portal {
+  --background: #1d1d1b;
+  --foreground: #ffffff;
+  --card: #2a2a2a;
+  --card-foreground: #ffffff;
+  --popover: #2a2a2a;
+  --popover-foreground: #ffffff;
+  --primary: #ffcc00;
+  --primary-foreground: #1d1d1b;
+  --secondary: #333333;
+  --secondary-foreground: #ffffff;
+  --muted: #333333;
+  --muted-foreground: #aaaaaa;
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #ffffff;
+  --destructive: #dc3545;
+  --destructive-foreground: #ffffff;
+  --border: #333333;
+  --input: #444444;
+  --ring: #ffcc00;
+  --chart-1: #ffcc00;
+  --chart-2: #d53192;
+  --chart-3: #4cc9f0;
+  --chart-4: #69db7c;
+  --chart-5: #ff922b;
+  --sidebar: #222222;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffcc00;
+  --sidebar-primary-foreground: #1d1d1b;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #333333;
+  --sidebar-ring: #ffcc00;
+}
+
+/* Kopfzeile leicht heller abgesetzt (altes header #222 auf Body #1d1d1b). */
+.theme-friesen-werk.portal header {
+  background-color: #222222;
+}
+
+/* Primäre Aktionen: magentafarbene Pillen (alte .customer-button). Gelb
+   bleibt Akzentfarbe für aktive Navigation, Icons und Fokusringe. */
+.theme-friesen-werk.portal [data-variant='default'][data-size] {
+  border-radius: 9999px;
+  background-color: #d53192;
+  color: #ffffff;
+}
+
+.theme-friesen-werk.portal [data-variant='default'][data-size]:hover {
+  background-color: #b22876;
+}
+
+/* Sekundäre Aktionen (Panel-Umschalter, Zurück): graue Pillen wie die alte
+   .toggle-offcanvas-button. */
+.theme-friesen-werk.portal [data-variant='outline'][data-size] {
+  border-radius: 9999px;
+  background-color: #333333;
+  border-color: #444444;
+  color: #cccccc;
+}
+
+.theme-friesen-werk.portal [data-variant='outline'][data-size]:hover {
+  background-color: #3a3a3a;
+  border-color: #555555;
+  color: #ffffff;
+}
+
+/* Icons in Kartenköpfen in Markengelb (altes .card-header svg). */
+.theme-friesen-werk.portal [data-slot='card-title'] svg {
+  color: #ffcc00;
+}
+
+/* Formularfelder dunkler als die Karte (alte .form-control #333). */
+.theme-friesen-werk.portal
+  :is([data-slot='input'], [data-slot='select-trigger'], textarea) {
+  background-color: #333333;
+}
+
+/* Seitliche Panels (Zählerstände/Anschreiben): Tiefenverlauf, weiche Kante
+   und gelber Akzent unter dem Kopf — wie die alten Offcanvas-Redesigns. */
+.theme-friesen-werk.portal [data-slot='sheet-content'] {
+  background: linear-gradient(180deg, #242421 0%, #1d1d1b 240px);
+  border-left: 1px solid #333333;
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.45);
+}
+
+.theme-friesen-werk.portal [data-slot='sheet-header'] {
+  position: relative;
+  background-color: #222222;
+  border-bottom: 1px solid #303030;
+}
+
+.theme-friesen-werk.portal [data-slot='sheet-header']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, #ffcc00 0%, rgba(255, 204, 0, 0) 60%);
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

@@ -162,7 +162,7 @@ function ChangeLink({
   children: ReactNode
 }) {
   return (
-    <Button asChild variant="outline" className="w-full">
+    <Button asChild className="w-full">
       <Link
         to="/kunde/$customerId/vertrag/$contractId/aendern/$formType"
         params={{ customerId, contractId, formType }}
@@ -250,7 +250,7 @@ function DynamicPriceCard({ contract }: { contract: Contract }) {
           '–'
         )}
       </InfoRow>
-      <p className="inline-block rounded bg-[#FFCC00] px-2 py-1 text-sm font-bold text-black">
+      <p className="bg-primary text-primary-foreground inline-block rounded px-2 py-1 text-sm font-bold">
         + Beschaffungskosten (Börse)
       </p>
       <InfoRow label="Grundpreis:*">
@@ -407,7 +407,7 @@ function DynamicPriceHelpDialog({ contract }: { contract: Contract }) {
               <p className="text-muted-foreground">{explanation}</p>
             </div>
           ))}
-          <div className="rounded bg-[#FFCC00] px-3 py-2 text-black">
+          <div className="bg-primary text-primary-foreground rounded px-3 py-2">
             <strong>Zusätzlich: Beschaffungskosten (Börse)</strong>
             <br />
             Da du einen dynamischen Tarif hast, werden die tatsächlichen
@@ -443,7 +443,7 @@ function ChartPageLink({
   children: ReactNode
 }) {
   return (
-    <Button asChild variant="outline" className="w-full">
+    <Button asChild className="w-full">
       {page === 'abrechnung' ? (
         <Link
           to="/kunde/$customerId/vertrag/$contractId/abrechnung"

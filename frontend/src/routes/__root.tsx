@@ -53,17 +53,21 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function RootComponent() {
   const { data: tenant } = useQuery(tenantQuery)
 
+  // Theme-Klasse auf <html>, damit auch Radix-Portale (Dropdowns, Sheets,
+  // Dialoge – gerendert in document.body) die Tenant-Tokens erben.
   useEffect(() => {
-    if (tenant) {
-      document.title = `${tenant.name.short} Kundenportal`
-    }
+    if (!tenant) return
+    document.title = `${tenant.name.short} Kundenportal`
+    const themeClass = `theme-${tenant.slug}`
+    document.documentElement.classList.add(themeClass)
+    return () => document.documentElement.classList.remove(themeClass)
   }, [tenant])
 
   return (
-    <div className={tenant ? `theme-${tenant.slug}` : undefined}>
+    <>
       <Outlet />
       <Toaster richColors position="top-center" />
-    </div>
+    </>
   )
 }
 
