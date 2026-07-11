@@ -36,6 +36,47 @@ export interface ChartSeries {
   kind: 'area' | 'line'
   /** Wert-Formatierung im Tooltip (inkl. Einheit). */
   formatValue: (value: number) => string
+  /**
+   * Färbt die Serie divergierend um eine Basislinie (z. B. Durchschnitt):
+   * neutral an der Basislinie, zum `high`-Pol darüber, zum `low`-Pol
+   * darunter. Zeichnet zusätzlich eine gestrichelte Referenzlinie.
+   */
+  diverging?: {
+    baseline: number
+    high: { light: string; dark: string }
+    low: { light: string; dark: string }
+    /** Beschriftung der Referenzlinie, z. B. `Ø 8,42 ct/kWh`. */
+    label: string
+  }
+}
+
+/**
+ * Farbverlaufs-Stopps eines divergierenden Verlaufs (oben → unten) über den
+ * Wertebereich `top…bottom`: Pol oben, neutral an der Basislinie, Pol unten.
+ * Stroke- und Füllpfad einer Area haben verschiedene Boundingboxen (die
+ * Füllung schließt an der Nulllinie), deshalb rechnet der Aufrufer beide
+ * getrennt aus.
+ */
+function divergingStops(
+  seriesKey: string,
+  baseline: number,
+  top: number,
+  bottom: number,
+): Array<{ offset: number; color: string }> {
+  const span = top - bottom
+  const neutral = 'var(--muted-foreground)'
+
+  if (span <= 0) {
+    return [{ offset: 0, color: neutral }]
+  }
+
+  const offset = Math.min(Math.max((top - baseline) / span, 0), 1)
+
+  return [
+    { offset: 0, color: `var(--color-${seriesKey}High)` },
+    { offset, color: neutral },
+    { offset: 1, color: `var(--color-${seriesKey}Low)` },
+  ]
 }
 
 interface QuarterHourChartProps {
@@ -72,14 +113,29 @@ export function QuarterHourChart({
   className,
 }: QuarterHourChartProps) {
   const config: ChartConfig = Object.fromEntries(
-    series.map((entry) => [
-      entry.key,
-      { label: entry.label, theme: entry.color },
+    series.flatMap((entry) => [
+      [entry.key, { label: entry.label, theme: entry.color }],
+      ...(entry.diverging !== undefined
+        ? [
+            [`${entry.key}High`, { theme: entry.diverging.high }],
+            [`${entry.key}Low`, { theme: entry.diverging.low }],
+          ]
+        : []),
     ]),
   )
   const seriesByKey = new Map(series.map((entry) => [entry.key, entry]))
   const domain = chartDomain(from, until)
   const nowTs = showNow ? nowWithin(domain) : null
+
+  const divergingSeries = series.filter(
+    (entry) => entry.diverging !== undefined,
+  )
+  const valueRange = (key: string): { min: number; max: number } => {
+    const values = data
+      .map((point) => point[key])
+      .filter((value): value is number => typeof value === 'number')
+    return { min: Math.min(...values), max: Math.max(...values) }
+  }
 
   return (
     <ChartContainer
@@ -93,6 +149,40 @@ export function QuarterHourChart({
         syncId={syncId}
         margin={{ top: 12, right: 24, left: 4, bottom: 0 }}
       >
+        <defs>
+          {divergingSeries.map((entry) => {
+            const diverging = entry.diverging
+            if (diverging === undefined || data.length === 0) {
+              return null
+            }
+            const { min, max } = valueRange(entry.key)
+            // Der Füllpfad einer Area schließt an der Nulllinie ab,
+            // der Linienpfad endet am Datenminimum.
+            const variants = [
+              { suffix: 'stroke', bottom: min },
+              { suffix: 'fill', bottom: Math.min(0, min) },
+            ]
+            return variants.map(({ suffix, bottom }) => (
+              <linearGradient
+                key={`${entry.key}-${suffix}`}
+                id={`diverging-${entry.key}-${suffix}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                {divergingStops(entry.key, diverging.baseline, max, bottom).map(
+                  (stop) => (
+                  <stop
+                    key={stop.offset}
+                    offset={stop.offset}
+                    style={{ stopColor: stop.color }}
+                  />
+                ))}
+              </linearGradient>
+            ))
+          })}
+        </defs>
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="ts"
@@ -146,6 +236,22 @@ export function QuarterHourChart({
             }}
           />
         ))}
+        {divergingSeries.map((entry) =>
+          entry.diverging === undefined ? null : (
+            <ReferenceLine
+              key={`baseline-${entry.key}`}
+              y={entry.diverging.baseline}
+              stroke="var(--muted-foreground)"
+              strokeDasharray="6 4"
+              label={{
+                value: entry.diverging.label,
+                position: 'insideBottomLeft',
+                fontSize: 11,
+                fill: 'var(--muted-foreground)',
+              }}
+            />
+          ),
+        )}
         {nowTs !== null ? (
           <ReferenceLine
             x={nowTs}
@@ -194,18 +300,35 @@ export function QuarterHourChart({
             />
           }
         />
-        {series.map((entry) =>
-          entry.kind === 'area' ? (
+        {series.map((entry) => {
+          const stroke =
+            entry.diverging === undefined
+              ? `var(--color-${entry.key})`
+              : `url(#diverging-${entry.key}-stroke)`
+          const activeDot = {
+            r: 4,
+            stroke: 'var(--card)',
+            strokeWidth: 2,
+            // Ein Verlauf würde relativ zur winzigen Punkt-Box aufgelöst.
+            ...(entry.diverging === undefined
+              ? {}
+              : { fill: 'var(--muted-foreground)' }),
+          }
+          return entry.kind === 'area' ? (
             <Area
               key={entry.key}
               dataKey={entry.key}
               type="stepAfter"
-              stroke={`var(--color-${entry.key})`}
+              stroke={stroke}
               strokeWidth={2}
-              fill={`var(--color-${entry.key})`}
+              fill={
+                entry.diverging === undefined
+                  ? `var(--color-${entry.key})`
+                  : `url(#diverging-${entry.key}-fill)`
+              }
               fillOpacity={0.1}
               dot={false}
-              activeDot={{ r: 4, stroke: 'var(--card)', strokeWidth: 2 }}
+              activeDot={activeDot}
               connectNulls={false}
               isAnimationActive={false}
             />
@@ -214,15 +337,15 @@ export function QuarterHourChart({
               key={entry.key}
               dataKey={entry.key}
               type="stepAfter"
-              stroke={`var(--color-${entry.key})`}
+              stroke={stroke}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, stroke: 'var(--card)', strokeWidth: 2 }}
+              activeDot={activeDot}
               connectNulls={false}
               isAnimationActive={false}
             />
-          ),
-        )}
+          )
+        })}
         {series.length > 1 ? (
           <ChartLegend content={<ChartLegendContent />} />
         ) : null}

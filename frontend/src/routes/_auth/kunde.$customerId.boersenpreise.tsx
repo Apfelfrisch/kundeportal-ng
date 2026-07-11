@@ -15,7 +15,8 @@ import {
   TableRow,
 } from '#/components/ui/table'
 import {
-  CHART_COLORS,
+  NEUTRAL_SERIES_COLOR,
+  PRICE_DIVERGING_COLORS,
   buildQuarterHourSeries,
   chartDateSearchSchema,
   formatCtValue,
@@ -57,6 +58,12 @@ function MarketPricesPage() {
   const navigate = Route.useNavigate()
   const { data } = useSuspenseQuery(marketPricesQuery(customerId, date))
 
+  const averagePrice =
+    data.prices.length > 0
+      ? data.prices.reduce((sum, price) => sum + price.cent_per_kwh, 0) /
+        data.prices.length
+      : null
+
   const series = buildQuarterHourSeries({
     from: data.from,
     until: data.until,
@@ -79,6 +86,16 @@ function MarketPricesPage() {
               {formatDate(`${data.from}T00:00:00`)} –{' '}
               {formatDate(`${data.until}T00:00:00`)}
             </p>
+            {averagePrice !== null ? (
+              <p className="mt-3">
+                <span className="text-muted-foreground text-sm">
+                  Durchschnittspreis im Zeitraum
+                </span>
+                <span className="block text-2xl font-semibold tabular-nums">
+                  {formatCtValue(averagePrice)} ct/kWh
+                </span>
+              </p>
+            ) : null}
           </div>
           <DayPager
             date={data.date}
@@ -96,14 +113,24 @@ function MarketPricesPage() {
               until={data.until}
               unit="ct/kWh"
               showNow
-              ariaLabel="Stufendiagramm der viertelstündlichen Börsenstrompreise in Cent pro Kilowattstunde. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
+              ariaLabel="Stufendiagramm der viertelstündlichen Börsenstrompreise in Cent pro Kilowattstunde. Eine gestrichelte Linie markiert den Durchschnittspreis; Preise darüber sind rot, darunter grün eingefärbt. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
               series={[
                 {
                   key: 'price',
                   label: 'Börsenpreis (ct/kWh)',
-                  color: CHART_COLORS.blue,
+                  color: NEUTRAL_SERIES_COLOR,
                   kind: 'area',
                   formatValue: (value) => `${formatCtValue(value)} ct/kWh`,
+                  ...(averagePrice !== null
+                    ? {
+                        diverging: {
+                          baseline: averagePrice,
+                          high: PRICE_DIVERGING_COLORS.high,
+                          low: PRICE_DIVERGING_COLORS.low,
+                          label: `Ø ${formatCtValue(averagePrice)} ct/kWh`,
+                        },
+                      }
+                    : {}),
                 },
               ]}
             />

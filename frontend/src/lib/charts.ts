@@ -34,6 +34,24 @@ export const CHART_COLORS = {
   yellow: { light: '#eda100', dark: '#c98500' },
 } as const
 
+/**
+ * Divergierende Pole für Preise relativ zum Durchschnitt (Status-Semantik
+ * teuer/günstig, fest — keine Serienfarben): critical `#d03b3b` und good
+ * `#0ca30c` halten ≥ 3:1 auf hellem wie dunklem Untergrund. Rot/Grün allein
+ * trägt die Richtung nicht (Farbfehlsichtigkeit) — die Ø-Referenzlinie und
+ * die Tabellenansicht sind das Relief.
+ */
+export const PRICE_DIVERGING_COLORS = {
+  high: { light: '#d03b3b', dark: '#d03b3b' },
+  low: { light: '#0ca30c', dark: '#0ca30c' },
+} as const
+
+/** Neutrale Serienfarbe (Tooltip-Marke/Basislinie) divergierender Serien. */
+export const NEUTRAL_SERIES_COLOR = {
+  light: 'var(--muted-foreground)',
+  dark: 'var(--muted-foreground)',
+} as const
+
 /** `"2025-06-10T00:15:00"` (lokale Zeit) → Epoch-Millisekunden. */
 export function parseApiDateTime(value: string): number {
   return new Date(value).getTime()
