@@ -741,8 +741,6 @@ function ContractDataCard({ contract, customerId, contractId }: CardProps) {
         </>
       }
     >
-      <InfoRow label="Vertragsnummer:">{contract.contract_number}</InfoRow>
-      <InfoRow label="Tarif:">{contract.tariff ?? '–'}</InfoRow>
       <InfoRow label="Vertragspartner:">
         {partnerName !== '' ? partnerName : '–'}
       </InfoRow>
