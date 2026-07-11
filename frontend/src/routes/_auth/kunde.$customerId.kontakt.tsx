@@ -35,7 +35,7 @@ function ContactPage() {
   if (tenant === undefined) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Kontakt</h1>
+        <h1 className="text-3xl font-semibold">Kontakt</h1>
         <div className="grid gap-4 md:grid-cols-2">
           <Skeleton className="h-64 w-full" />
           <Skeleton className="h-64 w-full" />
@@ -49,7 +49,7 @@ function ContactPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Kontakt</h1>
+      <h1 className="text-3xl font-semibold">Kontakt</h1>
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>

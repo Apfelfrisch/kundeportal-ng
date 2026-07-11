@@ -31,7 +31,8 @@ export function InfoCard({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-2 text-base">
+        {/* Altes Pendant war ein h3 im card-header (~1.75rem). */}
+        <CardTitle className="flex items-center justify-between gap-2 text-2xl [&_svg]:size-5">
           <span className="flex items-center gap-2">
             {icon}
             {title}
@@ -57,8 +58,9 @@ export function InfoRow({
 }) {
   return (
     <div>
-      <p className="text-muted-foreground text-xs font-medium">{label}</p>
-      <div className="text-sm">{children ?? '–'}</div>
+      {/* Wie im alten Portal voller Fließtext (1.1rem), Kopf fett. */}
+      <p className="text-muted-foreground text-base font-bold">{label}</p>
+      <div className="text-base">{children ?? '–'}</div>
     </div>
   )
 }

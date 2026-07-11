@@ -68,7 +68,7 @@ function CustomerLayout() {
             <TenantLogo className="h-8" onDark />
           </Link>
           <nav className="ml-6 hidden items-center gap-1 md:flex">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="text-lg" asChild>
               <Link
                 to="/kunde/$customerId"
                 params={{ customerId }}
@@ -79,7 +79,7 @@ function CustomerLayout() {
               </Link>
             </Button>
             {navItems.map((item) => (
-              <Button key={item.label} variant="ghost" asChild>
+              <Button key={item.label} variant="ghost" className="text-lg" asChild>
                 <Link
                   to={item.to}
                   params={{ customerId }}
@@ -90,7 +90,7 @@ function CustomerLayout() {
               </Button>
             ))}
             {featureNavItems.map((item) => (
-              <Button key={item.label} variant="ghost" asChild>
+              <Button key={item.label} variant="ghost" className="text-lg" asChild>
                 <Link
                   to={item.to}
                   params={{ customerId }}
@@ -123,7 +123,7 @@ function CustomerLayout() {
                     to="/kunde/$customerId"
                     params={{ customerId }}
                     onClick={() => setMobileNavOpen(false)}
-                    className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium"
+                    className="hover:bg-accent rounded-md px-3 py-2 text-lg font-medium"
                   >
                     Vertrag
                   </Link>
@@ -133,7 +133,7 @@ function CustomerLayout() {
                       to={item.to}
                       params={{ customerId }}
                       onClick={() => setMobileNavOpen(false)}
-                      className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium"
+                      className="hover:bg-accent rounded-md px-3 py-2 text-lg font-medium"
                     >
                       {item.label}
                     </Link>
@@ -144,7 +144,7 @@ function CustomerLayout() {
                       to={item.to}
                       params={{ customerId }}
                       onClick={() => setMobileNavOpen(false)}
-                      className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium"
+                      className="hover:bg-accent rounded-md px-3 py-2 text-lg font-medium"
                     >
                       {item.label}
                     </Link>

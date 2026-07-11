@@ -42,7 +42,7 @@ function MailboxPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-semibold">Kundenchat</h1>
+      <h1 className="text-3xl font-semibold">Kundenchat</h1>
 
       <Composer customerId={customerId} />
 

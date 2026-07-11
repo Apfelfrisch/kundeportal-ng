@@ -174,7 +174,8 @@
   --secondary: #333333;
   --secondary-foreground: #ffffff;
   --muted: #333333;
-  --muted-foreground: #aaaaaa;
+  /* Alte .info-head-Farbe (#ccc) — #aaa war auf #2a2a2a zu kontrastarm. */
+  --muted-foreground: #cccccc;
   --accent: rgba(255, 255, 255, 0.08);
   --accent-foreground: #ffffff;
   --destructive: #dc3545;

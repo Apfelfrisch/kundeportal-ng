@@ -77,7 +77,7 @@ function ContractDashboardPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-3xl font-semibold">
             Vertrag {contract.contract_number}
           </h1>
           <ContractStatusBadge status={contract.status} />

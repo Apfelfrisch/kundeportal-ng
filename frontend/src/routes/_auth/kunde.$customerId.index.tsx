@@ -29,7 +29,7 @@ function ContractListPage() {
   if (isPending) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Deine Verträge</h1>
+        <h1 className="text-3xl font-semibold">Deine Verträge</h1>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Skeleton className="h-56 w-full" />
           <Skeleton className="h-56 w-full" />
@@ -41,7 +41,7 @@ function ContractListPage() {
   if (isError) {
     return (
       <div className="space-y-2 py-12 text-center">
-        <h1 className="text-2xl font-semibold">Deine Verträge</h1>
+        <h1 className="text-3xl font-semibold">Deine Verträge</h1>
         <p className="text-muted-foreground">
           Deine Verträge konnten nicht geladen werden. Bitte versuche es später
           erneut.
@@ -66,7 +66,7 @@ function ContractListPage() {
     return (
       <div className="space-y-2 py-12 text-center">
         <FileText className="text-muted-foreground mx-auto size-10" />
-        <h1 className="text-2xl font-semibold">Keine Verträge vorhanden</h1>
+        <h1 className="text-3xl font-semibold">Keine Verträge vorhanden</h1>
         <p className="text-muted-foreground">
           Deinem Konto sind derzeit keine Verträge zugeordnet. Bitte wende dich
           an uns, wenn das nicht stimmt.
@@ -77,7 +77,7 @@ function ContractListPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Deine Verträge</h1>
+      <h1 className="text-3xl font-semibold">Deine Verträge</h1>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {contracts.map((contract) => (
           <ContractCard

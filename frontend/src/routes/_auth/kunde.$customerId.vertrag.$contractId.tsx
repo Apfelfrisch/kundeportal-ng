@@ -32,7 +32,7 @@ function ContractErrorComponent({ error }: { error: Error }) {
 
   return (
     <div className="space-y-4 py-12 text-center">
-      <h1 className="text-2xl font-semibold">Vertrag nicht verfügbar</h1>
+      <h1 className="text-3xl font-semibold">Vertrag nicht verfügbar</h1>
       <p className="text-muted-foreground">{message}</p>
       <Button asChild variant="outline">
         <Link to="/kunde/$customerId" params={{ customerId }}>

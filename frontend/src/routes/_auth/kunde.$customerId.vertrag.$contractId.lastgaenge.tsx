@@ -85,7 +85,7 @@ function EdiLoadProfilesPage() {
             Zurück zum Vertrag
           </Link>
         </Button>
-        <h1 className="text-2xl font-semibold">Lastgänge</h1>
+        <h1 className="text-3xl font-semibold">Lastgänge</h1>
       </div>
 
       <Card>
