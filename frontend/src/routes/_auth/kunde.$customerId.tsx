@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
 import { Menu } from 'lucide-react'
 
-import { tenantQuery } from '#/queries/tenant'
 import { TenantLogo } from '#/components/shared/tenant-logo'
 import { UserMenu } from '#/components/shared/user-menu'
 import { Button } from '#/components/ui/button'
@@ -38,7 +36,6 @@ const navItems = [
 function CustomerLayout() {
   const { session } = Route.useRouteContext()
   const { customerId } = Route.useParams()
-  const { data: tenant } = useQuery(tenantQuery)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   // Nur der Kundenbereich trägt das volle Tenant-Portal-Theme (bei
@@ -48,13 +45,6 @@ function CustomerLayout() {
     document.documentElement.classList.add('portal')
     return () => document.documentElement.classList.remove('portal')
   }, [])
-
-  // Börsenpreise nur bei aktiviertem Feature-Flag.
-  const featureNavItems = tenant?.features.dynamic_electric_prices
-    ? ([
-        { label: 'Börsenpreise', to: '/kunde/$customerId/boersenpreise' },
-      ] as const)
-    : []
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -79,17 +69,6 @@ function CustomerLayout() {
               </Link>
             </Button>
             {navItems.map((item) => (
-              <Button key={item.label} variant="ghost" className="text-lg" asChild>
-                <Link
-                  to={item.to}
-                  params={{ customerId }}
-                  activeProps={{ className: 'text-primary font-semibold' }}
-                >
-                  {item.label}
-                </Link>
-              </Button>
-            ))}
-            {featureNavItems.map((item) => (
               <Button key={item.label} variant="ghost" className="text-lg" asChild>
                 <Link
                   to={item.to}
@@ -128,17 +107,6 @@ function CustomerLayout() {
                     Vertrag
                   </Link>
                   {navItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      params={{ customerId }}
-                      onClick={() => setMobileNavOpen(false)}
-                      className="hover:bg-accent rounded-md px-3 py-2 text-lg font-medium"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                  {featureNavItems.map((item) => (
                     <Link
                       key={item.label}
                       to={item.to}

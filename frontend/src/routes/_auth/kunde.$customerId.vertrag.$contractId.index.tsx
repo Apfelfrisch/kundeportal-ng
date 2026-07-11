@@ -100,7 +100,7 @@ function ContractDashboardPage() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {contract.is_dynamic ? (
-          <DynamicPriceCard contract={contract} />
+          <DynamicPriceCard contract={contract} customerId={customerId} />
         ) : (
           <InstallmentCard
             contract={contract}
@@ -230,7 +230,13 @@ function InstallmentCard({ contract, customerId, contractId }: CardProps) {
 }
 
 /** Preis/Tarif-Karte des dynamischen Tarifs (Nettopreise + Komponenten). */
-function DynamicPriceCard({ contract }: { contract: Contract }) {
+function DynamicPriceCard({
+  contract,
+  customerId,
+}: {
+  contract: Contract
+  customerId: string
+}) {
   const prices = contract.prices
   const workingComponents = Object.entries(prices.working_price_components)
   const baseComponents = Object.entries(prices.base_price_components)
@@ -240,6 +246,20 @@ function DynamicPriceCard({ contract }: { contract: Contract }) {
       icon={<Zap className="size-4" />}
       title={`Tarif: ${contract.tariff ?? ''}`}
       titleExtra={<DynamicPriceHelpDialog contract={contract} />}
+      footer={
+        // Die Börsenpreis-Seite rechnet mit den Tarifkosten dieses
+        // Vertrags — der Einstieg sitzt deshalb hier statt in der
+        // Hauptnavigation.
+        <Button asChild className="w-full">
+          <Link
+            to="/kunde/$customerId/boersenpreise"
+            params={{ customerId }}
+            title="Viertelstündliche Börsenstrompreise, auf Wunsch inklusive deiner Tarifkosten."
+          >
+            Börsenpreise anzeigen
+          </Link>
+        </Button>
+      }
     >
       <InfoRow label="Arbeitspreis:*">
         {prices.calculated_dynamic_working_price_ct !== null ? (
