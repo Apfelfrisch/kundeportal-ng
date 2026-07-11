@@ -100,7 +100,11 @@ function ContractDashboardPage() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {contract.is_dynamic ? (
-          <DynamicPriceCard contract={contract} customerId={customerId} />
+          <DynamicPriceCard
+            contract={contract}
+            customerId={customerId}
+            contractId={contractId}
+          />
         ) : (
           <InstallmentCard
             contract={contract}
@@ -233,9 +237,11 @@ function InstallmentCard({ contract, customerId, contractId }: CardProps) {
 function DynamicPriceCard({
   contract,
   customerId,
+  contractId,
 }: {
   contract: Contract
   customerId: string
+  contractId: string
 }) {
   const prices = contract.prices
   const workingComponents = Object.entries(prices.working_price_components)
@@ -254,6 +260,7 @@ function DynamicPriceCard({
           <Link
             to="/kunde/$customerId/strompreis"
             params={{ customerId }}
+            search={{ vertrag: contractId }}
             title="Viertelstündlicher Strompreis, auf Wunsch inklusive deiner Tarifkosten."
           >
             Strompreis anzeigen

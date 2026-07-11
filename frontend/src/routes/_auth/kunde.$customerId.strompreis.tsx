@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
+import { z } from 'zod'
 
 import { ChartEmptyState } from '#/components/charts/chart-empty-state'
 import { ChartErrorState } from '#/components/charts/chart-error'
 import { CurrentPriceGauge } from '#/components/charts/current-price-gauge'
 import { DayPager } from '#/components/charts/day-pager'
 import { QuarterHourChart } from '#/components/charts/quarter-hour-chart'
+import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Label } from '#/components/ui/label'
 import { Switch } from '#/components/ui/switch'
@@ -40,7 +43,15 @@ import type { MarketPriceSlot } from '#/queries/charts'
  * `exchange-electricity-prices`-Seite.
  */
 export const Route = createFileRoute('/_auth/kunde/$customerId/strompreis')({
-  validateSearch: chartDateSearchSchema,
+  // `vertrag`: Absprung-Vertrag für den Zurück-Link (die Seite selbst ist
+  // kundenweit, der Einstieg sitzt auf der Vertragsseite).
+  validateSearch: chartDateSearchSchema.extend({
+    vertrag: z
+      .string()
+      .regex(/^\d+$/)
+      .optional()
+      .catch(undefined),
+  }),
   beforeLoad: async ({ context }) => {
     const tenant = await context.queryClient.ensureQueryData(tenantQuery)
     if (!tenant.features.dynamic_electric_prices) {
@@ -58,7 +69,7 @@ export const Route = createFileRoute('/_auth/kunde/$customerId/strompreis')({
 
 function MarketPricesPage() {
   const { customerId } = Route.useParams()
-  const { date } = Route.useSearch()
+  const { date, vertrag } = Route.useSearch()
   const navigate = Route.useNavigate()
   const { data } = useSuspenseQuery(marketPricesQuery(customerId, date))
   const [withTariffCosts, setWithTariffCosts] = useState(false)
@@ -104,7 +115,25 @@ function MarketPricesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-semibold">Strompreis</h1>
+      <div className="space-y-2">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          {vertrag !== undefined ? (
+            <Link
+              to="/kunde/$customerId/vertrag/$contractId"
+              params={{ customerId, contractId: vertrag }}
+            >
+              <ArrowLeft aria-hidden="true" />
+              Zurück zum Vertrag
+            </Link>
+          ) : (
+            <Link to="/kunde/$customerId" params={{ customerId }}>
+              <ArrowLeft aria-hidden="true" />
+              Zurück zur Übersicht
+            </Link>
+          )}
+        </Button>
+        <h1 className="text-3xl font-semibold">Strompreis</h1>
+      </div>
 
       <Card>
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -159,7 +188,9 @@ function MarketPricesPage() {
             prevDate={data.navigation.prev_date}
             nextDate={data.navigation.next_date}
             showReset={date !== undefined}
-            onSelect={(value) => void navigate({ search: { date: value } })}
+            onSelect={(value) =>
+              void navigate({ search: (prev) => ({ ...prev, date: value }) })
+            }
           />
         </CardHeader>
         <CardContent>
