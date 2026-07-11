@@ -38,8 +38,9 @@ export interface ChartSeries {
   formatValue: (value: number) => string
   /**
    * Färbt die Serie divergierend um eine Basislinie (z. B. Durchschnitt):
-   * neutral an der Basislinie, zum `high`-Pol darüber, zum `low`-Pol
-   * darunter. Zeichnet zusätzlich eine gestrichelte Referenzlinie.
+   * die Linie verläuft durchgängig vom `low`-Pol (unten) zum `high`-Pol
+   * (oben), die Füllung hinterlegt nur den Bereich über der Basislinie mit
+   * dem `high`-Pol. Zeichnet zusätzlich eine gestrichelte Referenzlinie.
    */
   diverging?: {
     baseline: number
@@ -51,32 +52,17 @@ export interface ChartSeries {
 }
 
 /**
- * Farbverlaufs-Stopps eines divergierenden Verlaufs (oben → unten) über den
- * Wertebereich `top…bottom`: Pol oben, neutral an der Basislinie, Pol unten.
- * Stroke- und Füllpfad einer Area haben verschiedene Boundingboxen (die
- * Füllung schließt an der Nulllinie), deshalb rechnet der Aufrufer beide
- * getrennt aus.
+ * Position der Basislinie (0 = oben, 1 = unten) innerhalb des Wertebereichs
+ * `top…bottom` — die Füllung schneidet dort hart ab.
  */
-function divergingStops(
-  seriesKey: string,
-  baseline: number,
-  top: number,
-  bottom: number,
-): Array<{ offset: number; color: string }> {
+function baselineOffset(baseline: number, top: number, bottom: number): number {
   const span = top - bottom
-  const neutral = 'var(--muted-foreground)'
 
   if (span <= 0) {
-    return [{ offset: 0, color: neutral }]
+    return 0
   }
 
-  const offset = Math.min(Math.max((top - baseline) / span, 0), 1)
-
-  return [
-    { offset: 0, color: `var(--color-${seriesKey}High)` },
-    { offset, color: neutral },
-    { offset: 1, color: `var(--color-${seriesKey}Low)` },
-  ]
+  return Math.min(Math.max((top - baseline) / span, 0), 1)
 }
 
 interface QuarterHourChartProps {
@@ -156,31 +142,58 @@ export function QuarterHourChart({
               return null
             }
             const { min, max } = valueRange(entry.key)
-            // Der Füllpfad einer Area schließt an der Nulllinie ab,
-            // der Linienpfad endet am Datenminimum.
-            const variants = [
-              { suffix: 'stroke', bottom: min },
-              { suffix: 'fill', bottom: Math.min(0, min) },
-            ]
-            return variants.map(({ suffix, bottom }) => (
+            // Der Füllpfad einer Area schließt an der Nulllinie ab (nicht am
+            // Datenminimum), daher gilt sein Schnittpunkt dieser Boundingbox.
+            const fillOffset = baselineOffset(
+              diverging.baseline,
+              max,
+              Math.min(0, min),
+            )
+            return [
+              // Linie: durchgängiger Verlauf vom high- zum low-Pol.
               <linearGradient
-                key={`${entry.key}-${suffix}`}
-                id={`diverging-${entry.key}-${suffix}`}
+                key={`${entry.key}-stroke`}
+                id={`diverging-${entry.key}-stroke`}
                 x1="0"
                 y1="0"
                 x2="0"
                 y2="1"
               >
-                {divergingStops(entry.key, diverging.baseline, max, bottom).map(
-                  (stop) => (
-                  <stop
-                    key={stop.offset}
-                    offset={stop.offset}
-                    style={{ stopColor: stop.color }}
-                  />
-                ))}
-              </linearGradient>
-            ))
+                <stop
+                  offset={0}
+                  style={{ stopColor: `var(--color-${entry.key}High)` }}
+                />
+                <stop
+                  offset={1}
+                  style={{ stopColor: `var(--color-${entry.key}Low)` }}
+                />
+              </linearGradient>,
+              // Füllung: nur der Bereich über der Basislinie, harter Schnitt.
+              <linearGradient
+                key={`${entry.key}-fill`}
+                id={`diverging-${entry.key}-fill`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset={0}
+                  style={{ stopColor: `var(--color-${entry.key}High)` }}
+                />
+                <stop
+                  offset={fillOffset}
+                  style={{ stopColor: `var(--color-${entry.key}High)` }}
+                />
+                <stop
+                  offset={fillOffset}
+                  style={{
+                    stopColor: `var(--color-${entry.key}High)`,
+                    stopOpacity: 0,
+                  }}
+                />
+              </linearGradient>,
+            ]
           })}
         </defs>
         <CartesianGrid vertical={false} />
