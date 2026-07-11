@@ -1,0 +1,146 @@
+{
+    "data": {
+        "id": 123456,
+        "customer_id": "10001",
+        "sales_partner_id": null,
+        "billing_contact_company": "Musterfirma GmbH",
+        "billing_contact_salutation": "Herr",
+        "billing_contact_title": null,
+        "billing_contact_first_name": "Max",
+        "billing_contact_last_name": "Mustermann",
+        "iban": "DE44500105175407324931",
+        "bank": "Musterbank",
+        "account_owner": "Max Mustermann",
+        "self_payer": false,
+        "received_at": "2024-06-15",
+        "delivery_start": "2024-07-01",
+        "delivery_end": null,
+        "price_guarantee": "2025-10-01",
+        "contract_term": "2026-07-01",
+        "earliest_termination_date": "2025-07-25",
+        "status": "3",
+        "tariff": "Klassik Strom",
+        "price_type": "fixed",
+        "working_price": "39.95",
+        "base_price": "12.50",
+        "tariff_effective_from": "2025-06-01",
+        "contract_tariff": {
+            "price": {
+                "base_price_components": [
+                    {"name": "supplierBasePrice", "type": "base_price", "amount": 8.5},
+                    {"name": "baseFee", "type": "base_price", "amount": 2.75},
+                    {"name": "measuringFee", "type": "base_price", "amount": 1.25}
+                ],
+                "working_price_components": [
+                    {"name": "supplierWorkingPrice", "type": "working_price", "amount": 0.05},
+                    {"name": "supplierPurchasePrice", "type": "working_price", "amount": 0.08},
+                    {"name": "workingPrice", "type": "working_price", "amount": 0.0721},
+                    {"name": "concessionFee", "type": "working_price", "amount": 0.0166},
+                    {"name": "energyFee", "type": "working_price", "amount": 0.0205},
+                    {"name": "eegFee", "type": "working_price", "amount": 0},
+                    {"name": "ablav", "type": "working_price", "amount": 0.0003},
+                    {"name": "kwkFee", "type": "working_price", "amount": 0.00275},
+                    {"name": "offshoreFee", "type": "working_price", "amount": 0.00591},
+                    {"name": "sku", "type": "working_price", "amount": 0.00643}
+                ]
+            }
+        },
+        "phone_number": "0401234567",
+        "mobile_number": "01701234567",
+        "mail_address": "alt@example.org",
+        "send_emails": "no",
+        "zip": "20095",
+        "city": "Hamburg",
+        "street": "Musterweg",
+        "street_number": "10",
+        "street_addition": "2. OG",
+        "invoices": [
+            {
+                "id": 501,
+                "invoice_number": "RE-2025-0001",
+                "contract_id": 123456,
+                "invoice_date": "2025-03-05",
+                "invoice_from": "2025-03-01",
+                "consumption": 2500,
+                "filename": "jahresrechnung-2024.pdf",
+                "complete_file_path": "invoices/123456/jahresrechnung-2024.pdf",
+                "canceled_at": null
+            }
+        ],
+        "meter_points": [
+            {
+                "id": 1,
+                "contract_id": 123456,
+                "customer_id": "10001",
+                "malo_id": "DE0012345678901234567890123456789",
+                "zip": "20095",
+                "city": "Hamburg",
+                "street": "Musterweg",
+                "street_number": "10",
+                "street_addition": "2. OG",
+                "yearly_consumption": 2500,
+                "delivery_from": "2024-07-01",
+                "delivery_until": null,
+                "meters": [
+                    {
+                        "id": 42,
+                        "meter_point_id": 1,
+                        "meter_number": "1APBN0012345",
+                        "type": "ETZ",
+                        "smart_meter": 0,
+                        "created_at": "2024-07-01"
+                    }
+                ],
+                "meter_counts": [
+                    {
+                        "id": 77,
+                        "meter_point_id": 1,
+                        "meter_id": 42,
+                        "meter_number": "1APBN0012345",
+                        "type": "ETZ",
+                        "reading_kind": "220",
+                        "reading_type": "MVR",
+                        "reading_date": "2025-06-30",
+                        "meter_count_1": 5120.5,
+                        "meter_count_2": null,
+                        "meter_count_3": null,
+                        "yearly_usage": 2500
+                    }
+                ]
+            }
+        ],
+        "payment_plans": [
+            {
+                "id": 1,
+                "contract_id": 123456,
+                "valid_from": "2025-06-01",
+                "valid_until": null,
+                "next_payment": "2025-08-01",
+                "type": "monthly",
+                "expression": "monthly",
+                "amount": 12000
+            }
+        ],
+        "contract_payments": [
+            {
+                "id": 301,
+                "contract_id": 123456,
+                "should_amount": 120,
+                "have_amount": 120,
+                "booking_date": "2025-06-01",
+                "counter_account": "1210"
+            }
+        ],
+        "contract_files": [
+            {
+                "id": 601,
+                "contract_id": 123456,
+                "body": "Vertragsbestätigung",
+                "tag": "contract-confirmation",
+                "path": "contracts/123456/vertragsbestaetigung.pdf",
+                "filename": "vertragsbestaetigung.pdf",
+                "created_at": "2024-07-02T10:00:00"
+            }
+        ]
+    }
+}

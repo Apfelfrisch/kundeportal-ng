@@ -1,0 +1,31 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "from": "2025-06-10 00:00:00",
+            "until": "2025-06-10 00:15:00",
+            "usage_kwh": 0.35,
+            "usage_type": 1,
+            "price_tag": null,
+            "tariff_name": "Dynamik Strom",
+            "cent_mwh": 8213,
+            "price_components": [
+                {"name": "supplierWorkingPrice", "type": "working_price", "amount": 0.02},
+                {"name": "supplierPurchasePrice", "type": "working_price", "amount": 0.08},
+                {"name": "workingPrice", "type": "working_price", "amount": 0.0721},
+                {"name": "eegFee", "type": "working_price", "amount": 0.0205},
+                {"name": "supplierBasePrice", "type": "base_price", "amount": 8.5}
+            ]
+        },
+        {
+            "id": 2,
+            "from": "2025-06-10 00:15:00",
+            "until": "2025-06-10 00:30:00",
+            "usage_kwh": 0.28,
+            "usage_type": 1,
+            "price_tag": null,
+            "tariff_name": "Dynamik Strom",
+            "cent_mwh": 7950.5
+        }
+    ]
+}
