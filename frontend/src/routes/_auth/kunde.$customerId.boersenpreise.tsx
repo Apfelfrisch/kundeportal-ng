@@ -97,50 +97,49 @@ function MarketPricesPage() {
       <h1 className="text-3xl font-semibold">Börsenpreise</h1>
 
       <Card>
-        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1.5">
             <CardTitle>Börsenpreise viertelstündlich</CardTitle>
-            <p className="text-muted-foreground mt-1 text-sm">
-              <span className="sr-only">Zeitraum: </span>
-              {formatDate(`${data.from}T00:00:00`)} –{' '}
-              {formatDate(`${data.until}T00:00:00`)}
-            </p>
-            {averagePrice !== null ? (
-              <p className="mt-3">
-                <span className="text-muted-foreground text-sm">
-                  Durchschnittspreis im Zeitraum
-                  {withTariffCosts ? ' (inkl. Tarifkosten)' : ''}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <span className="text-muted-foreground text-sm">
+                <span className="sr-only">Zeitraum: </span>
+                {formatDate(`${data.from}T00:00:00`)} –{' '}
+                {formatDate(`${data.until}T00:00:00`)}
+              </span>
+              {averagePrice !== null ? (
+                <span
+                  className="text-lg leading-none font-semibold tabular-nums"
+                  title={`Durchschnittspreis im Zeitraum${withTariffCosts ? ' (inkl. Tarifkosten)' : ''}`}
+                >
+                  <span className="sr-only">
+                    Durchschnittspreis im Zeitraum
+                    {withTariffCosts ? ' inkl. Tarifkosten' : ''}:{' '}
+                  </span>
+                  Ø {formatCtSummary(averagePrice)} ct/kWh
                 </span>
-                <span className="block text-2xl font-semibold tabular-nums">
-                  {formatCtSummary(averagePrice)} ct/kWh
-                </span>
-              </p>
-            ) : null}
-            {tariffCosts !== null ? (
-              <div className="mt-3">
-                <div className="flex items-center gap-2">
+              ) : null}
+              {tariffCosts !== null ? (
+                <span className="flex items-center gap-2">
                   <Switch
                     id="tariff-costs"
+                    size="sm"
                     checked={withTariffCosts}
                     onCheckedChange={setWithTariffCosts}
                   />
-                  <Label htmlFor="tariff-costs">
-                    Tarifkosten aufschlagen (
-                    {formatCtSummary(tariffCosts.total_ct)} ct/kWh)
+                  <Label
+                    htmlFor="tariff-costs"
+                    className="text-sm font-normal"
+                    // Aufschlüsselung ohne eigene Zeile — per Hover/Fokus.
+                    title={`${Object.entries(tariffCosts.components)
+                      .map(([label, ct]) => `${label} ${formatCtSummary(ct)}`)
+                      .join(', ')} ct/kWh, netto`}
+                  >
+                    inkl. Tarifkosten ({formatCtSummary(tariffCosts.total_ct)}
+                    {' ct/kWh)'}
                   </Label>
-                </div>
-                {withTariffCosts ? (
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    {Object.entries(tariffCosts.components)
-                      .map(
-                        ([label, ct]) => `${label} ${formatCtSummary(ct)}`,
-                      )
-                      .join(' · ')}{' '}
-                    ct/kWh, netto
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
+                </span>
+              ) : null}
+            </div>
           </div>
           <DayPager
             date={data.date}

@@ -3,6 +3,7 @@ import {
   CartesianGrid,
   ComposedChart,
   Line,
+  ReferenceDot,
   ReferenceLine,
   XAxis,
   YAxis,
@@ -182,6 +183,25 @@ export function QuarterHourChart({
   const fillBaseline = (key: string): number =>
     domainMin ?? Math.min(0, valueRange(key).min)
 
+  // Kreis auf der Kurve am Schnittpunkt mit der „Jetzt“-Linie: der Wert der
+  // Viertelstunde, in der „jetzt“ liegt (Stufenwert gilt bis zur nächsten
+  // Scheibe, der Punkt sitzt daher exakt auf der Linie).
+  const firstSeries = series[0]
+  const nowDot = (() => {
+    if (nowTs === null || firstSeries === undefined) {
+      return null
+    }
+    let current: QuarterHourPoint | null = null
+    for (const point of data) {
+      if (point.ts > nowTs) {
+        break
+      }
+      current = point
+    }
+    const value = current?.[firstSeries.key]
+    return typeof value === 'number' ? { value, series: firstSeries } : null
+  })()
+
   return (
     <ChartContainer
       config={config}
@@ -224,7 +244,8 @@ export function QuarterHourChart({
                   style={{ stopColor: `var(--color-${entry.key}Low)` }}
                 />
               </linearGradient>,
-              // Füllung: nur der Bereich über der Basislinie, harter Schnitt.
+              // Füllung: nur der Bereich über der Basislinie, weich zur
+              // Basislinie hin auslaufend.
               <linearGradient
                 key={`${entry.key}-fill`}
                 id={`diverging-${entry.key}-fill`}
@@ -235,10 +256,6 @@ export function QuarterHourChart({
               >
                 <stop
                   offset={0}
-                  style={{ stopColor: `var(--color-${entry.key}High)` }}
-                />
-                <stop
-                  offset={fillOffset}
                   style={{ stopColor: `var(--color-${entry.key}High)` }}
                 />
                 <stop
@@ -265,14 +282,7 @@ export function QuarterHourChart({
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          // Eigene Zeile unter den Ticks für die Achsenbeschriftung.
-          height={44}
-          label={{
-            value: 'Uhrzeit',
-            position: 'insideBottomRight',
-            fontSize: 12,
-            fill: 'var(--muted-foreground)',
-          }}
+          height={28}
         />
         <YAxis
           width={56}
@@ -398,7 +408,9 @@ export function QuarterHourChart({
                   ? `var(--color-${entry.key})`
                   : `url(#diverging-${entry.key}-fill)`
               }
-              fillOpacity={0.1}
+              // Der weiche Verlauf halbiert die wahrgenommene Deckung —
+              // divergierende Flächen starten deshalb etwas kräftiger.
+              fillOpacity={entry.diverging === undefined ? 0.1 : 0.18}
               dot={false}
               activeDot={activeDot}
               connectNulls={false}
@@ -418,6 +430,23 @@ export function QuarterHourChart({
             />
           )
         })}
+        {/* Nach den Serien gerendert, damit der Punkt über der Kurve liegt. */}
+        {nowTs !== null && nowDot !== null ? (
+          <ReferenceDot
+            x={nowTs}
+            y={nowDot.value}
+            r={5}
+            fill={
+              nowDot.series.diverging === undefined
+                ? `var(--color-${nowDot.series.key})`
+                : nowDot.value >= nowDot.series.diverging.baseline
+                  ? `var(--color-${nowDot.series.key}High)`
+                  : `var(--color-${nowDot.series.key}Low)`
+            }
+            stroke="var(--card)"
+            strokeWidth={2}
+          />
+        ) : null}
         {series.length > 1 ? (
           <ChartLegend content={<ChartLegendContent />} />
         ) : null}

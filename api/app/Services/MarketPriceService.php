@@ -16,7 +16,7 @@ use Carbon\CarbonImmutable;
 final class MarketPriceService
 {
     /**
-     * @return array{date: CarbonImmutable, prices: list<MarketPrice>}
+     * @return array{date: CarbonImmutable, prices: list<MarketPrice>, nextDate: CarbonImmutable|null}
      */
     public function day(?CarbonImmutable $date = null): array
     {
@@ -31,9 +31,17 @@ final class MarketPriceService
             ->get()
             ->all();
 
+        // Einen Tag vor geht es nur, solange das nächste Fenster noch
+        // mindestens zwei Tage mit Preisen abdeckt — also solange der
+        // nächste Zentrumstag selbst noch Preise hat.
+        $nextCenter = $center->addDay();
+
         return [
             'date' => $center,
             'prices' => array_values($prices),
+            'nextDate' => $nextCenter->startOfDay() <= $this->latestPriceDate()
+                ? $nextCenter
+                : null,
         ];
     }
 

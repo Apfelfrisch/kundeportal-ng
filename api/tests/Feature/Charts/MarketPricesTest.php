@@ -135,6 +135,29 @@ final class MarketPricesTest extends ChartsTestCase
             ->assertJsonCount(1, 'data.prices');
     }
 
+    public function test_forward_navigation_stops_when_the_next_window_covers_less_than_two_days(): void
+    {
+        $this->enableFeature('dynamic-electric-prices');
+
+        $user = User::factory()->create();
+
+        $this->createPrice('2025-06-09 12:00:00', 5000);
+        $this->createPrice('2025-06-10 00:15:00', 8213);
+
+        // Zentrum = letzter Preistag: das nächste Fenster hätte nur noch
+        // einen Tag mit Preisen → kein next_date.
+        $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-10")
+            ->assertOk()
+            ->assertJsonPath('data.navigation.next_date', null);
+
+        // Einen Tag davor deckt das nächste Fenster noch beide Tage ab.
+        $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-09")
+            ->assertOk()
+            ->assertJsonPath('data.navigation.next_date', '2025-06-10');
+    }
+
     public function test_tariff_costs_of_a_dynamic_contract_are_included(): void
     {
         $this->enableFeature('dynamic-electric-prices');

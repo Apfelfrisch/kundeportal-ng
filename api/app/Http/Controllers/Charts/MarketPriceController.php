@@ -30,7 +30,12 @@ final class MarketPriceController
     {
         $day = $this->marketPriceService->day($this->requestedDate($request));
 
-        return new MarketPriceDayResource($day['date'], $day['prices'], $this->tariffCosts($user));
+        return new MarketPriceDayResource(
+            $day['date'],
+            $day['prices'],
+            $this->tariffCosts($user),
+            $day['nextDate'],
+        );
     }
 
     /**

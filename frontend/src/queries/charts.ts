@@ -12,7 +12,8 @@ import type { ApiResponse } from '#/types/api'
 
 export interface ChartNavigation {
   prev_date: string
-  next_date: string
+  /** null: das nächste Fenster würde keine zwei Tage mehr abdecken. */
+  next_date: string | null
 }
 
 export interface MarketPriceSlot {

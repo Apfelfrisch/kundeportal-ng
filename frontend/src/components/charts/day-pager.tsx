@@ -9,7 +9,8 @@ interface DayPagerProps {
   /** Zentrumstag des angezeigten Fensters (`yyyy-mm-dd`, von der API). */
   date: string
   prevDate: string
-  nextDate: string
+  /** null: vorwärts würde das Fenster keine zwei Tage mehr abdecken. */
+  nextDate: string | null
   /** `?date=` gesetzt? Dann „Heute“-Button zum Zurücksetzen anzeigen. */
   showReset: boolean
   /** `undefined` = Parameter entfernen (Standardtag des Backends). */
@@ -17,9 +18,9 @@ interface DayPagerProps {
 }
 
 /**
- * Tages-Navigation der Chart-Seiten: einen Tag vor/zurück, Datumsauswahl und
- * „Heute“ zum Zurücksetzen – portiert aus der Zeitraum-Navigation des
- * Altsystems.
+ * Tages-Navigation der Chart-Seiten: runde Vor-/Zurück-Knöpfe um die
+ * Datumsauswahl, „Heute“ zum Zurücksetzen – portiert aus der
+ * Zeitraum-Navigation des Altsystems.
  */
 export function DayPager({
   date,
@@ -38,12 +39,12 @@ export function DayPager({
     >
       <Button
         variant="outline"
-        size="sm"
+        size="icon"
+        className="size-8 rounded-full"
         onClick={() => onSelect(prevDate)}
         aria-label={`Einen Tag zurück: ${formatDate(prevDate)}`}
       >
         <ChevronLeft aria-hidden="true" />
-        Zurück
       </Button>
       <label htmlFor={inputId} className="sr-only">
         Datum auswählen
@@ -65,11 +66,20 @@ export function DayPager({
       />
       <Button
         variant="outline"
-        size="sm"
-        onClick={() => onSelect(nextDate)}
-        aria-label={`Einen Tag vor: ${formatDate(nextDate)}`}
+        size="icon"
+        className="size-8 rounded-full"
+        disabled={nextDate === null}
+        onClick={() => {
+          if (nextDate !== null) {
+            onSelect(nextDate)
+          }
+        }}
+        aria-label={
+          nextDate === null
+            ? 'Einen Tag vor (keine weiteren Preise verfügbar)'
+            : `Einen Tag vor: ${formatDate(nextDate)}`
+        }
       >
-        Vor
         <ChevronRight aria-hidden="true" />
       </Button>
       {showReset ? (

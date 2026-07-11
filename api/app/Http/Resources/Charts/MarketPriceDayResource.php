@@ -20,11 +20,13 @@ final class MarketPriceDayResource extends JsonResource
     /**
      * @param  list<MarketPrice>  $prices
      * @param  array{total_ct: float, components: array<string, float>}|null  $tariffCosts
+     * @param  CarbonImmutable|null  $nextDate  null, wenn das nächste Fenster keine zwei Tage mehr abdecken würde
      */
     public function __construct(
         private readonly CarbonImmutable $date,
         private readonly array $prices,
         private readonly ?array $tariffCosts = null,
+        private readonly ?CarbonImmutable $nextDate = null,
     ) {
         parent::__construct($prices);
     }
@@ -48,7 +50,7 @@ final class MarketPriceDayResource extends JsonResource
             ),
             'navigation' => [
                 'prev_date' => $this->date->subDay()->toDateString(),
-                'next_date' => $this->date->addDay()->toDateString(),
+                'next_date' => $this->nextDate?->toDateString(),
             ],
             // Konstanter Tarifaufschlag (ct/kWh) des dynamischen Vertrags,
             // ohne Börsenbezug — null ohne dynamischen Vertrag / bei KVS-Ausfall.
