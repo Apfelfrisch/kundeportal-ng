@@ -1,7 +1,8 @@
 .PHONY: setup dev up down test test-api test-frontend stan lint lint-api lint-frontend
 
 up:
-	docker compose up -d --wait
+	docker compose up -d --wait mysql mailpit minio
+	docker compose run --rm minio-init
 
 down:
 	docker compose down
