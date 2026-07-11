@@ -1,0 +1,10 @@
+// Deterministische Zeitzone für Datums-Tests.
+import '@testing-library/jest-dom/vitest'
+import { cleanup } from '@testing-library/react'
+import { afterEach } from 'vitest'
+
+process.env.TZ = 'Europe/Berlin'
+
+afterEach(() => {
+  cleanup()
+})

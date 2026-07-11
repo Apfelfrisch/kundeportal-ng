@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" width="260" height="48" role="img" aria-label="FriesenWerk">
+  <circle cx="22" cy="24" r="18" fill="#ffcc00"/>
+  <path d="M24 12 L16 26 h7 l-3 12 L32 22 h-8 l4 -10 Z" fill="#1d1d1b"/>
+  <text x="50" y="32" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="700" fill="#1d1d1b">FriesenWerk</text>
+</svg>
