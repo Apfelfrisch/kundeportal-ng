@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { ChartEmptyState } from '#/components/charts/chart-empty-state'
 import { ChartErrorState } from '#/components/charts/chart-error'
+import { CurrentPriceGauge } from '#/components/charts/current-price-gauge'
 import { DayPager } from '#/components/charts/day-pager'
 import { QuarterHourChart } from '#/components/charts/quarter-hour-chart'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
@@ -83,6 +84,16 @@ function MarketPricesPage() {
         displayPrices.length
       : null
 
+  // Aktuelle Viertelstunde für den Preis-Ring (nur wenn „jetzt“ im Fenster
+  // liegt, z. B. nicht beim Blättern in die Vergangenheit).
+  const nowMs = Date.now()
+  const currentSlot =
+    displayPrices.find(
+      (price) =>
+        parseApiDateTime(price.starts_at) <= nowMs &&
+        nowMs < parseApiDateTime(price.ends_at),
+    ) ?? null
+
   const series = buildQuarterHourSeries({
     from: data.from,
     until: data.until,
@@ -97,9 +108,17 @@ function MarketPricesPage() {
       <h1 className="text-3xl font-semibold">Börsenpreise</h1>
 
       <Card>
-        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-1.5">
-            <CardTitle>Börsenpreise viertelstündlich</CardTitle>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            {currentSlot !== null && averagePrice !== null ? (
+              <CurrentPriceGauge
+                value={currentSlot.cent_per_kwh}
+                min={Math.min(...displayPrices.map((p) => p.cent_per_kwh))}
+                max={Math.max(...displayPrices.map((p) => p.cent_per_kwh))}
+                aboveAverage={currentSlot.cent_per_kwh >= averagePrice}
+                timeRange={`${formatUhrzeit(parseApiDateTime(currentSlot.starts_at))} – ${formatUhrzeit(parseApiDateTime(currentSlot.ends_at))}`}
+              />
+            ) : null}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
               <span className="text-muted-foreground text-sm">
                 <span className="sr-only">Zeitraum: </span>
