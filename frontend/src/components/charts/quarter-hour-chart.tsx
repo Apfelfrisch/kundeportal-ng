@@ -273,10 +273,15 @@ export function QuarterHourChart({
         />
         <YAxis
           width={56}
-          domain={[
-            domainMin ?? ((dataMin: number) => Math.min(0, dataMin)),
-            'auto',
-          ]}
+          // Bei fester Unterkante auch die Oberkante explizit setzen: mit
+          // 'auto' rundet Recharts die Ticks über die GESAMTE Domain und
+          // zieht die Unterkante dabei wieder Richtung Null (Totraum unter
+          // der Kurve).
+          domain={
+            domainMin !== null
+              ? [domainMin, (dataMax: number) => Math.ceil(dataMax)]
+              : [(dataMin: number) => Math.min(0, dataMin), 'auto']
+          }
           tickLine={false}
           axisLine={false}
           tickMargin={4}
@@ -305,19 +310,6 @@ export function QuarterHourChart({
             }}
           />
         ))}
-        {nowTs !== null ? (
-          <ReferenceLine
-            x={nowTs}
-            stroke="var(--destructive)"
-            strokeDasharray="4 4"
-            label={{
-              value: 'Jetzt',
-              position: 'insideTopRight',
-              fontSize: 12,
-              fill: 'var(--destructive)',
-            }}
-          />
-        ) : null}
         <ChartTooltip
           cursor={{ strokeDasharray: '4 4' }}
           content={
@@ -402,12 +394,13 @@ export function QuarterHourChart({
             />
           )
         })}
-        {/* Nach den Serien gerendert, damit der Punkt über der Kurve liegt. */}
+        {/* „Jetzt“-Markierung: nach den Serien gerendert, damit der Punkt
+            über der Kurve liegt. */}
         {nowTs !== null && nowDot !== null ? (
           <ReferenceDot
             x={nowTs}
             y={nowDot.value}
-            r={5}
+            r={8}
             fill={
               nowDot.series.diverging === undefined
                 ? `var(--color-${nowDot.series.key})`
