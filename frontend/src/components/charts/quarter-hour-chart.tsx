@@ -78,6 +78,12 @@ interface QuarterHourChartProps {
   syncId?: string
   /** „Jetzt“-Markierung einblenden (Börsenpreise). */
   showNow?: boolean
+  /**
+   * Unterkante der Y-Achse: `'zero'` (Standard) schließt die Null immer ein
+   * (Mengen wie kWh), `'data'` beginnt am abgerundeten Datenminimum, damit
+   * hoch liegende Kurven die volle Höhe nutzen.
+   */
+  yMin?: 'zero' | 'data'
   className?: string
 }
 
@@ -96,6 +102,7 @@ export function QuarterHourChart({
   ariaLabel,
   syncId,
   showNow = false,
+  yMin = 'zero',
   className,
 }: QuarterHourChartProps) {
   const config: ChartConfig = Object.fromEntries(
@@ -123,6 +130,18 @@ export function QuarterHourChart({
     return { min: Math.min(...values), max: Math.max(...values) }
   }
 
+  // Explizite Unterkante bei `yMin: 'data'` — sie ist zugleich die Basislinie
+  // der Area-Füllung und geht darum in die Füllverlaufs-Berechnung ein.
+  const allValues = series
+    .flatMap((entry) =>
+      data.map((point) => point[entry.key]),
+    )
+    .filter((value): value is number => typeof value === 'number')
+  const domainMin =
+    yMin === 'data' && allValues.length > 0
+      ? Math.floor(Math.min(...allValues))
+      : null
+
   return (
     <ChartContainer
       config={config}
@@ -142,12 +161,13 @@ export function QuarterHourChart({
               return null
             }
             const { min, max } = valueRange(entry.key)
-            // Der Füllpfad einer Area schließt an der Nulllinie ab (nicht am
-            // Datenminimum), daher gilt sein Schnittpunkt dieser Boundingbox.
+            // Der Füllpfad einer Area schließt an der Achsen-Unterkante ab
+            // (nicht am Datenminimum), daher gilt sein Schnittpunkt dieser
+            // Boundingbox.
             const fillOffset = baselineOffset(
               diverging.baseline,
               max,
-              Math.min(0, min),
+              domainMin ?? Math.min(0, min),
             )
             return [
               // Linie: durchgängiger Verlauf vom high- zum low-Pol.
@@ -220,7 +240,10 @@ export function QuarterHourChart({
         />
         <YAxis
           width={56}
-          domain={[(dataMin: number) => Math.min(0, dataMin), 'auto']}
+          domain={[
+            domainMin ?? ((dataMin: number) => Math.min(0, dataMin)),
+            'auto',
+          ]}
           tickLine={false}
           axisLine={false}
           tickMargin={4}
