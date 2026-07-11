@@ -17,6 +17,27 @@ interface CurrentPriceGaugeProps {
 }
 
 /**
+ * Platzhalter in Ringgröße für Fenster ohne „jetzt“ (z. B. beim Blättern in
+ * die Vergangenheit) — hält das Kopfzeilen-Layout stabil.
+ */
+export function CurrentPriceGaugePlaceholder() {
+  return (
+    <div className="size-32 shrink-0" aria-hidden="true">
+      <svg viewBox="0 0 100 100" className="size-full">
+        <circle
+          cx="50"
+          cy="50"
+          r={RADIUS}
+          fill="none"
+          stroke="var(--muted)"
+          strokeWidth={STROKE}
+        />
+      </svg>
+    </div>
+  )
+}
+
+/**
  * Aktueller Preis als Ring: der äußere Bogen füllt sich proportional zur
  * Lage des Preises zwischen Fenster-Tief (leer) und -Hoch (voll), gefärbt
  * nach der Seite des Durchschnitts.

@@ -6,7 +6,10 @@ import { z } from 'zod'
 
 import { ChartEmptyState } from '#/components/charts/chart-empty-state'
 import { ChartErrorState } from '#/components/charts/chart-error'
-import { CurrentPriceGauge } from '#/components/charts/current-price-gauge'
+import {
+  CurrentPriceGauge,
+  CurrentPriceGaugePlaceholder,
+} from '#/components/charts/current-price-gauge'
 import { DayPager } from '#/components/charts/day-pager'
 import { QuarterHourChart } from '#/components/charts/quarter-hour-chart'
 import { Button } from '#/components/ui/button'
@@ -146,7 +149,9 @@ function MarketPricesPage() {
                 aboveAverage={currentSlot.cent_per_kwh >= averagePrice}
                 timeRange={`${formatUhrzeit(parseApiDateTime(currentSlot.starts_at))} – ${formatUhrzeit(parseApiDateTime(currentSlot.ends_at))}`}
               />
-            ) : null}
+            ) : (
+              <CurrentPriceGaugePlaceholder />
+            )}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
               {averagePrice !== null ? (
                 <span
