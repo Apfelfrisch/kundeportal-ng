@@ -2,9 +2,15 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Database queue drained periodically instead of a long-running worker
+// (port of the old app:process-queue every-2-minutes pattern).
+Schedule::command('queue:work --stop-when-empty')
+    ->everyTwoMinutes()
+    ->withoutOverlapping();
+
+// Spot market prices are only needed by tenants with dynamic tariffs.
+if ((bool) config('company.app.dynamic-electric-prices')) {
+    Schedule::command('app:fetch-market-prices')->everyTenMinutes();
+}
