@@ -158,7 +158,7 @@ function MarketPricesPage() {
               unit="ct/kWh"
               showNow
               yMin="data"
-              ariaLabel="Stufendiagramm der viertelstündlichen Börsenstrompreise in Cent pro Kilowattstunde. Eine gestrichelte Linie markiert den Durchschnittspreis; Preise darüber sind rot, darunter grün eingefärbt. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
+              ariaLabel="Stufendiagramm der viertelstündlichen Börsenstrompreise in Cent pro Kilowattstunde. Preise über dem Durchschnitt sind rot, darunter grün eingefärbt. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
               series={[
                 {
                   key: 'price',
@@ -174,7 +174,6 @@ function MarketPricesPage() {
                           baseline: averagePrice,
                           high: PRICE_DIVERGING_COLORS.high,
                           low: PRICE_DIVERGING_COLORS.low,
-                          label: `Ø ${formatCtSummary(averagePrice)} ct/kWh`,
                         },
                       }
                     : {}),

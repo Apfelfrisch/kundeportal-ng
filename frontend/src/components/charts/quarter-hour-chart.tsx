@@ -39,11 +39,10 @@ export interface ChartSeries {
   formatValue: (value: number) => string
   /**
    * Färbt die Serie divergierend um eine Basislinie (z. B. Durchschnitt):
-   * je Arm ein Ein-Farbton-Verlauf von `near` (hell, an der Linie) zu `far`
-   * (dunkel, am Extrem) mit hartem Wechsel an der Basislinie — kein
-   * Mischverlauf zwischen den Armen. Die Füllung hinterlegt nur den Bereich
-   * über der Basislinie mit dem `high`-Arm. Zeichnet zusätzlich eine
-   * gestrichelte Referenzlinie.
+   * je Arm ein Ein-Farbton-Verlauf von `near` (hell, an der Basislinie) zu
+   * `far` (dunkel, am Extrem) mit hartem Wechsel an der Basislinie — kein
+   * Mischverlauf zwischen den Armen. Die Füllung schließt an der Basislinie
+   * ab und läuft zu ihr hin aus: rot oberhalb, grün unterhalb.
    */
   diverging?: {
     baseline: number
@@ -55,8 +54,6 @@ export interface ChartSeries {
       near: { light: string; dark: string }
       far: { light: string; dark: string }
     }
-    /** Beschriftung der Referenzlinie, z. B. `Ø 8,42 ct/kWh`. */
-    label: string
   }
 }
 
@@ -72,35 +69,6 @@ function baselineOffset(baseline: number, top: number, bottom: number): number {
   }
 
   return Math.min(Math.max((top - baseline) / span, 0), 1)
-}
-
-/**
- * Beschriftung der Basislinie: rechtsbündig knapp über der Linie, mit Halo
- * in Kartenfarbe, damit sie über der Kurve lesbar bleibt (statt des rohen
- * Recharts-Textes, der mit der Linie kollidiert). `viewBox` liefert Recharts.
- */
-function BaselineLabel(props: {
-  viewBox?: { x?: number; y?: number; width?: number }
-  value: string
-}) {
-  const { x = 0, y = 0, width = 0 } = props.viewBox ?? {}
-
-  return (
-    <text
-      x={x + width - 4}
-      y={y - 7}
-      textAnchor="end"
-      fontSize={12}
-      fontWeight={600}
-      fill="var(--foreground)"
-      stroke="var(--card)"
-      strokeWidth={4}
-      paintOrder="stroke"
-      style={{ fontVariantNumeric: 'tabular-nums' }}
-    >
-      {props.value}
-    </text>
-  )
 }
 
 interface QuarterHourChartProps {
@@ -182,17 +150,6 @@ export function QuarterHourChart({
       ? Math.floor(Math.min(...allValues))
       : null
 
-  /**
-   * Untere Kante des Füllpfads einer divergierenden Area. Recharts leitet
-   * die Standard-Basislinie aus der GERENDERTEN Achsen-Domain ab (die durch
-   * Tick-Rundung vom gesetzten Minimum abweichen kann) — deshalb wird sie
-   * per `baseValue` explizit auf genau den Wert gepinnt, mit dem auch der
-   * Füllverlaufs-Schnitt rechnet. Unterhalb der Basislinie ist die Füllung
-   * ohnehin transparent.
-   */
-  const fillBaseline = (key: string): number =>
-    domainMin ?? Math.min(0, valueRange(key).min)
-
   // Kreis auf der Kurve am Schnittpunkt mit der „Jetzt“-Linie: der Wert der
   // Viertelstunde, in der „jetzt“ liegt (Stufenwert gilt bis zur nächsten
   // Scheibe, der Punkt sitzt daher exakt auf der Linie).
@@ -230,13 +187,11 @@ export function QuarterHourChart({
             if (diverging === undefined || data.length === 0) {
               return null
             }
+            // Die Füllung schließt per `baseValue` an der Basislinie ab —
+            // Linien- und Füllpfad teilen sich damit dieselbe Boundingbox
+            // (Datenmaximum … Datenminimum) und denselben Schnittpunkt.
             const { min, max } = valueRange(entry.key)
             const strokeOffset = baselineOffset(diverging.baseline, max, min)
-            const fillOffset = baselineOffset(
-              diverging.baseline,
-              max,
-              fillBaseline(entry.key),
-            )
             return [
               // Linie: je Arm hell (an der Basislinie) → dunkel (am Extrem),
               // harter Wechsel an der Basislinie statt Mischverlauf.
@@ -265,8 +220,8 @@ export function QuarterHourChart({
                   style={{ stopColor: `var(--color-${entry.key}LowFar)` }}
                 />
               </linearGradient>,
-              // Füllung: nur der Bereich über der Basislinie, weich zur
-              // Basislinie hin auslaufend.
+              // Füllung: zwischen Kurve und Basislinie, zu ihr hin
+              // auslaufend — rot oberhalb, grün unterhalb.
               <linearGradient
                 key={`${entry.key}-fill`}
                 id={`diverging-${entry.key}-fill`}
@@ -280,11 +235,22 @@ export function QuarterHourChart({
                   style={{ stopColor: `var(--color-${entry.key}HighFar)` }}
                 />
                 <stop
-                  offset={fillOffset}
+                  offset={strokeOffset}
                   style={{
                     stopColor: `var(--color-${entry.key}HighNear)`,
                     stopOpacity: 0,
                   }}
+                />
+                <stop
+                  offset={strokeOffset}
+                  style={{
+                    stopColor: `var(--color-${entry.key}LowNear)`,
+                    stopOpacity: 0,
+                  }}
+                />
+                <stop
+                  offset={1}
+                  style={{ stopColor: `var(--color-${entry.key}LowFar)` }}
                 />
               </linearGradient>,
             ]
@@ -339,17 +305,6 @@ export function QuarterHourChart({
             }}
           />
         ))}
-        {divergingSeries.map((entry) =>
-          entry.diverging === undefined ? null : (
-            <ReferenceLine
-              key={`baseline-${entry.key}`}
-              y={entry.diverging.baseline}
-              stroke="var(--muted-foreground)"
-              strokeDasharray="6 4"
-              label={<BaselineLabel value={entry.diverging.label} />}
-            />
-          ),
-        )}
         {nowTs !== null ? (
           <ReferenceLine
             x={nowTs}
@@ -419,11 +374,7 @@ export function QuarterHourChart({
               type="stepAfter"
               stroke={stroke}
               strokeWidth={2}
-              baseValue={
-                entry.diverging === undefined || data.length === 0
-                  ? undefined
-                  : fillBaseline(entry.key)
-              }
+              baseValue={entry.diverging?.baseline}
               fill={
                 entry.diverging === undefined
                   ? `var(--color-${entry.key})`
