@@ -11,6 +11,7 @@ use App\Integrations\CustomerDataApi\Exceptions\ContractNotFoundException;
 use App\Integrations\CustomerDataApi\Requests\GetContractRequest;
 use App\Integrations\CustomerDataApi\Requests\GetContractsByIdsRequest;
 use App\Integrations\CustomerDataApi\Requests\GetContractsRequest;
+use App\Integrations\CustomerDataApi\StaleOnErrorCache;
 use App\Models\ContractToUser;
 use App\Models\User;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -20,6 +21,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * Access rule ported from the old ConfirmedContractAccessMiddleware: a
  * customer only reaches contracts with a confirmed ContractToUser row,
  * administrators bypass the check.
+ *
+ * All KVS reads go through the StaleOnErrorCache: contracts stay readable
+ * from the last known good copy while the customer-data-api is down.
  */
 final readonly class ContractService
 {
@@ -31,6 +35,7 @@ final readonly class ContractService
 
     public function __construct(
         private CustomerDataApiConnector $connector,
+        private StaleOnErrorCache $staleCache,
     ) {}
 
     /**
@@ -47,10 +52,7 @@ final readonly class ContractService
             return [];
         }
 
-        $request = new GetContractsByIdsRequest($contractNumbers);
-        $response = $this->connector->send($request);
-
-        return $request->createDtoFromResponse($response);
+        return $this->fetchByIds($contractNumbers);
     }
 
     /**
@@ -72,10 +74,12 @@ final readonly class ContractService
      */
     public function find(int $contractNumber): ContractData
     {
-        $request = new GetContractRequest($contractNumber);
-        $response = $this->connector->send($request);
+        return $this->staleCache->remember("contract:{$contractNumber}", function () use ($contractNumber): ContractData {
+            $request = new GetContractRequest($contractNumber);
+            $response = $this->connector->send($request);
 
-        return $request->createDtoFromResponse($response);
+            return $request->createDtoFromResponse($response);
+        });
     }
 
     /**
@@ -83,10 +87,12 @@ final readonly class ContractService
      */
     public function page(int $page = 1): ContractPageData
     {
-        $request = new GetContractsRequest($page);
-        $response = $this->connector->send($request);
+        return $this->staleCache->remember("contracts:page:{$page}", function () use ($page): ContractPageData {
+            $request = new GetContractsRequest($page);
+            $response = $this->connector->send($request);
 
-        return $request->createDtoFromResponse($response);
+            return $request->createDtoFromResponse($response);
+        });
     }
 
     /**
@@ -162,10 +168,7 @@ final readonly class ContractService
         }
 
         try {
-            $request = new GetContractsByIdsRequest($contractNumbers);
-            $response = $this->connector->send($request);
-
-            return self::adminSearchPage($request->createDtoFromResponse($response));
+            return self::adminSearchPage($this->fetchByIds($contractNumbers));
         } catch (ContractNotFoundException) {
             // Old behaviour: missing contracts silently drop out of the listing.
             return self::adminSearchPage([]);
@@ -185,6 +188,27 @@ final readonly class ContractService
             lastPage: 1,
             total: count($contracts),
         );
+    }
+
+    /**
+     * Shared batch fetch: the cache key is order-independent, so the customer
+     * listing and the admin user search share last-known-good entries.
+     *
+     * @param  list<int>  $contractNumbers
+     * @return list<ContractData>
+     */
+    private function fetchByIds(array $contractNumbers): array
+    {
+        sort($contractNumbers);
+
+        $cacheKey = 'contracts:by-ids:'.md5(implode(',', $contractNumbers));
+
+        return $this->staleCache->remember($cacheKey, function () use ($contractNumbers): array {
+            $request = new GetContractsByIdsRequest($contractNumbers);
+            $response = $this->connector->send($request);
+
+            return $request->createDtoFromResponse($response);
+        });
     }
 
     private function hasConfirmedAssignment(User $customer, int $contractNumber): bool
