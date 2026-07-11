@@ -192,9 +192,13 @@ export function QuarterHourChart({
             // (Datenmaximum … Datenminimum) und denselben Schnittpunkt.
             const { min, max } = valueRange(entry.key)
             const strokeOffset = baselineOffset(diverging.baseline, max, min)
+            // Schmale Mischzone um die Basislinie (±6 % der Kurvenhöhe):
+            // Rot geht nur dort weich in Grün über, außerhalb bleiben die
+            // Arme sortenrein.
+            const blendStart = Math.max(strokeOffset - 0.06, 0)
+            const blendEnd = Math.min(strokeOffset + 0.06, 1)
             return [
-              // Linie: je Arm hell (an der Basislinie) → dunkel (am Extrem),
-              // harter Wechsel an der Basislinie statt Mischverlauf.
+              // Linie: je Arm hell (an der Basislinie) → dunkel (am Extrem).
               <linearGradient
                 key={`${entry.key}-stroke`}
                 id={`diverging-${entry.key}-stroke`}
@@ -208,11 +212,11 @@ export function QuarterHourChart({
                   style={{ stopColor: `var(--color-${entry.key}HighFar)` }}
                 />
                 <stop
-                  offset={strokeOffset}
+                  offset={blendStart}
                   style={{ stopColor: `var(--color-${entry.key}HighNear)` }}
                 />
                 <stop
-                  offset={strokeOffset}
+                  offset={blendEnd}
                   style={{ stopColor: `var(--color-${entry.key}LowNear)` }}
                 />
                 <stop
