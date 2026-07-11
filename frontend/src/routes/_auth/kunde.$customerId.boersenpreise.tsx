@@ -30,7 +30,6 @@ import {
   groupByDay,
   parseApiDateTime,
 } from '#/lib/charts'
-import { formatDate } from '#/lib/format'
 import { marketPricesQuery } from '#/queries/charts'
 import { tenantQuery } from '#/queries/tenant'
 import type { MarketPriceSlot } from '#/queries/charts'
@@ -120,11 +119,6 @@ function MarketPricesPage() {
               />
             ) : null}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-              <span className="text-muted-foreground text-sm">
-                <span className="sr-only">Zeitraum: </span>
-                {formatDate(`${data.from}T00:00:00`)} –{' '}
-                {formatDate(`${data.until}T00:00:00`)}
-              </span>
               {averagePrice !== null ? (
                 <span
                   className="text-lg leading-none font-semibold tabular-nums"
