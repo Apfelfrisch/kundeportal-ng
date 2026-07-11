@@ -27,12 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '#/components/ui/dialog'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '#/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '#/components/ui/table'
 import {
   isRevocable,
   isSingleTariffMeter,
@@ -114,7 +109,7 @@ function ContractDashboardPage() {
           />
         )}
         {contract.is_dynamic ? (
-          <DynamicUsageCard />
+          <DynamicUsageCard customerId={customerId} contractId={contractId} />
         ) : (
           <UsageCard
             contract={contract}
@@ -430,24 +425,78 @@ function DynamicPriceHelpDialog({ contract }: { contract: Contract }) {
   )
 }
 
+/**
+ * Chart-Link einer Karte (Lastgänge/Abrechnung), analog zu den Link-Buttons
+ * der alten Verbrauchskarten.
+ */
+function ChartPageLink({
+  customerId,
+  contractId,
+  page,
+  title,
+  children,
+}: {
+  customerId: string
+  contractId: string
+  page: 'abrechnung' | 'lastgaenge'
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <Button asChild variant="outline" className="w-full">
+      {page === 'abrechnung' ? (
+        <Link
+          to="/kunde/$customerId/vertrag/$contractId/abrechnung"
+          params={{ customerId, contractId }}
+          title={title}
+        >
+          {children}
+        </Link>
+      ) : (
+        <Link
+          to="/kunde/$customerId/vertrag/$contractId/lastgaenge"
+          params={{ customerId, contractId }}
+          title={title}
+        >
+          {children}
+        </Link>
+      )}
+    </Button>
+  )
+}
+
 /** Verbrauchsdaten-Karte des klassischen Tarifs. */
 function UsageCard({ contract, customerId, contractId }: CardProps) {
+  const { data: tenant } = useQuery(tenantQuery)
   const meterPoint = primaryMeterPoint(contract)
   const meterCount = latestMeterCount(meterPoint)
+  const hasSmartMeter = primaryMeter(meterPoint)?.smart_meter === true
 
   return (
     <InfoCard
       icon={<Gauge className="size-4" />}
       title="Verbrauchsdaten"
       footer={
-        <ChangeLink
-          customerId={customerId}
-          contractId={contractId}
-          formType="meter-count"
-          title="Zählerstand mitteilen"
-        >
-          Zählerstand mitteilen
-        </ChangeLink>
+        <>
+          <ChangeLink
+            customerId={customerId}
+            contractId={contractId}
+            formType="meter-count"
+            title="Zählerstand mitteilen"
+          >
+            Zählerstand mitteilen
+          </ChangeLink>
+          {hasSmartMeter && tenant?.features.edi_load_profiles === true ? (
+            <ChartPageLink
+              customerId={customerId}
+              contractId={contractId}
+              page="lastgaenge"
+              title="Auflistung deiner Verbräuche."
+            >
+              Lastgang anzeigen
+            </ChartPageLink>
+          ) : null}
+        </>
       }
     >
       {meterCount !== null ? (
@@ -490,12 +539,51 @@ function UsageCard({ contract, customerId, contractId }: CardProps) {
 }
 
 /** Verbrauchsdaten-Karte des dynamischen Tarifs (Smart Meter). */
-function DynamicUsageCard() {
+function DynamicUsageCard({
+  customerId,
+  contractId,
+}: {
+  customerId: string
+  contractId: string
+}) {
+  const { data: tenant } = useQuery(tenantQuery)
+  const showBilled = tenant?.features.dynamic_electric_prices === true
+  const showEdi = tenant?.features.edi_load_profiles === true
+  const chartLinks =
+    showBilled || showEdi ? (
+      <>
+        {showBilled ? (
+          <ChartPageLink
+            customerId={customerId}
+            contractId={contractId}
+            page="abrechnung"
+            title="Darstellung Deiner bisher abgerechneten Verbräuche."
+          >
+            Abgerechnete Lastgänge
+          </ChartPageLink>
+        ) : null}
+        {showEdi ? (
+          <ChartPageLink
+            customerId={customerId}
+            contractId={contractId}
+            page="lastgaenge"
+            title="Auflistung deiner Verbräuche."
+          >
+            Lastgang anzeigen
+          </ChartPageLink>
+        ) : null}
+      </>
+    ) : undefined
+
   return (
-    <InfoCard icon={<Gauge className="size-4" />} title="Verbrauchsdaten">
+    <InfoCard
+      icon={<Gauge className="size-4" />}
+      title="Verbrauchsdaten"
+      footer={chartLinks}
+    >
       <p className="text-sm">
-        Wir erhalten deine Zählerstände/Verbräuche automatisch über deinen
-        Smart Meter.
+        Wir erhalten deine Zählerstände/Verbräuche automatisch über deinen Smart
+        Meter.
       </p>
       <p className="text-sm">Du musst uns keine Zählerstände mitteilen.</p>
     </InfoCard>

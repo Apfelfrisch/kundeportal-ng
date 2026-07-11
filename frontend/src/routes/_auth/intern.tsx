@@ -34,41 +34,43 @@ export const Route = createFileRoute('/_auth/intern')({
 interface AdminNavItem {
   label: string
   icon: LucideIcon
-  available: boolean
+  to:
+    | '/intern'
+    | '/intern/vertraege'
+    | '/intern/benutzer'
+    | '/intern/tickets'
+    | '/intern/ausgang'
+    | '/intern/profil'
+  exact?: boolean
 }
 
-// „Start“ ist die Index-Seite; die übrigen Bereiche folgen in Phase 10.
-const upcomingItems: Array<AdminNavItem> = [
-  { label: 'Verträge', icon: FileText, available: false },
-  { label: 'Benutzer', icon: Users, available: false },
-  { label: 'Tickets', icon: Ticket, available: false },
-  { label: 'Ausgang', icon: Send, available: false },
-  { label: 'Profil', icon: UserRound, available: false },
+const navItems: Array<AdminNavItem> = [
+  { label: 'Start', icon: LayoutDashboard, to: '/intern', exact: true },
+  { label: 'Verträge', icon: FileText, to: '/intern/vertraege' },
+  { label: 'Benutzer', icon: Users, to: '/intern/benutzer' },
+  { label: 'Tickets', icon: Ticket, to: '/intern/tickets' },
+  { label: 'Ausgang', icon: Send, to: '/intern/ausgang' },
+  { label: 'Profil', icon: UserRound, to: '/intern/profil' },
 ]
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="flex flex-col gap-1 p-4">
-      <Link
-        to="/intern"
-        onClick={onNavigate}
-        activeProps={{ className: 'bg-accent text-primary font-semibold' }}
-        activeOptions={{ exact: true }}
-        className="hover:bg-accent flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
-      >
-        <LayoutDashboard className="size-4" />
-        Start
-      </Link>
-      {upcomingItems.map((item) => (
-        <span
-          key={item.label}
-          aria-disabled="true"
-          title="Bald verfügbar"
-          className="text-muted-foreground/60 flex cursor-not-allowed items-center gap-2 px-3 py-2 text-sm font-medium"
+      {navItems.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          onClick={onNavigate}
+          activeProps={{ className: 'bg-accent text-primary font-semibold' }}
+          activeOptions={{
+            exact: item.exact ?? false,
+            includeSearch: false,
+          }}
+          className="hover:bg-accent flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
         >
           <item.icon className="size-4" />
           {item.label}
-        </span>
+        </Link>
       ))}
     </nav>
   )

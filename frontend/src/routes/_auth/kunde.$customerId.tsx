@@ -41,9 +41,11 @@ function CustomerLayout() {
   const { data: tenant } = useQuery(tenantQuery)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
-  // Börsenpreise folgen in Phase 11 (nur bei aktiviertem Feature-Flag).
-  const upcomingItems = tenant?.features.dynamic_electric_prices
-    ? ['Börsenpreise']
+  // Börsenpreise nur bei aktiviertem Feature-Flag.
+  const featureNavItems = tenant?.features.dynamic_electric_prices
+    ? ([
+        { label: 'Börsenpreise', to: '/kunde/$customerId/boersenpreise' },
+      ] as const)
     : []
 
   return (
@@ -79,15 +81,16 @@ function CustomerLayout() {
                 </Link>
               </Button>
             ))}
-            {upcomingItems.map((label) => (
-              <span
-                key={label}
-                aria-disabled="true"
-                title="Bald verfügbar"
-                className="text-muted-foreground/60 cursor-not-allowed px-4 py-2 text-sm font-medium"
-              >
-                {label}
-              </span>
+            {featureNavItems.map((item) => (
+              <Button key={item.label} variant="ghost" asChild>
+                <Link
+                  to={item.to}
+                  params={{ customerId }}
+                  activeProps={{ className: 'text-primary font-semibold' }}
+                >
+                  {item.label}
+                </Link>
+              </Button>
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2">
@@ -127,15 +130,16 @@ function CustomerLayout() {
                       {item.label}
                     </Link>
                   ))}
-                  {upcomingItems.map((label) => (
-                    <span
-                      key={label}
-                      aria-disabled="true"
-                      title="Bald verfügbar"
-                      className="text-muted-foreground/60 cursor-not-allowed px-3 py-2 text-sm font-medium"
+                  {featureNavItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      params={{ customerId }}
+                      onClick={() => setMobileNavOpen(false)}
+                      className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium"
                     >
-                      {label}
-                    </span>
+                      {item.label}
+                    </Link>
                   ))}
                 </nav>
               </SheetContent>

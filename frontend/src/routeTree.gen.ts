@@ -22,12 +22,20 @@ import { Route as AuthEmailVerifizierenRouteImport } from './routes/_auth/email-
 import { Route as AuthInternIndexRouteImport } from './routes/_auth/intern.index'
 import { Route as GuestAccountEinrichtenRouteImport } from './routes/_guest/account.einrichten'
 import { Route as AuthKundeCustomerIdRouteImport } from './routes/_auth/kunde.$customerId'
+import { Route as AuthInternVertraegeRouteImport } from './routes/_auth/intern.vertraege'
+import { Route as AuthInternTicketsRouteImport } from './routes/_auth/intern.tickets'
+import { Route as AuthInternProfilRouteImport } from './routes/_auth/intern.profil'
+import { Route as AuthInternBenutzerRouteImport } from './routes/_auth/intern.benutzer'
+import { Route as AuthInternAusgangRouteImport } from './routes/_auth/intern.ausgang'
 import { Route as AuthKundeCustomerIdIndexRouteImport } from './routes/_auth/kunde.$customerId.index'
 import { Route as AuthKundeCustomerIdProfilRouteImport } from './routes/_auth/kunde.$customerId.profil'
 import { Route as AuthKundeCustomerIdPostfachRouteImport } from './routes/_auth/kunde.$customerId.postfach'
 import { Route as AuthKundeCustomerIdKontaktRouteImport } from './routes/_auth/kunde.$customerId.kontakt'
+import { Route as AuthKundeCustomerIdBoersenpreiseRouteImport } from './routes/_auth/kunde.$customerId.boersenpreise'
 import { Route as AuthKundeCustomerIdVertragContractIdRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId'
 import { Route as AuthKundeCustomerIdVertragContractIdIndexRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.index'
+import { Route as AuthKundeCustomerIdVertragContractIdLastgaengeRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.lastgaenge'
+import { Route as AuthKundeCustomerIdVertragContractIdAbrechnungRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.abrechnung'
 import { Route as AuthKundeCustomerIdVertragContractIdAendernFormTypeRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.aendern.$formType'
 
 const VertragBestaetigenRoute = VertragBestaetigenRouteImport.update({
@@ -94,6 +102,31 @@ const AuthKundeCustomerIdRoute = AuthKundeCustomerIdRouteImport.update({
   path: '/kunde/$customerId',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthInternVertraegeRoute = AuthInternVertraegeRouteImport.update({
+  id: '/vertraege',
+  path: '/vertraege',
+  getParentRoute: () => AuthInternRoute,
+} as any)
+const AuthInternTicketsRoute = AuthInternTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AuthInternRoute,
+} as any)
+const AuthInternProfilRoute = AuthInternProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AuthInternRoute,
+} as any)
+const AuthInternBenutzerRoute = AuthInternBenutzerRouteImport.update({
+  id: '/benutzer',
+  path: '/benutzer',
+  getParentRoute: () => AuthInternRoute,
+} as any)
+const AuthInternAusgangRoute = AuthInternAusgangRouteImport.update({
+  id: '/ausgang',
+  path: '/ausgang',
+  getParentRoute: () => AuthInternRoute,
+} as any)
 const AuthKundeCustomerIdIndexRoute =
   AuthKundeCustomerIdIndexRouteImport.update({
     id: '/',
@@ -118,6 +151,12 @@ const AuthKundeCustomerIdKontaktRoute =
     path: '/kontakt',
     getParentRoute: () => AuthKundeCustomerIdRoute,
   } as any)
+const AuthKundeCustomerIdBoersenpreiseRoute =
+  AuthKundeCustomerIdBoersenpreiseRouteImport.update({
+    id: '/boersenpreise',
+    path: '/boersenpreise',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
 const AuthKundeCustomerIdVertragContractIdRoute =
   AuthKundeCustomerIdVertragContractIdRouteImport.update({
     id: '/vertrag/$contractId',
@@ -128,6 +167,18 @@ const AuthKundeCustomerIdVertragContractIdIndexRoute =
   AuthKundeCustomerIdVertragContractIdIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => AuthKundeCustomerIdVertragContractIdRoute,
+  } as any)
+const AuthKundeCustomerIdVertragContractIdLastgaengeRoute =
+  AuthKundeCustomerIdVertragContractIdLastgaengeRouteImport.update({
+    id: '/lastgaenge',
+    path: '/lastgaenge',
+    getParentRoute: () => AuthKundeCustomerIdVertragContractIdRoute,
+  } as any)
+const AuthKundeCustomerIdVertragContractIdAbrechnungRoute =
+  AuthKundeCustomerIdVertragContractIdAbrechnungRouteImport.update({
+    id: '/abrechnung',
+    path: '/abrechnung',
     getParentRoute: () => AuthKundeCustomerIdVertragContractIdRoute,
   } as any)
 const AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute =
@@ -146,14 +197,22 @@ export interface FileRoutesByFullPath {
   '/login': typeof GuestLoginRoute
   '/passwort-vergessen': typeof GuestPasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof GuestPasswortZuruecksetzenRoute
+  '/intern/ausgang': typeof AuthInternAusgangRoute
+  '/intern/benutzer': typeof AuthInternBenutzerRoute
+  '/intern/profil': typeof AuthInternProfilRoute
+  '/intern/tickets': typeof AuthInternTicketsRoute
+  '/intern/vertraege': typeof AuthInternVertraegeRoute
   '/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern/': typeof AuthInternIndexRoute
+  '/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
   '/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
+  '/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
+  '/kunde/$customerId/vertrag/$contractId/lastgaenge': typeof AuthKundeCustomerIdVertragContractIdLastgaengeRoute
   '/kunde/$customerId/vertrag/$contractId/': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
   '/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
@@ -165,12 +224,20 @@ export interface FileRoutesByTo {
   '/login': typeof GuestLoginRoute
   '/passwort-vergessen': typeof GuestPasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof GuestPasswortZuruecksetzenRoute
+  '/intern/ausgang': typeof AuthInternAusgangRoute
+  '/intern/benutzer': typeof AuthInternBenutzerRoute
+  '/intern/profil': typeof AuthInternProfilRoute
+  '/intern/tickets': typeof AuthInternTicketsRoute
+  '/intern/vertraege': typeof AuthInternVertraegeRoute
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern': typeof AuthInternIndexRoute
+  '/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/kunde/$customerId': typeof AuthKundeCustomerIdIndexRoute
+  '/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
+  '/kunde/$customerId/vertrag/$contractId/lastgaenge': typeof AuthKundeCustomerIdVertragContractIdLastgaengeRoute
   '/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
   '/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
@@ -186,14 +253,22 @@ export interface FileRoutesById {
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/passwort-vergessen': typeof GuestPasswortVergessenRoute
   '/_guest/passwort-zuruecksetzen': typeof GuestPasswortZuruecksetzenRoute
+  '/_auth/intern/ausgang': typeof AuthInternAusgangRoute
+  '/_auth/intern/benutzer': typeof AuthInternBenutzerRoute
+  '/_auth/intern/profil': typeof AuthInternProfilRoute
+  '/_auth/intern/tickets': typeof AuthInternTicketsRoute
+  '/_auth/intern/vertraege': typeof AuthInternVertraegeRoute
   '/_auth/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/_guest/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/_auth/intern/': typeof AuthInternIndexRoute
+  '/_auth/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/_auth/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/_auth/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/_auth/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
   '/_auth/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
   '/_auth/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
+  '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
+  '/_auth/kunde/$customerId/vertrag/$contractId/lastgaenge': typeof AuthKundeCustomerIdVertragContractIdLastgaengeRoute
   '/_auth/kunde/$customerId/vertrag/$contractId/': typeof AuthKundeCustomerIdVertragContractIdIndexRoute
   '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType': typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
@@ -208,14 +283,22 @@ export interface FileRouteTypes {
     | '/login'
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
+    | '/intern/ausgang'
+    | '/intern/benutzer'
+    | '/intern/profil'
+    | '/intern/tickets'
+    | '/intern/vertraege'
     | '/kunde/$customerId'
     | '/account/einrichten'
     | '/intern/'
+    | '/kunde/$customerId/boersenpreise'
     | '/kunde/$customerId/kontakt'
     | '/kunde/$customerId/postfach'
     | '/kunde/$customerId/profil'
     | '/kunde/$customerId/'
     | '/kunde/$customerId/vertrag/$contractId'
+    | '/kunde/$customerId/vertrag/$contractId/abrechnung'
+    | '/kunde/$customerId/vertrag/$contractId/lastgaenge'
     | '/kunde/$customerId/vertrag/$contractId/'
     | '/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   fileRoutesByTo: FileRoutesByTo
@@ -227,12 +310,20 @@ export interface FileRouteTypes {
     | '/login'
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
+    | '/intern/ausgang'
+    | '/intern/benutzer'
+    | '/intern/profil'
+    | '/intern/tickets'
+    | '/intern/vertraege'
     | '/account/einrichten'
     | '/intern'
+    | '/kunde/$customerId/boersenpreise'
     | '/kunde/$customerId/kontakt'
     | '/kunde/$customerId/postfach'
     | '/kunde/$customerId/profil'
     | '/kunde/$customerId'
+    | '/kunde/$customerId/vertrag/$contractId/abrechnung'
+    | '/kunde/$customerId/vertrag/$contractId/lastgaenge'
     | '/kunde/$customerId/vertrag/$contractId'
     | '/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   id:
@@ -247,14 +338,22 @@ export interface FileRouteTypes {
     | '/_guest/login'
     | '/_guest/passwort-vergessen'
     | '/_guest/passwort-zuruecksetzen'
+    | '/_auth/intern/ausgang'
+    | '/_auth/intern/benutzer'
+    | '/_auth/intern/profil'
+    | '/_auth/intern/tickets'
+    | '/_auth/intern/vertraege'
     | '/_auth/kunde/$customerId'
     | '/_guest/account/einrichten'
     | '/_auth/intern/'
+    | '/_auth/kunde/$customerId/boersenpreise'
     | '/_auth/kunde/$customerId/kontakt'
     | '/_auth/kunde/$customerId/postfach'
     | '/_auth/kunde/$customerId/profil'
     | '/_auth/kunde/$customerId/'
     | '/_auth/kunde/$customerId/vertrag/$contractId'
+    | '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung'
+    | '/_auth/kunde/$customerId/vertrag/$contractId/lastgaenge'
     | '/_auth/kunde/$customerId/vertrag/$contractId/'
     | '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType'
   fileRoutesById: FileRoutesById
@@ -359,6 +458,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthKundeCustomerIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/intern/vertraege': {
+      id: '/_auth/intern/vertraege'
+      path: '/vertraege'
+      fullPath: '/intern/vertraege'
+      preLoaderRoute: typeof AuthInternVertraegeRouteImport
+      parentRoute: typeof AuthInternRoute
+    }
+    '/_auth/intern/tickets': {
+      id: '/_auth/intern/tickets'
+      path: '/tickets'
+      fullPath: '/intern/tickets'
+      preLoaderRoute: typeof AuthInternTicketsRouteImport
+      parentRoute: typeof AuthInternRoute
+    }
+    '/_auth/intern/profil': {
+      id: '/_auth/intern/profil'
+      path: '/profil'
+      fullPath: '/intern/profil'
+      preLoaderRoute: typeof AuthInternProfilRouteImport
+      parentRoute: typeof AuthInternRoute
+    }
+    '/_auth/intern/benutzer': {
+      id: '/_auth/intern/benutzer'
+      path: '/benutzer'
+      fullPath: '/intern/benutzer'
+      preLoaderRoute: typeof AuthInternBenutzerRouteImport
+      parentRoute: typeof AuthInternRoute
+    }
+    '/_auth/intern/ausgang': {
+      id: '/_auth/intern/ausgang'
+      path: '/ausgang'
+      fullPath: '/intern/ausgang'
+      preLoaderRoute: typeof AuthInternAusgangRouteImport
+      parentRoute: typeof AuthInternRoute
+    }
     '/_auth/kunde/$customerId/': {
       id: '/_auth/kunde/$customerId/'
       path: '/'
@@ -387,6 +521,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthKundeCustomerIdKontaktRouteImport
       parentRoute: typeof AuthKundeCustomerIdRoute
     }
+    '/_auth/kunde/$customerId/boersenpreise': {
+      id: '/_auth/kunde/$customerId/boersenpreise'
+      path: '/boersenpreise'
+      fullPath: '/kunde/$customerId/boersenpreise'
+      preLoaderRoute: typeof AuthKundeCustomerIdBoersenpreiseRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
     '/_auth/kunde/$customerId/vertrag/$contractId': {
       id: '/_auth/kunde/$customerId/vertrag/$contractId'
       path: '/vertrag/$contractId'
@@ -401,6 +542,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdIndexRouteImport
       parentRoute: typeof AuthKundeCustomerIdVertragContractIdRoute
     }
+    '/_auth/kunde/$customerId/vertrag/$contractId/lastgaenge': {
+      id: '/_auth/kunde/$customerId/vertrag/$contractId/lastgaenge'
+      path: '/lastgaenge'
+      fullPath: '/kunde/$customerId/vertrag/$contractId/lastgaenge'
+      preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdLastgaengeRouteImport
+      parentRoute: typeof AuthKundeCustomerIdVertragContractIdRoute
+    }
+    '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung': {
+      id: '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung'
+      path: '/abrechnung'
+      fullPath: '/kunde/$customerId/vertrag/$contractId/abrechnung'
+      preLoaderRoute: typeof AuthKundeCustomerIdVertragContractIdAbrechnungRouteImport
+      parentRoute: typeof AuthKundeCustomerIdVertragContractIdRoute
+    }
     '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType': {
       id: '/_auth/kunde/$customerId/vertrag/$contractId/aendern/$formType'
       path: '/aendern/$formType'
@@ -412,10 +567,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthInternRouteChildren {
+  AuthInternAusgangRoute: typeof AuthInternAusgangRoute
+  AuthInternBenutzerRoute: typeof AuthInternBenutzerRoute
+  AuthInternProfilRoute: typeof AuthInternProfilRoute
+  AuthInternTicketsRoute: typeof AuthInternTicketsRoute
+  AuthInternVertraegeRoute: typeof AuthInternVertraegeRoute
   AuthInternIndexRoute: typeof AuthInternIndexRoute
 }
 
 const AuthInternRouteChildren: AuthInternRouteChildren = {
+  AuthInternAusgangRoute: AuthInternAusgangRoute,
+  AuthInternBenutzerRoute: AuthInternBenutzerRoute,
+  AuthInternProfilRoute: AuthInternProfilRoute,
+  AuthInternTicketsRoute: AuthInternTicketsRoute,
+  AuthInternVertraegeRoute: AuthInternVertraegeRoute,
   AuthInternIndexRoute: AuthInternIndexRoute,
 }
 
@@ -424,12 +589,18 @@ const AuthInternRouteWithChildren = AuthInternRoute._addFileChildren(
 )
 
 interface AuthKundeCustomerIdVertragContractIdRouteChildren {
+  AuthKundeCustomerIdVertragContractIdAbrechnungRoute: typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
+  AuthKundeCustomerIdVertragContractIdLastgaengeRoute: typeof AuthKundeCustomerIdVertragContractIdLastgaengeRoute
   AuthKundeCustomerIdVertragContractIdIndexRoute: typeof AuthKundeCustomerIdVertragContractIdIndexRoute
   AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute: typeof AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute
 }
 
 const AuthKundeCustomerIdVertragContractIdRouteChildren: AuthKundeCustomerIdVertragContractIdRouteChildren =
   {
+    AuthKundeCustomerIdVertragContractIdAbrechnungRoute:
+      AuthKundeCustomerIdVertragContractIdAbrechnungRoute,
+    AuthKundeCustomerIdVertragContractIdLastgaengeRoute:
+      AuthKundeCustomerIdVertragContractIdLastgaengeRoute,
     AuthKundeCustomerIdVertragContractIdIndexRoute:
       AuthKundeCustomerIdVertragContractIdIndexRoute,
     AuthKundeCustomerIdVertragContractIdAendernFormTypeRoute:
@@ -442,6 +613,7 @@ const AuthKundeCustomerIdVertragContractIdRouteWithChildren =
   )
 
 interface AuthKundeCustomerIdRouteChildren {
+  AuthKundeCustomerIdBoersenpreiseRoute: typeof AuthKundeCustomerIdBoersenpreiseRoute
   AuthKundeCustomerIdKontaktRoute: typeof AuthKundeCustomerIdKontaktRoute
   AuthKundeCustomerIdPostfachRoute: typeof AuthKundeCustomerIdPostfachRoute
   AuthKundeCustomerIdProfilRoute: typeof AuthKundeCustomerIdProfilRoute
@@ -450,6 +622,7 @@ interface AuthKundeCustomerIdRouteChildren {
 }
 
 const AuthKundeCustomerIdRouteChildren: AuthKundeCustomerIdRouteChildren = {
+  AuthKundeCustomerIdBoersenpreiseRoute: AuthKundeCustomerIdBoersenpreiseRoute,
   AuthKundeCustomerIdKontaktRoute: AuthKundeCustomerIdKontaktRoute,
   AuthKundeCustomerIdPostfachRoute: AuthKundeCustomerIdPostfachRoute,
   AuthKundeCustomerIdProfilRoute: AuthKundeCustomerIdProfilRoute,

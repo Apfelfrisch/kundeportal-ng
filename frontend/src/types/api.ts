@@ -324,3 +324,130 @@ export interface ChangeRequestResponse {
   }
   info: string
 }
+
+/* ------------------------------------------------------------------ */
+/* Admin-Bereich (/api/admin)                                          */
+/* ------------------------------------------------------------------ */
+
+/** Laravel-Paginierung: `{ data, meta }` der Admin-Listen. */
+export interface PaginationMeta {
+  current_page: number
+  last_page: number
+  total: number
+}
+
+export interface PaginatedResponse<T> {
+  data: Array<T>
+  meta: PaginationMeta
+}
+
+/** Antwort mit deutscher Erfolgsmeldung (`{ message }`). */
+export interface MessageResponse {
+  message: string
+}
+
+/** GET /api/admin/dashboard */
+export interface AdminDashboard {
+  tickets: {
+    open: number
+    in_process: number
+    mine: number
+  }
+}
+
+export interface AdminAssignedUser {
+  id: number
+  name: string
+  email: string
+}
+
+/** Zuordnung eines Vertrags in der Admin-Vertragsliste. */
+export interface AdminContractAssignment {
+  id: number
+  user_id: number
+  confirmed: boolean
+  user: AdminAssignedUser | null
+}
+
+/** Eintrag der Admin-Vertragsliste (AdminContractResource). */
+export interface AdminContract {
+  contract_number: number
+  billing_contact: {
+    company: string | null
+    first_name: string | null
+    last_name: string | null
+  }
+  address: Address
+  assignment: AdminContractAssignment | null
+}
+
+/** Vertragszuordnung eines Benutzers (inkl. unbestätigter). */
+export interface AdminUserContractAssignment {
+  id: number
+  contract_number: number
+  confirmed: boolean
+}
+
+/** Eintrag der Admin-Benutzerliste (AdminUserResource). */
+export interface AdminUser {
+  id: number
+  customer_number: string | null
+  name: string
+  email: string
+  email_verified: boolean
+  password_set: boolean
+  created_at: string | null
+  contract_assignments: Array<AdminUserContractAssignment>
+}
+
+export type AdminTicketStatus = 'open' | 'in_process' | 'processed'
+
+/** Ticket (CustomerMessage) der Admin-Warteschlange (TicketResource). */
+export interface AdminTicket {
+  id: number
+  form_type: string | null
+  contract_number: string | null
+  data: Record<string, unknown>
+  status: {
+    value: AdminTicketStatus
+    label: string
+  }
+  customer: {
+    id: number
+    customer_number: string | null
+    name: string
+    email: string
+  } | null
+  caseworker: {
+    id: number
+    name: string
+  } | null
+  created_at: string | null
+}
+
+/** Postausgang-Eintrag (CompanyMessageResource). */
+export interface AdminOutboxMessage {
+  id: number
+  subject: string | null
+  message: string
+  contract_number: string | null
+  read_at: string | null
+  created_at: string | null
+  recipient: {
+    id: number
+    name: string
+    email: string
+  } | null
+  files: Array<MailboxFile>
+}
+
+/** GET /api/admin/search/contract */
+export interface AdminContractSearchResult {
+  contract_number: number
+  user_id: number
+}
+
+/** GET /api/admin/search/user */
+export interface AdminUserSearchResult {
+  user_id: number
+}
