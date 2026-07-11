@@ -28,10 +28,10 @@ import { Route as AuthInternProfilRouteImport } from './routes/_auth/intern.prof
 import { Route as AuthInternBenutzerRouteImport } from './routes/_auth/intern.benutzer'
 import { Route as AuthInternAusgangRouteImport } from './routes/_auth/intern.ausgang'
 import { Route as AuthKundeCustomerIdIndexRouteImport } from './routes/_auth/kunde.$customerId.index'
+import { Route as AuthKundeCustomerIdStrompreisRouteImport } from './routes/_auth/kunde.$customerId.strompreis'
 import { Route as AuthKundeCustomerIdProfilRouteImport } from './routes/_auth/kunde.$customerId.profil'
 import { Route as AuthKundeCustomerIdPostfachRouteImport } from './routes/_auth/kunde.$customerId.postfach'
 import { Route as AuthKundeCustomerIdKontaktRouteImport } from './routes/_auth/kunde.$customerId.kontakt'
-import { Route as AuthKundeCustomerIdBoersenpreiseRouteImport } from './routes/_auth/kunde.$customerId.boersenpreise'
 import { Route as AuthKundeCustomerIdVertragContractIdRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId'
 import { Route as AuthKundeCustomerIdVertragContractIdIndexRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.index'
 import { Route as AuthKundeCustomerIdVertragContractIdLastgaengeRouteImport } from './routes/_auth/kunde.$customerId.vertrag.$contractId.lastgaenge'
@@ -133,6 +133,12 @@ const AuthKundeCustomerIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthKundeCustomerIdRoute,
   } as any)
+const AuthKundeCustomerIdStrompreisRoute =
+  AuthKundeCustomerIdStrompreisRouteImport.update({
+    id: '/strompreis',
+    path: '/strompreis',
+    getParentRoute: () => AuthKundeCustomerIdRoute,
+  } as any)
 const AuthKundeCustomerIdProfilRoute =
   AuthKundeCustomerIdProfilRouteImport.update({
     id: '/profil',
@@ -149,12 +155,6 @@ const AuthKundeCustomerIdKontaktRoute =
   AuthKundeCustomerIdKontaktRouteImport.update({
     id: '/kontakt',
     path: '/kontakt',
-    getParentRoute: () => AuthKundeCustomerIdRoute,
-  } as any)
-const AuthKundeCustomerIdBoersenpreiseRoute =
-  AuthKundeCustomerIdBoersenpreiseRouteImport.update({
-    id: '/boersenpreise',
-    path: '/boersenpreise',
     getParentRoute: () => AuthKundeCustomerIdRoute,
   } as any)
 const AuthKundeCustomerIdVertragContractIdRoute =
@@ -205,10 +205,10 @@ export interface FileRoutesByFullPath {
   '/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern/': typeof AuthInternIndexRoute
-  '/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
+  '/kunde/$customerId/strompreis': typeof AuthKundeCustomerIdStrompreisRoute
   '/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
   '/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
   '/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
@@ -231,10 +231,10 @@ export interface FileRoutesByTo {
   '/intern/vertraege': typeof AuthInternVertraegeRoute
   '/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/intern': typeof AuthInternIndexRoute
-  '/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
+  '/kunde/$customerId/strompreis': typeof AuthKundeCustomerIdStrompreisRoute
   '/kunde/$customerId': typeof AuthKundeCustomerIdIndexRoute
   '/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
   '/kunde/$customerId/vertrag/$contractId/lastgaenge': typeof AuthKundeCustomerIdVertragContractIdLastgaengeRoute
@@ -261,10 +261,10 @@ export interface FileRoutesById {
   '/_auth/kunde/$customerId': typeof AuthKundeCustomerIdRouteWithChildren
   '/_guest/account/einrichten': typeof GuestAccountEinrichtenRoute
   '/_auth/intern/': typeof AuthInternIndexRoute
-  '/_auth/kunde/$customerId/boersenpreise': typeof AuthKundeCustomerIdBoersenpreiseRoute
   '/_auth/kunde/$customerId/kontakt': typeof AuthKundeCustomerIdKontaktRoute
   '/_auth/kunde/$customerId/postfach': typeof AuthKundeCustomerIdPostfachRoute
   '/_auth/kunde/$customerId/profil': typeof AuthKundeCustomerIdProfilRoute
+  '/_auth/kunde/$customerId/strompreis': typeof AuthKundeCustomerIdStrompreisRoute
   '/_auth/kunde/$customerId/': typeof AuthKundeCustomerIdIndexRoute
   '/_auth/kunde/$customerId/vertrag/$contractId': typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
   '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung': typeof AuthKundeCustomerIdVertragContractIdAbrechnungRoute
@@ -291,10 +291,10 @@ export interface FileRouteTypes {
     | '/kunde/$customerId'
     | '/account/einrichten'
     | '/intern/'
-    | '/kunde/$customerId/boersenpreise'
     | '/kunde/$customerId/kontakt'
     | '/kunde/$customerId/postfach'
     | '/kunde/$customerId/profil'
+    | '/kunde/$customerId/strompreis'
     | '/kunde/$customerId/'
     | '/kunde/$customerId/vertrag/$contractId'
     | '/kunde/$customerId/vertrag/$contractId/abrechnung'
@@ -317,10 +317,10 @@ export interface FileRouteTypes {
     | '/intern/vertraege'
     | '/account/einrichten'
     | '/intern'
-    | '/kunde/$customerId/boersenpreise'
     | '/kunde/$customerId/kontakt'
     | '/kunde/$customerId/postfach'
     | '/kunde/$customerId/profil'
+    | '/kunde/$customerId/strompreis'
     | '/kunde/$customerId'
     | '/kunde/$customerId/vertrag/$contractId/abrechnung'
     | '/kunde/$customerId/vertrag/$contractId/lastgaenge'
@@ -346,10 +346,10 @@ export interface FileRouteTypes {
     | '/_auth/kunde/$customerId'
     | '/_guest/account/einrichten'
     | '/_auth/intern/'
-    | '/_auth/kunde/$customerId/boersenpreise'
     | '/_auth/kunde/$customerId/kontakt'
     | '/_auth/kunde/$customerId/postfach'
     | '/_auth/kunde/$customerId/profil'
+    | '/_auth/kunde/$customerId/strompreis'
     | '/_auth/kunde/$customerId/'
     | '/_auth/kunde/$customerId/vertrag/$contractId'
     | '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung'
@@ -500,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthKundeCustomerIdIndexRouteImport
       parentRoute: typeof AuthKundeCustomerIdRoute
     }
+    '/_auth/kunde/$customerId/strompreis': {
+      id: '/_auth/kunde/$customerId/strompreis'
+      path: '/strompreis'
+      fullPath: '/kunde/$customerId/strompreis'
+      preLoaderRoute: typeof AuthKundeCustomerIdStrompreisRouteImport
+      parentRoute: typeof AuthKundeCustomerIdRoute
+    }
     '/_auth/kunde/$customerId/profil': {
       id: '/_auth/kunde/$customerId/profil'
       path: '/profil'
@@ -519,13 +526,6 @@ declare module '@tanstack/react-router' {
       path: '/kontakt'
       fullPath: '/kunde/$customerId/kontakt'
       preLoaderRoute: typeof AuthKundeCustomerIdKontaktRouteImport
-      parentRoute: typeof AuthKundeCustomerIdRoute
-    }
-    '/_auth/kunde/$customerId/boersenpreise': {
-      id: '/_auth/kunde/$customerId/boersenpreise'
-      path: '/boersenpreise'
-      fullPath: '/kunde/$customerId/boersenpreise'
-      preLoaderRoute: typeof AuthKundeCustomerIdBoersenpreiseRouteImport
       parentRoute: typeof AuthKundeCustomerIdRoute
     }
     '/_auth/kunde/$customerId/vertrag/$contractId': {
@@ -613,19 +613,19 @@ const AuthKundeCustomerIdVertragContractIdRouteWithChildren =
   )
 
 interface AuthKundeCustomerIdRouteChildren {
-  AuthKundeCustomerIdBoersenpreiseRoute: typeof AuthKundeCustomerIdBoersenpreiseRoute
   AuthKundeCustomerIdKontaktRoute: typeof AuthKundeCustomerIdKontaktRoute
   AuthKundeCustomerIdPostfachRoute: typeof AuthKundeCustomerIdPostfachRoute
   AuthKundeCustomerIdProfilRoute: typeof AuthKundeCustomerIdProfilRoute
+  AuthKundeCustomerIdStrompreisRoute: typeof AuthKundeCustomerIdStrompreisRoute
   AuthKundeCustomerIdIndexRoute: typeof AuthKundeCustomerIdIndexRoute
   AuthKundeCustomerIdVertragContractIdRoute: typeof AuthKundeCustomerIdVertragContractIdRouteWithChildren
 }
 
 const AuthKundeCustomerIdRouteChildren: AuthKundeCustomerIdRouteChildren = {
-  AuthKundeCustomerIdBoersenpreiseRoute: AuthKundeCustomerIdBoersenpreiseRoute,
   AuthKundeCustomerIdKontaktRoute: AuthKundeCustomerIdKontaktRoute,
   AuthKundeCustomerIdPostfachRoute: AuthKundeCustomerIdPostfachRoute,
   AuthKundeCustomerIdProfilRoute: AuthKundeCustomerIdProfilRoute,
+  AuthKundeCustomerIdStrompreisRoute: AuthKundeCustomerIdStrompreisRoute,
   AuthKundeCustomerIdIndexRoute: AuthKundeCustomerIdIndexRoute,
   AuthKundeCustomerIdVertragContractIdRoute:
     AuthKundeCustomerIdVertragContractIdRouteWithChildren,

@@ -247,16 +247,16 @@ function DynamicPriceCard({
       title={`Tarif: ${contract.tariff ?? ''}`}
       titleExtra={<DynamicPriceHelpDialog contract={contract} />}
       footer={
-        // Die Börsenpreis-Seite rechnet mit den Tarifkosten dieses
+        // Die Strompreis-Seite rechnet mit den Tarifkosten dieses
         // Vertrags — der Einstieg sitzt deshalb hier statt in der
         // Hauptnavigation.
         <Button asChild className="w-full">
           <Link
-            to="/kunde/$customerId/boersenpreise"
+            to="/kunde/$customerId/strompreis"
             params={{ customerId }}
-            title="Viertelstündliche Börsenstrompreise, auf Wunsch inklusive deiner Tarifkosten."
+            title="Viertelstündlicher Strompreis, auf Wunsch inklusive deiner Tarifkosten."
           >
-            Börsenpreise anzeigen
+            Strompreis anzeigen
           </Link>
         </Button>
       }

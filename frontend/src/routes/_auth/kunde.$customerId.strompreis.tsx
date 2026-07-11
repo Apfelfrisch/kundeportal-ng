@@ -35,11 +35,11 @@ import { tenantQuery } from '#/queries/tenant'
 import type { MarketPriceSlot } from '#/queries/charts'
 
 /**
- * Börsenpreise: viertelstündliche Spotmarktpreise als Stufendiagramm über
+ * Strompreis: viertelstündliche Spotmarktpreise als Stufendiagramm über
  * ein 3-Tage-Fenster plus Tagestabellen – Nachfolger der alten
  * `exchange-electricity-prices`-Seite.
  */
-export const Route = createFileRoute('/_auth/kunde/$customerId/boersenpreise')({
+export const Route = createFileRoute('/_auth/kunde/$customerId/strompreis')({
   validateSearch: chartDateSearchSchema,
   beforeLoad: async ({ context }) => {
     const tenant = await context.queryClient.ensureQueryData(tenantQuery)
@@ -104,7 +104,7 @@ function MarketPricesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-semibold">Börsenpreise</h1>
+      <h1 className="text-3xl font-semibold">Strompreis</h1>
 
       <Card>
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -171,13 +171,13 @@ function MarketPricesPage() {
               unit="ct/kWh"
               showNow
               yMin="data"
-              ariaLabel="Stufendiagramm der viertelstündlichen Börsenstrompreise in Cent pro Kilowattstunde. Preise über dem Durchschnitt sind rot, darunter grün eingefärbt. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
+              ariaLabel="Stufendiagramm der viertelstündlichen Strompreise in Cent pro Kilowattstunde. Preise über dem Durchschnitt sind rot, darunter grün eingefärbt. Die Detailwerte stehen in der Tabellenübersicht unterhalb."
               series={[
                 {
                   key: 'price',
                   label: withTariffCosts
                     ? 'Preis inkl. Tarifkosten (ct/kWh)'
-                    : 'Börsenpreis (ct/kWh)',
+                    : 'Strompreis (ct/kWh)',
                   color: NEUTRAL_SERIES_COLOR,
                   kind: 'area',
                   formatValue: (value) => `${formatCtValue(value)} ct/kWh`,
@@ -195,7 +195,7 @@ function MarketPricesPage() {
             />
           ) : (
             <ChartEmptyState>
-              Für diesen Zeitraum liegen keine Börsenpreise vor.
+              Für diesen Zeitraum liegen keine Strompreise vor.
             </ChartEmptyState>
           )}
         </CardContent>
@@ -239,7 +239,7 @@ function MarketPriceDayTable({
         <CardTitle className="text-sm">{heading}</CardTitle>
       </CardHeader>
       <CardContent className="max-h-80 overflow-y-auto">
-        <Table aria-label={`Börsenpreise für ${heading}`}>
+        <Table aria-label={`Strompreise für ${heading}`}>
           <TableHeader className="bg-card sticky top-0">
             <TableRow>
               <TableHead>Uhrzeit</TableHead>
