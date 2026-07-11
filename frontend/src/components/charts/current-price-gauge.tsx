@@ -37,7 +37,7 @@ export function CurrentPriceGauge({
 
   return (
     <div
-      className="relative size-28 shrink-0"
+      className="relative size-32 shrink-0"
       role="img"
       aria-label={`Aktueller Preis ${formatCtSummary(value)} ct/kWh (${timeRange} Uhr), ${Math.round(fraction * 100)} % zwischen Tief und Hoch des Zeitraums`}
     >
@@ -61,14 +61,15 @@ export function CurrentPriceGauge({
           strokeDasharray={`${fraction * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+      {/* inset-4: Luft zwischen Ziffern und Ring. */}
+      <div className="absolute inset-4 flex flex-col items-center justify-center gap-1">
         <span className="text-xl leading-none font-bold tabular-nums">
           {formatCtSummary(value)}
         </span>
         <span className="text-muted-foreground text-xs leading-none">
           ct/kWh
         </span>
-        <span className="text-muted-foreground text-xs leading-none tabular-nums">
+        <span className="text-muted-foreground text-[11px] leading-none tabular-nums">
           {timeRange}
         </span>
       </div>
