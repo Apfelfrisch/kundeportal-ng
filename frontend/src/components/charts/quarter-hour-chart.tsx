@@ -142,6 +142,17 @@ export function QuarterHourChart({
       ? Math.floor(Math.min(...allValues))
       : null
 
+  /**
+   * Untere Kante des Füllpfads einer divergierenden Area. Recharts leitet
+   * die Standard-Basislinie aus der GERENDERTEN Achsen-Domain ab (die durch
+   * Tick-Rundung vom gesetzten Minimum abweichen kann) — deshalb wird sie
+   * per `baseValue` explizit auf genau den Wert gepinnt, mit dem auch der
+   * Füllverlaufs-Schnitt rechnet. Unterhalb der Basislinie ist die Füllung
+   * ohnehin transparent.
+   */
+  const fillBaseline = (key: string): number =>
+    domainMin ?? Math.min(0, valueRange(key).min)
+
   return (
     <ChartContainer
       config={config}
@@ -160,14 +171,10 @@ export function QuarterHourChart({
             if (diverging === undefined || data.length === 0) {
               return null
             }
-            const { min, max } = valueRange(entry.key)
-            // Der Füllpfad einer Area schließt an der Achsen-Unterkante ab
-            // (nicht am Datenminimum), daher gilt sein Schnittpunkt dieser
-            // Boundingbox.
             const fillOffset = baselineOffset(
               diverging.baseline,
-              max,
-              domainMin ?? Math.min(0, min),
+              valueRange(entry.key).max,
+              fillBaseline(entry.key),
             )
             return [
               // Linie: durchgängiger Verlauf vom high- zum low-Pol.
@@ -357,6 +364,11 @@ export function QuarterHourChart({
               type="stepAfter"
               stroke={stroke}
               strokeWidth={2}
+              baseValue={
+                entry.diverging === undefined || data.length === 0
+                  ? undefined
+                  : fillBaseline(entry.key)
+              }
               fill={
                 entry.diverging === undefined
                   ? `var(--color-${entry.key})`
