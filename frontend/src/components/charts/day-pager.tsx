@@ -1,8 +1,7 @@
-import { useId } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+import { DatePicker } from '#/components/shared/date-picker'
 import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
 import { formatDate } from '#/lib/format'
 
 interface DayPagerProps {
@@ -29,8 +28,6 @@ export function DayPager({
   showReset,
   onSelect,
 }: DayPagerProps) {
-  const inputId = useId()
-
   return (
     <div
       className="flex flex-wrap items-center gap-2"
@@ -46,24 +43,7 @@ export function DayPager({
       >
         <ChevronLeft aria-hidden="true" />
       </Button>
-      <label htmlFor={inputId} className="sr-only">
-        Datum auswählen
-      </label>
-      <Input
-        id={inputId}
-        // Key erzwingt den Reset auf den neuen Zentrumstag nach Navigation,
-        // ohne Tipp-Zwischenstände (unvollständige Daten) zu verwerfen.
-        key={date}
-        type="date"
-        defaultValue={date}
-        onChange={(event) => {
-          const value = event.target.value
-          if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            onSelect(value)
-          }
-        }}
-        className="h-8 w-fit"
-      />
+      <DatePicker value={date} onChange={onSelect} label="Datum auswählen" />
       <Button
         variant="outline"
         size="icon"

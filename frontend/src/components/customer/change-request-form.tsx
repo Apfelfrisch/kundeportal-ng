@@ -7,6 +7,7 @@ import type { Resolver } from 'react-hook-form'
 
 import { isApiError } from '#/api/client'
 import { InfoHtml } from '#/components/customer/info-html'
+import { DateInput } from '#/components/shared/date-picker'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'
@@ -124,7 +125,9 @@ export function ChangeRequestForm({
         {config.noticeTitle !== undefined ? (
           <p className="font-semibold">{config.noticeTitle}</p>
         ) : null}
-        {config.notice?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        {config.notice?.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
         {config.bullets !== undefined ? (
           <ul className="list-disc space-y-1 pl-5">
             {config.bullets.map((bullet) => (
@@ -185,9 +188,7 @@ export function ChangeRequestForm({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="sr-only">
-              Änderung übermittelt
-            </DialogTitle>
+            <DialogTitle className="sr-only">Änderung übermittelt</DialogTitle>
           </DialogHeader>
           {successInfo !== null ? <InfoHtml html={successInfo} /> : null}
           <DialogFooter>
@@ -255,7 +256,19 @@ function ChangeRequestFormField({
             ) : null}
           </FormLabel>
           <FormControl>
-            {fieldConfig.type === 'textarea' ? (
+            {fieldConfig.type === 'date' ? (
+              <DateInput
+                value={
+                  typeof field.value === 'string' && field.value !== ''
+                    ? field.value
+                    : undefined
+                }
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                min={fieldConfig.min}
+                max={fieldConfig.max}
+              />
+            ) : fieldConfig.type === 'textarea' ? (
               <Textarea
                 rows={3}
                 {...field}
