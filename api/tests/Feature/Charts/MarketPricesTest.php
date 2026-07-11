@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Charts;
 
+use App\Integrations\CustomerDataApi\Requests\GetContractsByIdsRequest;
 use App\Models\MarketPrice;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 
 final class MarketPricesTest extends ChartsTestCase
 {
@@ -130,6 +133,72 @@ final class MarketPricesTest extends ChartsTestCase
             ->getJson("/api/customers/{$customer->id}/market-prices?date=2025-06-10")
             ->assertOk()
             ->assertJsonCount(1, 'data.prices');
+    }
+
+    public function test_tariff_costs_of_a_dynamic_contract_are_included(): void
+    {
+        $this->enableFeature('dynamic-electric-prices');
+
+        $user = $this->customerWithContract();
+
+        $payload = $this->contractPayload();
+        $payload['price_type'] = 'dynamic';
+
+        MockClient::global([
+            GetContractsByIdsRequest::class => new MockResponse(['data' => [$payload]]),
+        ]);
+
+        $costs = $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices")
+            ->assertOk()
+            ->json('data.tariff_costs');
+
+        $this->assertIsArray($costs);
+        // Fixture working price components without supplierPurchasePrice.
+        $this->assertSame(17.459, $costs['total_ct']);
+
+        $components = $costs['components'];
+        $this->assertIsArray($components);
+        $this->assertEqualsWithDelta(1.66, $components['Konzessionsabgabe'], 0.0001);
+        // Beschaffungskosten stecken bereits im Börsenpreis, EEG-Umlage ist 0.
+        $this->assertArrayNotHasKey('Beschaffungskosten', $components);
+        $this->assertArrayNotHasKey('EEG-Umlage', $components);
+    }
+
+    public function test_tariff_costs_are_null_without_a_dynamic_contract(): void
+    {
+        $this->enableFeature('dynamic-electric-prices');
+
+        $user = $this->customerWithContract();
+
+        // Fixture default: price_type "fixed".
+        MockClient::global([
+            GetContractsByIdsRequest::class => new MockResponse(['data' => [$this->contractPayload()]]),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices")
+            ->assertOk()
+            ->assertJsonPath('data.tariff_costs', null);
+    }
+
+    public function test_a_kvs_outage_does_not_break_the_market_prices(): void
+    {
+        $this->enableFeature('dynamic-electric-prices');
+
+        $user = $this->customerWithContract();
+
+        MockClient::global([
+            GetContractsByIdsRequest::class => new MockResponse([], 500),
+        ]);
+
+        $this->createPrice('2025-06-10 00:00:00', 8213);
+
+        $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-10")
+            ->assertOk()
+            ->assertJsonCount(1, 'data.prices')
+            ->assertJsonPath('data.tariff_costs', null);
     }
 
     private function createPrice(string $startsAt, int $centPerMwh): void

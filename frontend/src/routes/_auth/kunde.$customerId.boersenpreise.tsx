@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 
@@ -6,6 +7,8 @@ import { ChartErrorState } from '#/components/charts/chart-error'
 import { DayPager } from '#/components/charts/day-pager'
 import { QuarterHourChart } from '#/components/charts/quarter-hour-chart'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
+import { Label } from '#/components/ui/label'
+import { Switch } from '#/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -57,17 +60,32 @@ function MarketPricesPage() {
   const { date } = Route.useSearch()
   const navigate = Route.useNavigate()
   const { data } = useSuspenseQuery(marketPricesQuery(customerId, date))
+  const [withTariffCosts, setWithTariffCosts] = useState(false)
+
+  const tariffCosts = data.tariff_costs
+  const surcharge =
+    withTariffCosts && tariffCosts !== null ? tariffCosts.total_ct : 0
+
+  // Der Tarifaufschlag ist je Viertelstunde konstant — Chart, Durchschnitt
+  // und Tabellen verschieben sich gemeinsam.
+  const displayPrices =
+    surcharge === 0
+      ? data.prices
+      : data.prices.map((price) => ({
+          ...price,
+          cent_per_kwh: price.cent_per_kwh + surcharge,
+        }))
 
   const averagePrice =
-    data.prices.length > 0
-      ? data.prices.reduce((sum, price) => sum + price.cent_per_kwh, 0) /
-        data.prices.length
+    displayPrices.length > 0
+      ? displayPrices.reduce((sum, price) => sum + price.cent_per_kwh, 0) /
+        displayPrices.length
       : null
 
   const series = buildQuarterHourSeries({
     from: data.from,
     until: data.until,
-    entries: data.prices,
+    entries: displayPrices,
     getStart: (price) => price.starts_at,
     getValues: (price) => ({ price: price.cent_per_kwh }),
     keys: ['price'],
@@ -90,11 +108,37 @@ function MarketPricesPage() {
               <p className="mt-3">
                 <span className="text-muted-foreground text-sm">
                   Durchschnittspreis im Zeitraum
+                  {withTariffCosts ? ' (inkl. Tarifkosten)' : ''}
                 </span>
                 <span className="block text-2xl font-semibold tabular-nums">
                   {formatCtValue(averagePrice)} ct/kWh
                 </span>
               </p>
+            ) : null}
+            {tariffCosts !== null ? (
+              <div className="mt-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="tariff-costs"
+                    checked={withTariffCosts}
+                    onCheckedChange={setWithTariffCosts}
+                  />
+                  <Label htmlFor="tariff-costs">
+                    Tarifkosten aufschlagen (
+                    {formatCtValue(tariffCosts.total_ct)} ct/kWh)
+                  </Label>
+                </div>
+                {withTariffCosts ? (
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {Object.entries(tariffCosts.components)
+                      .map(
+                        ([label, ct]) => `${label} ${formatCtValue(ct)}`,
+                      )
+                      .join(' · ')}{' '}
+                    ct/kWh, netto
+                  </p>
+                ) : null}
+              </div>
             ) : null}
           </div>
           <DayPager
@@ -117,7 +161,9 @@ function MarketPricesPage() {
               series={[
                 {
                   key: 'price',
-                  label: 'Börsenpreis (ct/kWh)',
+                  label: withTariffCosts
+                    ? 'Preis inkl. Tarifkosten (ct/kWh)'
+                    : 'Börsenpreis (ct/kWh)',
                   color: NEUTRAL_SERIES_COLOR,
                   kind: 'area',
                   formatValue: (value) => `${formatCtValue(value)} ct/kWh`,
@@ -146,9 +192,14 @@ function MarketPricesPage() {
         <section aria-label="Tabellenübersicht" className="space-y-3">
           <h2 className="text-lg font-semibold">Tabellenübersicht</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {groupByDay(data.prices, (price) => price.starts_at).map(
+            {groupByDay(displayPrices, (price) => price.starts_at).map(
               ([day, prices]) => (
-                <MarketPriceDayTable key={day} day={day} prices={prices} />
+                <MarketPriceDayTable
+                  key={day}
+                  day={day}
+                  prices={prices}
+                  withTariffCosts={withTariffCosts && tariffCosts !== null}
+                />
               ),
             )}
           </div>
@@ -161,9 +212,11 @@ function MarketPricesPage() {
 function MarketPriceDayTable({
   day,
   prices,
+  withTariffCosts,
 }: {
   day: string
   prices: Array<MarketPriceSlot>
+  withTariffCosts: boolean
 }) {
   const heading = formatDayHeading(day)
 
@@ -177,7 +230,11 @@ function MarketPriceDayTable({
           <TableHeader className="bg-card sticky top-0">
             <TableRow>
               <TableHead>Uhrzeit</TableHead>
-              <TableHead className="text-right">Preis (ct/kWh)</TableHead>
+              <TableHead className="text-right">
+                {withTariffCosts
+                  ? 'Preis inkl. Tarifkosten (ct/kWh)'
+                  : 'Preis (ct/kWh)'}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

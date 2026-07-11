@@ -23,6 +23,15 @@ export interface MarketPriceSlot {
 }
 
 export interface MarketPricesDay {
+  /**
+   * Konstanter Tarifaufschlag (ct/kWh, netto, ohne Börsenbezug) des
+   * dynamischen Vertrags — null ohne dynamischen Vertrag oder bei
+   * KVS-Ausfall. `components`: übersetztes Label → ct/kWh.
+   */
+  tariff_costs: {
+    total_ct: number
+    components: Record<string, number>
+  } | null
   date: string
   from: string
   until: string
