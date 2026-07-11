@@ -39,14 +39,22 @@ export interface ChartSeries {
   formatValue: (value: number) => string
   /**
    * Färbt die Serie divergierend um eine Basislinie (z. B. Durchschnitt):
-   * die Linie verläuft durchgängig vom `low`-Pol (unten) zum `high`-Pol
-   * (oben), die Füllung hinterlegt nur den Bereich über der Basislinie mit
-   * dem `high`-Pol. Zeichnet zusätzlich eine gestrichelte Referenzlinie.
+   * je Arm ein Ein-Farbton-Verlauf von `near` (hell, an der Linie) zu `far`
+   * (dunkel, am Extrem) mit hartem Wechsel an der Basislinie — kein
+   * Mischverlauf zwischen den Armen. Die Füllung hinterlegt nur den Bereich
+   * über der Basislinie mit dem `high`-Arm. Zeichnet zusätzlich eine
+   * gestrichelte Referenzlinie.
    */
   diverging?: {
     baseline: number
-    high: { light: string; dark: string }
-    low: { light: string; dark: string }
+    high: {
+      near: { light: string; dark: string }
+      far: { light: string; dark: string }
+    }
+    low: {
+      near: { light: string; dark: string }
+      far: { light: string; dark: string }
+    }
     /** Beschriftung der Referenzlinie, z. B. `Ø 8,42 ct/kWh`. */
     label: string
   }
@@ -140,8 +148,10 @@ export function QuarterHourChart({
       [entry.key, { label: entry.label, theme: entry.color }],
       ...(entry.diverging !== undefined
         ? [
-            [`${entry.key}High`, { theme: entry.diverging.high }],
-            [`${entry.key}Low`, { theme: entry.diverging.low }],
+            [`${entry.key}HighNear`, { theme: entry.diverging.high.near }],
+            [`${entry.key}HighFar`, { theme: entry.diverging.high.far }],
+            [`${entry.key}LowNear`, { theme: entry.diverging.low.near }],
+            [`${entry.key}LowFar`, { theme: entry.diverging.low.far }],
           ]
         : []),
     ]),
@@ -220,13 +230,16 @@ export function QuarterHourChart({
             if (diverging === undefined || data.length === 0) {
               return null
             }
+            const { min, max } = valueRange(entry.key)
+            const strokeOffset = baselineOffset(diverging.baseline, max, min)
             const fillOffset = baselineOffset(
               diverging.baseline,
-              valueRange(entry.key).max,
+              max,
               fillBaseline(entry.key),
             )
             return [
-              // Linie: durchgängiger Verlauf vom high- zum low-Pol.
+              // Linie: je Arm hell (an der Basislinie) → dunkel (am Extrem),
+              // harter Wechsel an der Basislinie statt Mischverlauf.
               <linearGradient
                 key={`${entry.key}-stroke`}
                 id={`diverging-${entry.key}-stroke`}
@@ -237,11 +250,19 @@ export function QuarterHourChart({
               >
                 <stop
                   offset={0}
-                  style={{ stopColor: `var(--color-${entry.key}High)` }}
+                  style={{ stopColor: `var(--color-${entry.key}HighFar)` }}
+                />
+                <stop
+                  offset={strokeOffset}
+                  style={{ stopColor: `var(--color-${entry.key}HighNear)` }}
+                />
+                <stop
+                  offset={strokeOffset}
+                  style={{ stopColor: `var(--color-${entry.key}LowNear)` }}
                 />
                 <stop
                   offset={1}
-                  style={{ stopColor: `var(--color-${entry.key}Low)` }}
+                  style={{ stopColor: `var(--color-${entry.key}LowFar)` }}
                 />
               </linearGradient>,
               // Füllung: nur der Bereich über der Basislinie, weich zur
@@ -256,12 +277,12 @@ export function QuarterHourChart({
               >
                 <stop
                   offset={0}
-                  style={{ stopColor: `var(--color-${entry.key}High)` }}
+                  style={{ stopColor: `var(--color-${entry.key}HighFar)` }}
                 />
                 <stop
                   offset={fillOffset}
                   style={{
-                    stopColor: `var(--color-${entry.key}High)`,
+                    stopColor: `var(--color-${entry.key}HighNear)`,
                     stopOpacity: 0,
                   }}
                 />
@@ -440,8 +461,8 @@ export function QuarterHourChart({
               nowDot.series.diverging === undefined
                 ? `var(--color-${nowDot.series.key})`
                 : nowDot.value >= nowDot.series.diverging.baseline
-                  ? `var(--color-${nowDot.series.key}High)`
-                  : `var(--color-${nowDot.series.key}Low)`
+                  ? `var(--color-${nowDot.series.key}HighFar)`
+                  : `var(--color-${nowDot.series.key}LowFar)`
             }
             stroke="var(--card)"
             strokeWidth={2}

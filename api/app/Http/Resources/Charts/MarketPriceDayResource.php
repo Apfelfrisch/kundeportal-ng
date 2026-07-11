@@ -20,7 +20,7 @@ final class MarketPriceDayResource extends JsonResource
     /**
      * @param  list<MarketPrice>  $prices
      * @param  array{total_ct: float, components: array<string, float>}|null  $tariffCosts
-     * @param  CarbonImmutable|null  $nextDate  null, wenn das nächste Fenster keine zwei Tage mehr abdecken würde
+     * @param  CarbonImmutable|null  $nextDate  null, wenn das nächste Fenster nicht mehr voll mit Preisen abgedeckt wäre
      */
     public function __construct(
         private readonly CarbonImmutable $date,

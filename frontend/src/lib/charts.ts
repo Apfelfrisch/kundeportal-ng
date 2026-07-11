@@ -35,15 +35,22 @@ export const CHART_COLORS = {
 } as const
 
 /**
- * Divergierende Pole für Preise relativ zum Durchschnitt (Status-Semantik
- * teuer/günstig, fest — keine Serienfarben): critical `#d03b3b` und good
- * `#0ca30c` halten ≥ 3:1 auf hellem wie dunklem Untergrund. Rot/Grün allein
- * trägt die Richtung nicht (Farbfehlsichtigkeit) — die Ø-Referenzlinie und
- * die Tabellenansicht sind das Relief.
+ * Divergierende Rampen für Preise relativ zum Durchschnitt (Status-Semantik
+ * teuer/günstig, fest — keine Serienfarben). Je Arm ein eigener Ein-Farbton-
+ * Verlauf: `near` (hell) an der Basislinie → `far` (dunkel) am Extrem, mit
+ * hartem Wechsel an der Linie statt einer Grün-Rot-Mischzone. Rot/Grün
+ * allein trägt die Richtung nicht (Farbfehlsichtigkeit) — die
+ * Ø-Referenzlinie und die Tabellenansicht sind das Relief.
  */
 export const PRICE_DIVERGING_COLORS = {
-  high: { light: '#d03b3b', dark: '#d03b3b' },
-  low: { light: '#0ca30c', dark: '#0ca30c' },
+  high: {
+    near: { light: '#e9a1a1', dark: '#f0a6a3' },
+    far: { light: '#b53232', dark: '#d03b3b' },
+  },
+  low: {
+    near: { light: '#9ccf9b', dark: '#a4d8a4' },
+    far: { light: '#0a8a0a', dark: '#0ca30c' },
+  },
 } as const
 
 /** Neutrale Serienfarbe (Tooltip-Marke/Basislinie) divergierender Serien. */

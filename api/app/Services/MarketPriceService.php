@@ -20,7 +20,7 @@ final class MarketPriceService
      */
     public function day(?CarbonImmutable $date = null): array
     {
-        $center = $date ?? $this->latestPriceDate();
+        $center = $date ?? $this->defaultCenter();
 
         $prices = MarketPrice::query()
             ->whereBetween('starts_at', [
@@ -31,18 +31,32 @@ final class MarketPriceService
             ->get()
             ->all();
 
-        // Einen Tag vor geht es nur, solange das nächste Fenster noch
-        // mindestens zwei Tage mit Preisen abdeckt — also solange der
-        // nächste Zentrumstag selbst noch Preise hat.
+        // Einen Tag vor geht es nur, solange auch das nächste Fenster noch
+        // komplett mit Preisen abgedeckt ist — sein letzter Tag (Zentrum + 2)
+        // muss also noch Preise haben. So endet die Ansicht nie in Leere.
         $nextCenter = $center->addDay();
 
         return [
             'date' => $center,
             'prices' => array_values($prices),
-            'nextDate' => $nextCenter->startOfDay() <= $this->latestPriceDate()
+            'nextDate' => $nextCenter->addDay()->startOfDay() <= $this->latestPriceDate()
                 ? $nextCenter
                 : null,
         ];
+    }
+
+    /**
+     * Standard-Zentrum: der Tag VOR dem letzten Preistag, damit das Fenster
+     * Zentrum ± 1 vollständig abgedeckt ist. Mit Day-Ahead-Daten (letzter
+     * Preistag = morgen) ist das Zentrum genau heute.
+     */
+    private function defaultCenter(): CarbonImmutable
+    {
+        $latest = MarketPrice::query()->max('starts_at');
+
+        return is_string($latest) && $latest !== ''
+            ? CarbonImmutable::parse($latest)->subDay()
+            : CarbonImmutable::today();
     }
 
     private function latestPriceDate(): CarbonImmutable

@@ -9,7 +9,7 @@ interface DayPagerProps {
   /** Zentrumstag des angezeigten Fensters (`yyyy-mm-dd`, von der API). */
   date: string
   prevDate: string
-  /** null: vorwärts würde das Fenster keine zwei Tage mehr abdecken. */
+  /** null: vorwärts wäre das Fenster nicht mehr voll mit Preisen abgedeckt. */
   nextDate: string | null
   /** `?date=` gesetzt? Dann „Heute“-Button zum Zurücksetzen anzeigen. */
   showReset: boolean

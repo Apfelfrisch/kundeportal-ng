@@ -77,7 +77,7 @@ final class MarketPricesTest extends ChartsTestCase
             ->assertJsonPath('data.navigation.next_date', '2025-06-11');
     }
 
-    public function test_the_center_defaults_to_the_day_of_the_latest_stored_price(): void
+    public function test_the_center_defaults_to_the_day_before_the_latest_stored_price(): void
     {
         $this->enableFeature('dynamic-electric-prices');
 
@@ -86,10 +86,14 @@ final class MarketPricesTest extends ChartsTestCase
         $this->createPrice('2025-06-09 12:00:00', 5000);
         $this->createPrice('2025-06-10 00:15:00', 8213);
 
+        // Fenster Zentrum ± 1 endet auf dem letzten Preistag — kein leerer
+        // Folgetag in der Standardansicht.
         $this->actingAs($user)
             ->getJson("/api/customers/{$user->id}/market-prices")
             ->assertOk()
-            ->assertJsonPath('data.date', '2025-06-10')
+            ->assertJsonPath('data.date', '2025-06-09')
+            ->assertJsonPath('data.until', '2025-06-10')
+            ->assertJsonPath('data.navigation.next_date', null)
             ->assertJsonCount(2, 'data.prices');
     }
 
@@ -135,7 +139,7 @@ final class MarketPricesTest extends ChartsTestCase
             ->assertJsonCount(1, 'data.prices');
     }
 
-    public function test_forward_navigation_stops_when_the_next_window_covers_less_than_two_days(): void
+    public function test_forward_navigation_stops_when_the_next_window_would_not_be_fully_covered(): void
     {
         $this->enableFeature('dynamic-electric-prices');
 
@@ -144,18 +148,18 @@ final class MarketPricesTest extends ChartsTestCase
         $this->createPrice('2025-06-09 12:00:00', 5000);
         $this->createPrice('2025-06-10 00:15:00', 8213);
 
-        // Zentrum = letzter Preistag: das nächste Fenster hätte nur noch
-        // einen Tag mit Preisen → kein next_date.
-        $this->actingAs($user)
-            ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-10")
-            ->assertOk()
-            ->assertJsonPath('data.navigation.next_date', null);
-
-        // Einen Tag davor deckt das nächste Fenster noch beide Tage ab.
+        // Das nächste Fenster (Zentrum 2025-06-10) endete auf dem leeren
+        // 2025-06-11 → kein next_date.
         $this->actingAs($user)
             ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-09")
             ->assertOk()
-            ->assertJsonPath('data.navigation.next_date', '2025-06-10');
+            ->assertJsonPath('data.navigation.next_date', null);
+
+        // Einen Tag davor ist das nächste Fenster noch voll abgedeckt.
+        $this->actingAs($user)
+            ->getJson("/api/customers/{$user->id}/market-prices?date=2025-06-08")
+            ->assertOk()
+            ->assertJsonPath('data.navigation.next_date', '2025-06-09');
     }
 
     public function test_tariff_costs_of_a_dynamic_contract_are_included(): void
