@@ -265,6 +265,12 @@
 }
 
 @theme inline {
+  /* Schriftstapel von Bootstrap 5.3, wie im alten Portal — Tailwinds
+     ui-sans-serif-Default löst je nach Plattform anders auf. */
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -304,6 +310,12 @@
 }
 
 @layer base {
+  /* Altes Portal: Fließtext 1.1rem/17.6px (public/css/kundenportal.css).
+     Der größere Wurzelwert skaliert alle rem-basierten Größen mit, sodass
+     text-base wieder den alten 17.6px entspricht (text-sm: 15.4px). */
+  :root {
+    font-size: 110%;
+  }
   * {
     @apply border-border outline-ring/50;
   }
