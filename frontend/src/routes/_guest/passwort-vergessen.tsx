@@ -62,7 +62,7 @@ function ForgotPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Neues Passwort anfordern</CardTitle>
+        <CardTitle className="text-2xl">Neues Passwort anfordern</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-muted-foreground space-y-2 text-sm">

@@ -100,7 +100,7 @@ function VerifyEmailPage() {
       <main className="w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-xl">
+            <CardTitle className="text-center text-2xl">
               Vielen Dank für deine Anmeldung!
             </CardTitle>
           </CardHeader>

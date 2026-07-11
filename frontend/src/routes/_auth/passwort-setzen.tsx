@@ -31,7 +31,7 @@ function SetPasswordPage() {
       <main className="w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Neues Passwort speichern</CardTitle>
+            <CardTitle className="text-2xl">Neues Passwort speichern</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-muted-foreground space-y-2 text-sm">

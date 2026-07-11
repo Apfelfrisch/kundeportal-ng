@@ -58,7 +58,7 @@ function AccountSetupPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-center text-xl">Willkommen!</CardTitle>
+        <CardTitle className="text-center text-2xl">Willkommen!</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {invalidLink ? (

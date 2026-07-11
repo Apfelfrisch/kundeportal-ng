@@ -9,7 +9,7 @@ export function ChartErrorState({ error }: { error: Error }) {
 
   return (
     <div className="space-y-2 py-12 text-center">
-      <h1 className="text-2xl font-semibold">Auswertung nicht verfügbar</h1>
+      <h1 className="text-3xl font-semibold">Auswertung nicht verfügbar</h1>
       <p className="text-muted-foreground">{message}</p>
     </div>
   )

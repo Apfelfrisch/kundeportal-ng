@@ -25,7 +25,7 @@ function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Anmelden</CardTitle>
+        <CardTitle className="text-2xl">Anmelden</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-muted-foreground text-sm">

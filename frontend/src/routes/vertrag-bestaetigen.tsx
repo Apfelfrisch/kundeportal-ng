@@ -67,7 +67,7 @@ function ContractConfirmationPage() {
       <main className="w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Vertrag bestätigen</CardTitle>
+            <CardTitle className="text-2xl">Vertrag bestätigen</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {invalidLink ? (

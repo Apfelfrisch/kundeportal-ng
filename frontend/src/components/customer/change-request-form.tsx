@@ -114,7 +114,7 @@ export function ChangeRequestForm({
             Zurück zum Vertrag
           </Link>
         </Button>
-        <h1 className="text-2xl font-semibold">{config.title}</h1>
+        <h1 className="text-3xl font-semibold">{config.title}</h1>
       </div>
 
       <div className="space-y-2 text-sm">

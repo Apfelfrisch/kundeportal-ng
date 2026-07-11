@@ -164,7 +164,7 @@ function OutboxPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Postausgang</h1>
+        <h1 className="text-3xl font-semibold">Postausgang</h1>
         <Button onClick={() => setSendOpen(true)}>Nachricht senden</Button>
       </div>
 

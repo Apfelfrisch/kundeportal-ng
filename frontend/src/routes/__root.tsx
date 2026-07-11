@@ -74,7 +74,7 @@ function RootComponent() {
 function RootErrorComponent({ error }: { error: Error }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-2xl font-semibold">Es ist ein Fehler aufgetreten</h1>
+      <h1 className="text-3xl font-semibold">Es ist ein Fehler aufgetreten</h1>
       <p className="text-muted-foreground max-w-md">
         {error.message !== ''
           ? error.message
@@ -88,7 +88,7 @@ function RootErrorComponent({ error }: { error: Error }) {
 function RootNotFoundComponent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-2xl font-semibold">Seite nicht gefunden</h1>
+      <h1 className="text-3xl font-semibold">Seite nicht gefunden</h1>
       <p className="text-muted-foreground max-w-md">
         Die angeforderte Seite existiert nicht oder wurde verschoben.
       </p>

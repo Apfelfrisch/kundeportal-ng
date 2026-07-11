@@ -236,7 +236,7 @@ function UsersPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Benutzerübersicht</h1>
+        <h1 className="text-3xl font-semibold">Benutzerübersicht</h1>
         <Button onClick={() => setCreateOpen(true)}>Benutzer anlegen</Button>
       </div>
 
