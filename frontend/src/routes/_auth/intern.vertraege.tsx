@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { apiErrorMessage } from '#/api/client'
 import { AssignContractDialog } from '#/components/admin/assign-contract-dialog'
 import { DataTable } from '#/components/admin/data-table'
 import { ServerPagination } from '#/components/admin/server-pagination'
@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '#/components/ui/select'
+import { emptyToUndefined } from '#/lib/admin'
 import {
   adminContractsQuery,
   useResendConfirmation,
@@ -51,10 +52,6 @@ export const Route = createFileRoute('/_auth/intern/vertraege')({
 })
 
 const USER_FILTER_ALL = 'all'
-
-function emptyToUndefined(value: string): string | undefined {
-  return value.trim() === '' ? undefined : value.trim()
-}
 
 function ContractsPage() {
   const search = Route.useSearch()
@@ -86,11 +83,7 @@ function ContractsPage() {
       )
       toast.success(response.message)
     } catch (error) {
-      toast.error(
-        isApiError(error)
-          ? error.message
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
+      toast.error(apiErrorMessage(error))
     } finally {
       setResendContractNumber(null)
     }

@@ -4,8 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 
-import { isApiError, post } from '#/api/client'
-import { applyApiErrorsToForm } from '#/lib/forms'
+import { GENERIC_ERROR_MESSAGE, isApiError, post } from '#/api/client'
+import {
+  PASSWORD_MIN_LENGTH,
+  applyApiErrorsToForm,
+  newPasswordSchema,
+  passwordsMatch,
+  passwordsMatchParams,
+} from '#/lib/forms'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import {
   Form,
@@ -32,15 +38,10 @@ export const Route = createFileRoute('/_guest/passwort-zuruecksetzen')({
 const resetPasswordSchema = z
   .object({
     email: z.email('Bitte gib eine gültige E-Mail-Adresse ein.'),
-    password: z
-      .string()
-      .min(12, 'Das Passwort muss aus mindestens 12 Zeichen bestehen.'),
+    password: newPasswordSchema,
     password_confirmation: z.string(),
   })
-  .refine((values) => values.password === values.password_confirmation, {
-    message: 'Die Passwörter stimmen nicht überein.',
-    path: ['password_confirmation'],
-  })
+  .refine(passwordsMatch, passwordsMatchParams)
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
@@ -99,10 +100,7 @@ function ResetPasswordPage() {
           'password_confirmation',
         ])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }
@@ -119,8 +117,8 @@ function ResetPasswordPage() {
             das neue Passwort zu speichern.
           </p>
           <p>
-            Das neue Passwort muss aus mindestens <strong>12 Zeichen</strong>{' '}
-            bestehen.
+            Das neue Passwort muss aus mindestens{' '}
+            <strong>{PASSWORD_MIN_LENGTH} Zeichen</strong> bestehen.
           </p>
         </div>
         <Form {...form}>

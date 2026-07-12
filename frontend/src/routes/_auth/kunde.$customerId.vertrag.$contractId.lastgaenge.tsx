@@ -1,4 +1,4 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 
@@ -27,9 +27,9 @@ import {
   parseApiDateTime,
   sumBy,
 } from '#/lib/charts'
-import { formatDate } from '#/lib/format'
+import { formatDate, parseIsoDate } from '#/lib/format'
 import { ediLoadProfilesQuery } from '#/queries/charts'
-import { tenantQuery } from '#/queries/tenant'
+import { requireFeature } from '#/queries/tenant'
 import type { EdiLoadProfileSlot } from '#/queries/charts'
 
 /**
@@ -41,12 +41,7 @@ export const Route = createFileRoute(
   '/_auth/kunde/$customerId/vertrag/$contractId/lastgaenge',
 )({
   validateSearch: chartDateSearchSchema,
-  beforeLoad: async ({ context }) => {
-    const tenant = await context.queryClient.ensureQueryData(tenantQuery)
-    if (!tenant.features.edi_load_profiles) {
-      throw notFound()
-    }
-  },
+  beforeLoad: requireFeature('edi_load_profiles'),
   loaderDeps: ({ search }) => ({ date: search.date }),
   loader: ({ context, params, deps }) =>
     context.queryClient.ensureQueryData(
@@ -94,8 +89,8 @@ function EdiLoadProfilesPage() {
             <CardTitle>Lastprofil viertelstündlich</CardTitle>
             <p className="text-muted-foreground mt-1 text-sm">
               <span className="sr-only">Zeitraum: </span>
-              {formatDate(`${data.from}T00:00:00`)} –{' '}
-              {formatDate(`${data.until}T00:00:00`)}
+              {formatDate(parseIsoDate(data.from))} –{' '}
+              {formatDate(parseIsoDate(data.until))}
             </p>
           </div>
           <DayPager

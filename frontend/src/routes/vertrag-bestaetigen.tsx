@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { get, isApiError, post } from '#/api/client'
+import { apiErrorMessage, get, post } from '#/api/client'
 import { TenantLogo } from '#/components/shared/tenant-logo'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Alert, AlertDescription } from '#/components/ui/alert'
@@ -27,7 +26,6 @@ export const Route = createFileRoute('/vertrag-bestaetigen')({
 
 function ContractConfirmationPage() {
   const search = Route.useSearch()
-  const [confirmed, setConfirmed] = useState(false)
 
   const hasValidParams =
     search.contract !== '' && search.expires !== '' && search.signature !== ''
@@ -52,9 +50,6 @@ function ContractConfirmationPage() {
 
   const confirm = useMutation({
     mutationFn: () => post<undefined>(confirmationUrl),
-    onSuccess: () => {
-      setConfirmed(true)
-    },
   })
 
   const invalidLink = !hasValidParams || confirmationInfo.isError
@@ -78,7 +73,7 @@ function ContractConfirmationPage() {
                   erhalten.
                 </AlertDescription>
               </Alert>
-            ) : confirmed ? (
+            ) : confirm.isSuccess ? (
               <>
                 <Alert>
                   <AlertDescription>
@@ -110,9 +105,7 @@ function ContractConfirmationPage() {
                 {confirm.isError ? (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {isApiError(confirm.error)
-                        ? confirm.error.message
-                        : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.'}
+                      {apiErrorMessage(confirm.error)}
                     </AlertDescription>
                   </Alert>
                 ) : null}

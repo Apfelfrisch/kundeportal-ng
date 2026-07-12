@@ -5,7 +5,6 @@ import {
   formatTicketDataValue,
   ticketDataEntries,
   ticketDataLabel,
-  ticketStatusLabel,
   ticketStatusTransitions,
   ticketTypeLabel,
 } from '#/lib/admin'
@@ -37,14 +36,6 @@ describe('buildAdminQuery', () => {
     expect(buildAdminQuery({ email: 'a+b@example.com' })).toBe(
       '?email=a%2Bb%40example.com',
     )
-  })
-})
-
-describe('ticketStatusLabel', () => {
-  it('übersetzt die Status ins Deutsche', () => {
-    expect(ticketStatusLabel('open')).toBe('Offen')
-    expect(ticketStatusLabel('in_process')).toBe('In Arbeit')
-    expect(ticketStatusLabel('processed')).toBe('Erledigt')
   })
 })
 

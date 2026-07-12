@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { apiErrorMessage } from '#/api/client'
 import { AssignContractDialog } from '#/components/admin/assign-contract-dialog'
 import { CreateUserDialog } from '#/components/admin/create-user-dialog'
 import { DataTable } from '#/components/admin/data-table'
@@ -24,6 +24,7 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
+import { emptyToUndefined } from '#/lib/admin'
 import { formatDate } from '#/lib/format'
 import {
   adminUsersQuery,
@@ -46,10 +47,6 @@ export const Route = createFileRoute('/_auth/intern/benutzer')({
   validateSearch: usersSearchSchema,
   component: UsersPage,
 })
-
-function emptyToUndefined(value: string): string | undefined {
-  return value.trim() === '' ? undefined : value.trim()
-}
 
 interface RemoveAssignmentTarget {
   assignment: AdminUserContractAssignment
@@ -80,11 +77,7 @@ function UsersPage() {
   const deleteUser = useDeleteUser()
 
   function showError(error: unknown) {
-    toast.error(
-      isApiError(error)
-        ? error.message
-        : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-    )
+    toast.error(apiErrorMessage(error))
   }
 
   async function onSendSetupMail(user: AdminUser) {

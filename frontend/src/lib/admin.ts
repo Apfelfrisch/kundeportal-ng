@@ -25,6 +25,11 @@ export function buildAdminQuery(params: AdminQueryParams): string {
   return query === '' ? '' : `?${query}`
 }
 
+/** Getrimmte Filter-Eingabe; leer → `undefined` (Suchparameter entfällt). */
+export function emptyToUndefined(value: string): string | undefined {
+  return value.trim() === '' ? undefined : value.trim()
+}
+
 /* ------------------------------------------------------------------ */
 /* Ticket-Status                                                       */
 /* ------------------------------------------------------------------ */
@@ -33,10 +38,6 @@ export const TICKET_STATUS_LABELS: Record<AdminTicketStatus, string> = {
   open: 'Offen',
   in_process: 'In Arbeit',
   processed: 'Erledigt',
-}
-
-export function ticketStatusLabel(status: AdminTicketStatus): string {
-  return TICKET_STATUS_LABELS[status]
 }
 
 export interface TicketStatusTransition {

@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { GENERIC_ERROR_MESSAGE, isApiError } from '#/api/client'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'
@@ -88,10 +88,7 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
           'send_mail',
         ])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }

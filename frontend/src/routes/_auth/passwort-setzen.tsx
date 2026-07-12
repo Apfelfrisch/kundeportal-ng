@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { post } from '#/api/client'
+import { PASSWORD_MIN_LENGTH } from '#/lib/forms'
 import { sessionQuery, setSessionUser, useLogout } from '#/queries/session'
 import { PasswordForm } from '#/components/auth/password-form'
 import { TenantLogo } from '#/components/shared/tenant-logo'
@@ -39,7 +40,10 @@ function SetPasswordPage() {
                 Bitte setzen Sie hier Ihr Passwort, um sich am Kundenportal
                 anmelden zu können.
               </p>
-              <p>Das neue Passwort muss aus mindestens 12 Zeichen bestehen.</p>
+              <p>
+                Das neue Passwort muss aus mindestens {PASSWORD_MIN_LENGTH}{' '}
+                Zeichen bestehen.
+              </p>
             </div>
             <PasswordForm
               submitLabel="Neues Passwort speichern"

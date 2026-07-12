@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Building2, Paperclip, User, X } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { isApiError } from '#/api/client'
+import { firstApiErrorMessage } from '#/api/client'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import {
@@ -191,12 +191,7 @@ function Composer({ customerId }: { customerId: string }) {
       setError(null)
       toast.success('Deine Nachricht wurde gesendet.')
     } catch (submitError) {
-      setError(
-        isApiError(submitError)
-          ? (Object.values(submitError.errors ?? {})[0]?.[0] ??
-              submitError.message)
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
+      setError(firstApiErrorMessage(submitError))
     }
   }
 

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 
 import { get, post } from '#/api/client'
+import { PASSWORD_MIN_LENGTH } from '#/lib/forms'
 import { setSessionUser } from '#/queries/session'
 import { PasswordForm } from '#/components/auth/password-form'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
@@ -91,7 +92,10 @@ function AccountSetupPage() {
                 Hallo {setupInfo.data.name} ({setupInfo.data.email}), bitte
                 setzen Sie ein Passwort, um Ihren Account einzurichten.
               </p>
-              <p>Das Passwort muss aus mindestens 12 Zeichen bestehen.</p>
+              <p>
+                Das Passwort muss aus mindestens {PASSWORD_MIN_LENGTH} Zeichen
+                bestehen.
+              </p>
             </div>
             <PasswordForm
               submitLabel="Account einrichten"

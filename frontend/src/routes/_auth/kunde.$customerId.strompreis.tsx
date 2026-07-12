@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { z } from 'zod'
@@ -35,9 +35,10 @@ import {
   formatUhrzeit,
   groupByDay,
   parseApiDateTime,
+  sumBy,
 } from '#/lib/charts'
 import { marketPricesQuery } from '#/queries/charts'
-import { tenantQuery } from '#/queries/tenant'
+import { requireFeature } from '#/queries/tenant'
 import type { MarketPriceSlot } from '#/queries/charts'
 
 /**
@@ -55,12 +56,7 @@ export const Route = createFileRoute('/_auth/kunde/$customerId/strompreis')({
       .optional()
       .catch(undefined),
   }),
-  beforeLoad: async ({ context }) => {
-    const tenant = await context.queryClient.ensureQueryData(tenantQuery)
-    if (!tenant.features.dynamic_electric_prices) {
-      throw notFound()
-    }
-  },
+  beforeLoad: requireFeature('dynamic_electric_prices'),
   loaderDeps: ({ search }) => ({ date: search.date }),
   loader: ({ context, params, deps }) =>
     context.queryClient.ensureQueryData(
@@ -93,7 +89,7 @@ function MarketPricesPage() {
 
   const averagePrice =
     displayPrices.length > 0
-      ? displayPrices.reduce((sum, price) => sum + price.cent_per_kwh, 0) /
+      ? sumBy(displayPrices, (price) => price.cent_per_kwh) /
         displayPrices.length
       : null
 

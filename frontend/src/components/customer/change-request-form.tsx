@@ -5,7 +5,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import type { Resolver } from 'react-hook-form'
 
-import { isApiError } from '#/api/client'
+import { GENERIC_ERROR_MESSAGE, isApiError } from '#/api/client'
 import { InfoHtml } from '#/components/customer/info-html'
 import { DateInput } from '#/components/shared/date-picker'
 import { Alert, AlertDescription } from '#/components/ui/alert'
@@ -87,10 +87,7 @@ export function ChangeRequestForm({
       if (isApiError(error)) {
         applyApiErrorsToForm(error, form.setError, fieldNames)
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }

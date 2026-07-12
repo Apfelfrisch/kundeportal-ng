@@ -2,8 +2,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
-import { applyApiErrorsToForm } from '#/lib/forms'
+import { GENERIC_ERROR_MESSAGE, isApiError } from '#/api/client'
+import {
+  applyApiErrorsToForm,
+  newPasswordSchema,
+  passwordsMatch,
+  passwordsMatchParams,
+} from '#/lib/forms'
 import {
   Form,
   FormControl,
@@ -18,15 +23,10 @@ import { Alert, AlertDescription } from '#/components/ui/alert'
 
 export const passwordSchema = z
   .object({
-    password: z
-      .string()
-      .min(12, 'Das Passwort muss aus mindestens 12 Zeichen bestehen.'),
+    password: newPasswordSchema,
     password_confirmation: z.string(),
   })
-  .refine((values) => values.password === values.password_confirmation, {
-    message: 'Die Passwörter stimmen nicht überein.',
-    path: ['password_confirmation'],
-  })
+  .refine(passwordsMatch, passwordsMatchParams)
 
 export type PasswordValues = z.infer<typeof passwordSchema>
 
@@ -52,10 +52,7 @@ export function PasswordForm({ submitLabel, submit }: PasswordFormProps) {
           'password_confirmation',
         ])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }

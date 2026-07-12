@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { isApiError } from '#/api/client'
+import { firstApiErrorMessage } from '#/api/client'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import {
@@ -72,12 +72,7 @@ export function AssignContractDialog({
       toast.success(response.message)
       close(false)
     } catch (submitError) {
-      setError(
-        isApiError(submitError)
-          ? (Object.values(submitError.errors ?? {})[0]?.[0] ??
-              submitError.message)
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
+      setError(firstApiErrorMessage(submitError))
     }
   }
 

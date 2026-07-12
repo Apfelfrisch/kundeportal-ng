@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { GENERIC_ERROR_MESSAGE, isApiError } from '#/api/client'
+import { ProfilePasswordCard } from '#/components/shared/profile-password-card'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import {
@@ -38,6 +39,7 @@ export const Route = createFileRoute('/_auth/kunde/$customerId/profil')({
 function ProfilePage() {
   const { customerId } = Route.useParams()
   const { data: profile, isPending } = useQuery(profileQuery(customerId))
+  const updatePassword = useUpdateProfilePassword(customerId)
 
   return (
     <div className="space-y-6">
@@ -68,7 +70,7 @@ function ProfilePage() {
         </Card>
 
         <EmailCard customerId={customerId} currentEmail={profile?.email} />
-        <PasswordCard customerId={customerId} />
+        <ProfilePasswordCard updatePassword={updatePassword.mutateAsync} />
       </div>
     </div>
   )
@@ -110,10 +112,7 @@ function EmailCard({
       if (isApiError(error)) {
         applyApiErrorsToForm(error, form.setError, ['email'])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }
@@ -154,139 +153,6 @@ function EmailCard({
               {form.formState.isSubmitting
                 ? 'Wird gespeichert…'
                 : 'E-Mail speichern'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  )
-}
-
-const passwordSchema = z
-  .object({
-    current_password: z.string().min(1, 'Bitte gib dein aktuelles Passwort an.'),
-    password: z
-      .string()
-      .min(12, 'Das Passwort muss aus mindestens 12 Zeichen bestehen.'),
-    password_confirmation: z.string(),
-  })
-  .refine((values) => values.password === values.password_confirmation, {
-    message: 'Die Passwörter stimmen nicht überein.',
-    path: ['password_confirmation'],
-  })
-
-type PasswordValues = z.infer<typeof passwordSchema>
-
-function PasswordCard({ customerId }: { customerId: string }) {
-  const updatePassword = useUpdateProfilePassword(customerId)
-
-  const form = useForm<PasswordValues>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: {
-      current_password: '',
-      password: '',
-      password_confirmation: '',
-    },
-  })
-
-  async function onSubmit(values: PasswordValues) {
-    try {
-      const response = await updatePassword.mutateAsync(values)
-      toast.success(response.message ?? 'Dein Passwort wurde aktualisiert.')
-      form.reset()
-    } catch (error) {
-      if (isApiError(error)) {
-        applyApiErrorsToForm(error, form.setError, [
-          'current_password',
-          'password',
-          'password_confirmation',
-        ])
-      } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
-      }
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Passwort ändern</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4 text-sm">
-          Das neue Passwort muss aus mindestens 12 Zeichen bestehen.
-        </p>
-        <Form {...form}>
-          <form
-            onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
-            className="space-y-4"
-            noValidate
-          >
-            {form.formState.errors.root ? (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {form.formState.errors.root.message}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-            <FormField
-              control={form.control}
-              name="current_password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Aktuelles Passwort</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="current-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Neues Passwort</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password_confirmation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Neues Passwort bestätigen</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting
-                ? 'Wird gespeichert…'
-                : 'Passwort speichern'}
             </Button>
           </form>
         </Form>

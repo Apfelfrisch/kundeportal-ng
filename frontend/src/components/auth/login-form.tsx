@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { GENERIC_ERROR_MESSAGE, isApiError } from '#/api/client'
 import { applyApiErrorsToForm } from '#/lib/forms'
 import {
   Form,
@@ -40,10 +40,7 @@ export function LoginForm({ login }: LoginFormProps) {
       if (isApiError(error)) {
         applyApiErrorsToForm(error, form.setError, ['email', 'password'])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }

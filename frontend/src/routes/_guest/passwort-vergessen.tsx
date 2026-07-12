@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-import { isApiError, post } from '#/api/client'
+import { GENERIC_ERROR_MESSAGE, isApiError, post } from '#/api/client'
 import { applyApiErrorsToForm } from '#/lib/forms'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import {
@@ -51,10 +51,7 @@ function ForgotPasswordPage() {
       if (isApiError(error)) {
         applyApiErrorsToForm(error, form.setError, ['email'])
       } else {
-        form.setError('root', {
-          message:
-            'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-        })
+        form.setError('root', { message: GENERIC_ERROR_MESSAGE })
       }
     }
   }

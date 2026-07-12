@@ -40,6 +40,24 @@ export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError
 }
 
+/** Generische Fallback-Meldung für unerwartete (Nicht-API-)Fehler. */
+export const GENERIC_ERROR_MESSAGE =
+  'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.'
+
+/** Deutsche Fehlermeldung: `ApiError.message`, sonst die generische Meldung. */
+export function apiErrorMessage(error: unknown): string {
+  return isApiError(error) ? error.message : GENERIC_ERROR_MESSAGE
+}
+
+/**
+ * Wie `apiErrorMessage`, bevorzugt aber die erste Feldmeldung eines
+ * 422-Fehlers – für Formulare ohne feldgenaue Fehleranzeige.
+ */
+export function firstApiErrorMessage(error: unknown): string {
+  if (!isApiError(error)) return GENERIC_ERROR_MESSAGE
+  return Object.values(error.errors ?? {})[0]?.[0] ?? error.message
+}
+
 function defaultMessage(status: number): string {
   switch (status) {
     case 401:
@@ -55,7 +73,7 @@ function defaultMessage(status: number): string {
     case 429:
       return 'Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.'
     default:
-      return 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.'
+      return GENERIC_ERROR_MESSAGE
   }
 }
 

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import {
   formatCt,
   formatDate,
-  formatDateTime,
   formatEuro,
   formatIban,
   formatKwh,
@@ -58,18 +57,6 @@ describe('formatDate', () => {
 
   it('accepts Date objects', () => {
     expect(formatDate(new Date(2025, 0, 3))).toBe('03.01.2025')
-  })
-})
-
-describe('formatDateTime', () => {
-  it('formats date and time', () => {
-    expect(formatDateTime(new Date(2026, 6, 11, 14, 30))).toBe(
-      '11.07.2026, 14:30',
-    )
-  })
-
-  it('pads hours and minutes', () => {
-    expect(formatDateTime(new Date(2026, 6, 1, 8, 5))).toBe('01.07.2026, 08:05')
   })
 })
 

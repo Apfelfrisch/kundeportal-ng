@@ -3,7 +3,7 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { isApiError } from '#/api/client'
+import { apiErrorMessage } from '#/api/client'
 import { Button } from '#/components/ui/button'
 import {
   Card,
@@ -23,6 +23,7 @@ export const Route = createFileRoute('/_auth/intern/')({
 function AdminDashboardPage() {
   const { session } = Route.useRouteContext()
   const { data: dashboard, isPending } = useQuery(adminDashboardQuery)
+  const navigate = useNavigate()
 
   return (
     <div className="space-y-6">
@@ -53,8 +54,36 @@ function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <ContractSearchCard />
-        <UserSearchCard />
+        <SearchCard
+          title="Suche nach Vertragsnummer"
+          label="Vertragsnummer"
+          inputId="search-contract-number"
+          placeholder="Vertragsnummer suchen"
+          buttonLabel="Zum Vertrag"
+          onSearch={async (value) => {
+            const response = await searchContract(value)
+            await navigate({
+              to: '/intern/vertraege',
+              search: {
+                contract_number: String(response.data.contract_number),
+              },
+            })
+          }}
+        />
+        <SearchCard
+          title="Suche nach Stammnummer (User ID)"
+          label="Stammnummer"
+          inputId="search-user-id"
+          placeholder="Benutzer-ID suchen"
+          buttonLabel="Zum Kunden"
+          onSearch={async (value) => {
+            const response = await searchUser(value)
+            await navigate({
+              to: '/intern/benutzer',
+              search: { id: String(response.data.user_id) },
+            })
+          }}
+        />
       </div>
     </div>
   )
@@ -92,26 +121,32 @@ function StatCard({
   )
 }
 
-function ContractSearchCard() {
-  const navigate = useNavigate()
-  const [contractNumber, setContractNumber] = useState('')
+/** Suchkarte des Dashboards: eine Nummer eingeben, bei Treffer navigieren. */
+function SearchCard({
+  title,
+  label,
+  inputId,
+  placeholder,
+  buttonLabel,
+  onSearch,
+}: {
+  title: string
+  label: string
+  inputId: string
+  placeholder: string
+  buttonLabel: string
+  onSearch: (value: string) => Promise<void>
+}) {
+  const [value, setValue] = useState('')
   const [isSearching, setIsSearching] = useState(false)
 
   async function submit() {
-    if (contractNumber.trim() === '') return
+    if (value.trim() === '') return
     setIsSearching(true)
     try {
-      const response = await searchContract(contractNumber.trim())
-      await navigate({
-        to: '/intern/vertraege',
-        search: { contract_number: String(response.data.contract_number) },
-      })
+      await onSearch(value.trim())
     } catch (error) {
-      toast.error(
-        isApiError(error)
-          ? error.message
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
+      toast.error(apiErrorMessage(error))
     } finally {
       setIsSearching(false)
     }
@@ -120,7 +155,7 @@ function ContractSearchCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Suche nach Vertragsnummer</CardTitle>
+        <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <form
@@ -131,80 +166,19 @@ function ContractSearchCard() {
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="search-contract-number">Vertragsnummer</Label>
+            <Label htmlFor={inputId}>{label}</Label>
             <Input
-              id="search-contract-number"
+              id={inputId}
               type="number"
               inputMode="numeric"
-              placeholder="Vertragsnummer suchen"
-              value={contractNumber}
-              onChange={(event) => setContractNumber(event.target.value)}
+              placeholder={placeholder}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
               required
             />
           </div>
           <Button type="submit" disabled={isSearching}>
-            {isSearching ? 'Wird gesucht…' : 'Zum Vertrag'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  )
-}
-
-function UserSearchCard() {
-  const navigate = useNavigate()
-  const [userId, setUserId] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
-
-  async function submit() {
-    if (userId.trim() === '') return
-    setIsSearching(true)
-    try {
-      const response = await searchUser(userId.trim())
-      await navigate({
-        to: '/intern/benutzer',
-        search: { id: String(response.data.user_id) },
-      })
-    } catch (error) {
-      toast.error(
-        isApiError(error)
-          ? error.message
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
-    } finally {
-      setIsSearching(false)
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">
-          Suche nach Stammnummer (User ID)
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form
-          className="space-y-4"
-          onSubmit={(event) => {
-            event.preventDefault()
-            void submit()
-          }}
-        >
-          <div className="space-y-2">
-            <Label htmlFor="search-user-id">Stammnummer</Label>
-            <Input
-              id="search-user-id"
-              type="number"
-              inputMode="numeric"
-              placeholder="Benutzer-ID suchen"
-              value={userId}
-              onChange={(event) => setUserId(event.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={isSearching}>
-            {isSearching ? 'Wird gesucht…' : 'Zum Kunden'}
+            {isSearching ? 'Wird gesucht…' : buttonLabel}
           </Button>
         </form>
       </CardContent>

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { parseIsoDate } from '#/lib/format'
+
 /**
  * Reine Transformations- und Formatierungshelfer für die Chart-Seiten
  * (Börsenpreise, abgerechnete Lastprofile, Lastgänge).
@@ -66,12 +68,12 @@ export function parseApiDateTime(value: string): number {
 
 /** `"2025-06-10"` → Epoch-ms des lokalen Tagesbeginns. */
 export function dayStartMs(date: string): number {
-  return new Date(`${date}T00:00:00`).getTime()
+  return parseIsoDate(date).getTime()
 }
 
 /** Mitternacht NACH `date` (DST-sicher über Kalendertage). */
 export function nextDayStartMs(date: string): number {
-  const cursor = new Date(`${date}T00:00:00`)
+  const cursor = parseIsoDate(date)
   cursor.setDate(cursor.getDate() + 1)
   return cursor.getTime()
 }
@@ -89,7 +91,7 @@ export function timeTicks(
 ): Array<number> {
   const ticks: Array<number> = []
   const end = nextDayStartMs(until)
-  const cursor = new Date(`${from}T00:00:00`)
+  const cursor = parseIsoDate(from)
   while (cursor.getTime() < end) {
     ticks.push(cursor.getTime())
     cursor.setHours(cursor.getHours() + stepHours)
@@ -134,7 +136,7 @@ const dayHeadingFormat = new Intl.DateTimeFormat('de-DE', {
 
 /** `"2025-06-10"` → `"Dienstag, 10. Juni 2025"` (Tabellen-Überschriften). */
 export function formatDayHeading(date: string): string {
-  return dayHeadingFormat.format(new Date(`${date}T00:00:00`))
+  return dayHeadingFormat.format(parseIsoDate(date))
 }
 
 const ctValueFormat = new Intl.NumberFormat('de-DE', {
@@ -217,7 +219,7 @@ export function buildQuarterHourSeries<T>(options: {
 export function dayBoundaries(from: string, until: string): Array<number> {
   const boundaries: Array<number> = []
   const end = nextDayStartMs(until)
-  const cursor = new Date(`${from}T00:00:00`)
+  const cursor = parseIsoDate(from)
   cursor.setDate(cursor.getDate() + 1)
   while (cursor.getTime() < end) {
     boundaries.push(cursor.getTime())

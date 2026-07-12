@@ -5,7 +5,7 @@ import { Paperclip } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { isApiError } from '#/api/client'
+import { apiErrorMessage } from '#/api/client'
 import { DataTable } from '#/components/admin/data-table'
 import { SendMessageDialog } from '#/components/admin/send-message-dialog'
 import { ServerPagination } from '#/components/admin/server-pagination'
@@ -23,6 +23,7 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
+import { emptyToUndefined } from '#/lib/admin'
 import { formatDate } from '#/lib/format'
 import { adminOutboxQuery, useDeleteCompanyMessage } from '#/queries/admin'
 import type { DataTableColumn } from '#/components/admin/data-table'
@@ -40,10 +41,6 @@ export const Route = createFileRoute('/_auth/intern/ausgang')({
   validateSearch: outboxSearchSchema,
   component: OutboxPage,
 })
-
-function emptyToUndefined(value: string): string | undefined {
-  return value.trim() === '' ? undefined : value.trim()
-}
 
 function truncate(text: string, length = 80): string {
   return text.length > length ? `${text.slice(0, length)}…` : text
@@ -74,11 +71,7 @@ function OutboxPage() {
       const response = await deleteMessage.mutateAsync(deleteTarget.id)
       toast.success(response.message)
     } catch (error) {
-      toast.error(
-        isApiError(error)
-          ? error.message
-          : 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.',
-      )
+      toast.error(apiErrorMessage(error))
     } finally {
       setDeleteTarget(null)
     }

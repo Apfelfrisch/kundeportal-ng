@@ -18,11 +18,6 @@ const dateFormat = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',
 })
 
-const timeFormat = new Intl.DateTimeFormat('de-DE', {
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
 function toDate(value: string | number | Date): Date {
   return value instanceof Date ? value : new Date(value)
 }
@@ -69,12 +64,6 @@ export function toIsoDate(date: Date): string {
 /** ISO-Datum/Date → `"dd.MM.yyyy"` */
 export function formatDate(value: string | number | Date): string {
   return dateFormat.format(toDate(value))
-}
-
-/** ISO-Datum/Date → `"dd.MM.yyyy, HH:mm"` */
-export function formatDateTime(value: string | number | Date): string {
-  const date = toDate(value)
-  return `${dateFormat.format(date)}, ${timeFormat.format(date)}`
 }
 
 /** `"DE69284500000021025564"` → `"DE69 2845 0000 0021 0255 64"` */

@@ -21,6 +21,7 @@ import { Label } from '#/components/ui/label'
 import { Tabs, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import {
   TICKET_STATUS_LABELS,
+  emptyToUndefined,
   ticketDataEntries,
   ticketStatusTransitions,
   ticketTypeLabel,
@@ -44,10 +45,6 @@ export const Route = createFileRoute('/_auth/intern/tickets')({
   validateSearch: ticketsSearchSchema,
   component: TicketsPage,
 })
-
-function emptyToUndefined(value: string): string | undefined {
-  return value.trim() === '' ? undefined : value.trim()
-}
 
 const STATUS_BADGE_VARIANT: Record<
   AdminTicketStatus,

@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react'
 
@@ -29,9 +29,9 @@ import {
   parseApiDateTime,
   sumBy,
 } from '#/lib/charts'
-import { formatCt, formatDate, formatKwh } from '#/lib/format'
+import { formatCt, formatDate, formatKwh, parseIsoDate } from '#/lib/format'
 import { billedLoadProfilesQuery } from '#/queries/charts'
-import { tenantQuery } from '#/queries/tenant'
+import { requireFeature } from '#/queries/tenant'
 import type { BilledLoadProfileSlot } from '#/queries/charts'
 
 /**
@@ -44,12 +44,7 @@ export const Route = createFileRoute(
   '/_auth/kunde/$customerId/vertrag/$contractId/abrechnung',
 )({
   validateSearch: chartDateSearchSchema,
-  beforeLoad: async ({ context }) => {
-    const tenant = await context.queryClient.ensureQueryData(tenantQuery)
-    if (!tenant.features.dynamic_electric_prices) {
-      throw notFound()
-    }
-  },
+  beforeLoad: requireFeature('dynamic_electric_prices'),
   loaderDeps: ({ search }) => ({ date: search.date }),
   loader: ({ context, params, deps }) =>
     context.queryClient.ensureQueryData(
@@ -102,8 +97,8 @@ function BilledLoadProfilesPage() {
             <CardTitle>Lastprofil viertelstündlich</CardTitle>
             <p className="text-muted-foreground mt-1 text-sm">
               <span className="sr-only">Zeitraum: </span>
-              {formatDate(`${data.from}T00:00:00`)} –{' '}
-              {formatDate(`${data.until}T00:00:00`)}
+              {formatDate(parseIsoDate(data.from))} –{' '}
+              {formatDate(parseIsoDate(data.until))}
             </p>
           </div>
           <DayPager
