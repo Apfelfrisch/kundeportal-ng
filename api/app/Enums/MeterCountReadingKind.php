@@ -17,22 +17,6 @@ enum MeterCountReadingKind: string
     case APPRECIATED = 'Schätzung';
 
     /**
-     * @return list<string>
-     */
-    public static function values(): array
-    {
-        return array_map(static fn (self $case): string => $case->value, self::cases());
-    }
-
-    /**
-     * @return list<string>
-     */
-    public static function names(): array
-    {
-        return array_map(static fn (self $case): string => $case->name, self::cases());
-    }
-
-    /**
      * Old MeterCountReadingKind::setWithId() — maps the raw KVS reading-kind id.
      */
     public static function fromKvsId(int|string $id): self

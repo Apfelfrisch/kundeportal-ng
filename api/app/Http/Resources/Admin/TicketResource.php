@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
-use App\Enums\CustomerMessageStatus;
 use App\Models\CustomerMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,7 +34,7 @@ final class TicketResource extends JsonResource
             'contract_number' => $this->ticket->contract_number,
             'data' => $this->ticket->data,
             'status' => [
-                'value' => self::apiStatus($this->ticket->status),
+                'value' => $this->ticket->status->apiStatus(),
                 'label' => $this->ticket->status->label(),
             ],
             'customer' => $customer === null ? null : [
@@ -50,14 +49,5 @@ final class TicketResource extends JsonResource
             ],
             'created_at' => $this->ticket->created_at?->toISOString(),
         ];
-    }
-
-    public static function apiStatus(CustomerMessageStatus $status): string
-    {
-        return match ($status) {
-            CustomerMessageStatus::UnProcessed => 'open',
-            CustomerMessageStatus::InProcess => 'in_process',
-            CustomerMessageStatus::Processed => 'processed',
-        };
     }
 }

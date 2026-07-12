@@ -25,10 +25,6 @@ return [
             'href' => 'https://www.voltaik-strom.de',
             'show' => 'voltaik-strom.de',
         ],
-        'kvs' => [
-            'root' => env('KVS_APP_URL'),
-            'customer' => '/kunde/show',
-        ],
         'contact' => [
             'website' => 'https://voltaik-strom.de/kontakt',
             'messenger' => [

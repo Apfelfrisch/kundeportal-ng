@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Support\MailboxFileRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreCompanyMessageRequest extends FormRequest
@@ -24,8 +25,15 @@ final class StoreCompanyMessageRequest extends FormRequest
             'customer_user_id' => ['required', 'integer', 'exists:users,id'],
             'subject' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string'],
-            'files' => ['nullable', 'array'],
-            'files.*' => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            ...MailboxFileRules::rules(),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return MailboxFileRules::messages();
     }
 }

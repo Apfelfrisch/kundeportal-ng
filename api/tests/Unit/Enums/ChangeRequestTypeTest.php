@@ -12,6 +12,7 @@ final class ChangeRequestTypeTest extends TestCase
 {
     public function test_it_covers_all_change_request_form_types(): void
     {
+        // CONTACT is the mailbox chat, not a change-request form.
         $this->assertSame([
             'bank',
             'billing-address',
@@ -21,8 +22,7 @@ final class ChangeRequestTypeTest extends TestCase
             'meter-count',
             'termination',
             'revocation',
-            'contact',
-        ], ChangeRequestType::values());
+        ], ChangeRequestType::formTypeValues());
     }
 
     public function test_it_can_be_resolved_from_the_route_parameter(): void

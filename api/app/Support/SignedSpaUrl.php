@@ -14,7 +14,7 @@ final readonly class SignedSpaUrl
 {
     public static function toFrontend(string $signedApiUrl, string $frontendPath): string
     {
-        $frontendBase = rtrim(config()->string('app.frontend_url'), '/').$frontendPath;
+        $frontendBase = SpaUrl::to($frontendPath);
 
         $query = parse_url($signedApiUrl, PHP_URL_QUERY);
 

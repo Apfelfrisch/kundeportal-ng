@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Mailbox;
 
+use App\Support\MailboxFileRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 
@@ -25,8 +26,7 @@ final class StoreMailboxMessageRequest extends FormRequest
     {
         return [
             'message' => ['required_without:files', 'nullable', 'string', 'max:5000'],
-            'files' => ['nullable', 'array'],
-            'files.*' => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            ...MailboxFileRules::rules(),
             'bot-check' => ['prohibited'],
         ];
     }
@@ -37,9 +37,7 @@ final class StoreMailboxMessageRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'files.*.mimes' => 'Datei konnte nicht gespeichert werden. Die Datei muss vom Typ JPG, PNG oder PDF sein.',
-            'files.*.max' => 'Datei konnte nicht gespeichert werden. Die Datei darf nicht größer als 10 MB sein.',
-            'files.*.file' => 'Datei konnte nicht gespeichert werden. Die Datei ist ungültig.',
+            ...MailboxFileRules::messages(),
             'message.required_without' => 'Bitte eine Nachricht eingeben oder eine Datei anhängen.',
             'bot-check.prohibited' => 'Ihre Anfrage konnte nicht verarbeitet werden.',
         ];

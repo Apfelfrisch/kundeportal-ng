@@ -20,4 +20,33 @@ enum CustomerMessageStatus: string
             self::Processed => 'erledigt',
         };
     }
+
+    /**
+     * The status string used on the API level (open|in_process|processed).
+     */
+    public function apiStatus(): string
+    {
+        return match ($this) {
+            self::UnProcessed => 'open',
+            self::InProcess => 'in_process',
+            self::Processed => 'processed',
+        };
+    }
+
+    public static function fromApiStatus(string $value): self
+    {
+        return match ($value) {
+            'open' => self::UnProcessed,
+            'in_process' => self::InProcess,
+            default => self::Processed,
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function apiStatuses(): array
+    {
+        return array_map(static fn (self $status): string => $status->apiStatus(), self::cases());
+    }
 }

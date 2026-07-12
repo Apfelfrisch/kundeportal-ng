@@ -20,22 +20,6 @@ enum ContractStatus: string
     case REJECTED = 'Abgelehnt';
 
     /**
-     * @return list<string>
-     */
-    public static function values(): array
-    {
-        return array_map(static fn (self $case): string => $case->value, self::cases());
-    }
-
-    /**
-     * @return list<string>
-     */
-    public static function names(): array
-    {
-        return array_map(static fn (self $case): string => $case->name, self::cases());
-    }
-
-    /**
      * Old ContractStatus::setWithId() — maps the raw KVS state-type id.
      */
     public static function fromKvsId(int|string $stateTypeId): self

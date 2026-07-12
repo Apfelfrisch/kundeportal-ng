@@ -21,10 +21,21 @@ enum ChangeRequestType: string
     case CONTACT = 'contact';
 
     /**
+     * The form types a change request can be submitted for. CONTACT is the
+     * mailbox chat, not a change-request form, so it is excluded.
+     *
      * @return list<string>
      */
-    public static function values(): array
+    public static function formTypeValues(): array
     {
-        return array_map(static fn (self $case): string => $case->value, self::cases());
+        $values = [];
+
+        foreach (self::cases() as $case) {
+            if ($case !== self::CONTACT) {
+                $values[] = $case->value;
+            }
+        }
+
+        return $values;
     }
 }

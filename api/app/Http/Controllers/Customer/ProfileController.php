@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Customer;
 
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Customer\UpdateProfileEmailRequest;
-use App\Http\Requests\Customer\UpdateProfilePasswordRequest;
 use App\Models\User;
-use App\Notifications\EmailChangedNotification;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 
 /**
  * Customer profile, ported from the old ProfileController. An email change
  * revokes the verification, notifies the OLD address and sends a fresh
  * verification mail to the new one.
  */
-final class ProfileController
+final readonly class ProfileController
 {
+    public function __construct(
+        private ProfileService $profiles,
+    ) {}
+
     public function show(User $user): JsonResponse
     {
         return $this->profileResponse($user);
@@ -27,16 +28,7 @@ final class ProfileController
 
     public function updateEmail(UpdateProfileEmailRequest $request, User $user): JsonResponse
     {
-        $oldEmail = $user->email;
-
-        $user->email = $request->string('email')->value();
-        $user->email_verified_at = null;
-        $user->save();
-
-        Notification::route('mail', $oldEmail)
-            ->notify(new EmailChangedNotification($user->email));
-
-        $user->sendEmailVerificationNotification();
+        $this->profiles->changeEmail($user, $request->string('email')->value());
 
         return $this->profileResponse(
             $user,
@@ -44,14 +36,9 @@ final class ProfileController
         );
     }
 
-    public function updatePassword(UpdateProfilePasswordRequest $request, User $user): JsonResponse
+    public function updatePassword(UpdatePasswordRequest $request, User $user): JsonResponse
     {
-        $user->password = Hash::make($request->string('password')->value());
-        $user->save();
-
-        // The SendPasswordChangedMail listener informs the user, exactly
-        // like the broker based reset flow and the auth password endpoint.
-        event(new PasswordReset($user));
+        $this->profiles->changePassword($user, $request->string('password')->value());
 
         return $this->profileResponse($user, 'Ihr Passwort wurde aktualisiert.');
     }

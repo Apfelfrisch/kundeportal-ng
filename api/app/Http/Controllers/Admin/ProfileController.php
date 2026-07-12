@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\UpdateAdminProfileEmailRequest;
-use App\Http\Requests\Customer\UpdateProfilePasswordRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Models\User;
-use App\Notifications\EmailChangedNotification;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 
 /**
  * Admin profile (old Company\ProfileController). Same behaviour as the
@@ -20,8 +17,12 @@ use Illuminate\Support\Facades\Notification;
  * middleware: after an email change the old admin area stayed usable while
  * the new address was still unverified, so the admin variant must too.
  */
-final class ProfileController
+final readonly class ProfileController
 {
+    public function __construct(
+        private ProfileService $profiles,
+    ) {}
+
     public function show(Request $request): JsonResponse
     {
         return $this->profileResponse($this->admin($request));
@@ -31,16 +32,7 @@ final class ProfileController
     {
         $admin = $this->admin($request);
 
-        $oldEmail = $admin->email;
-
-        $admin->email = $request->string('email')->value();
-        $admin->email_verified_at = null;
-        $admin->save();
-
-        Notification::route('mail', $oldEmail)
-            ->notify(new EmailChangedNotification($admin->email));
-
-        $admin->sendEmailVerificationNotification();
+        $this->profiles->changeEmail($admin, $request->string('email')->value());
 
         return $this->profileResponse(
             $admin,
@@ -48,16 +40,11 @@ final class ProfileController
         );
     }
 
-    public function updatePassword(UpdateProfilePasswordRequest $request): JsonResponse
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
     {
         $admin = $this->admin($request);
 
-        $admin->password = Hash::make($request->string('password')->value());
-        $admin->save();
-
-        // The SendPasswordChangedMail listener informs the admin, exactly
-        // like the customer profile endpoint.
-        event(new PasswordReset($admin));
+        $this->profiles->changePassword($admin, $request->string('password')->value());
 
         return $this->profileResponse($admin, 'Ihr Passwort wurde aktualisiert.');
     }

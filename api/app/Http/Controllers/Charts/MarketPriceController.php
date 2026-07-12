@@ -10,6 +10,7 @@ use App\Integrations\CustomerDataApi\Exceptions\CustomerDataApiException;
 use App\Models\User;
 use App\Services\ContractService;
 use App\Services\MarketPriceService;
+use App\Support\TenantConfig;
 use Illuminate\Http\Request;
 use Saloon\Exceptions\Request\FatalRequestException;
 
@@ -24,6 +25,7 @@ final class MarketPriceController
     public function __construct(
         private readonly MarketPriceService $marketPriceService,
         private readonly ContractService $contractService,
+        private readonly TenantConfig $tenant,
     ) {}
 
     public function __invoke(Request $request, User $user): MarketPriceDayResource
@@ -55,7 +57,7 @@ final class MarketPriceController
         }
 
         foreach ($contracts as $contract) {
-            if (! $contract->isDynamic()) {
+            if (! $contract->isDynamicFor($this->tenant)) {
                 continue;
             }
 

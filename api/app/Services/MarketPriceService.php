@@ -20,7 +20,12 @@ final class MarketPriceService
      */
     public function day(?CarbonImmutable $date = null): array
     {
-        $center = $date ?? $this->defaultCenter();
+        $latestPriceStart = $this->latestPriceStart();
+
+        // Standard-Zentrum: der Tag VOR dem letzten Preistag, damit das
+        // Fenster Zentrum ± 1 vollständig abgedeckt ist. Mit Day-Ahead-Daten
+        // (letzter Preistag = morgen) ist das Zentrum genau heute.
+        $center = $date ?? $latestPriceStart?->subDay() ?? CarbonImmutable::today();
 
         $prices = MarketPrice::query()
             ->whereBetween('starts_at', [
@@ -39,32 +44,21 @@ final class MarketPriceService
         return [
             'date' => $center,
             'prices' => array_values($prices),
-            'nextDate' => $nextCenter->addDay()->startOfDay() <= $this->latestPriceDate()
+            'nextDate' => $nextCenter->addDay()->startOfDay() <= ($latestPriceStart ?? CarbonImmutable::today())
                 ? $nextCenter
                 : null,
         ];
     }
 
     /**
-     * Standard-Zentrum: der Tag VOR dem letzten Preistag, damit das Fenster
-     * Zentrum ± 1 vollständig abgedeckt ist. Mit Day-Ahead-Daten (letzter
-     * Preistag = morgen) ist das Zentrum genau heute.
+     * Start of the latest known price; null while no prices are stored yet.
      */
-    private function defaultCenter(): CarbonImmutable
-    {
-        $latest = MarketPrice::query()->max('starts_at');
-
-        return is_string($latest) && $latest !== ''
-            ? CarbonImmutable::parse($latest)->subDay()
-            : CarbonImmutable::today();
-    }
-
-    private function latestPriceDate(): CarbonImmutable
+    private function latestPriceStart(): ?CarbonImmutable
     {
         $latest = MarketPrice::query()->max('starts_at');
 
         return is_string($latest) && $latest !== ''
             ? CarbonImmutable::parse($latest)
-            : CarbonImmutable::today();
+            : null;
     }
 }

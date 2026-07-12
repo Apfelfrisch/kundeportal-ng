@@ -9,6 +9,8 @@ use App\Notifications\VerifyEmailNotification;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,6 +80,23 @@ final class User extends Authenticatable implements MustVerifyEmail
                 ->map(static fn (ContractToUser $assignment): int => $assignment->contract_number)
                 ->all(),
         );
+    }
+
+    /**
+     * Contains-search on name and/or email, shared by the admin listings.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function searchNameEmail(Builder $query, ?string $name, ?string $email): void
+    {
+        if ($name !== null) {
+            $query->where('name', 'like', "%{$name}%");
+        }
+
+        if ($email !== null) {
+            $query->where('email', 'like', "%{$email}%");
+        }
     }
 
     public function isAdministrator(): bool

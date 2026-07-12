@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ChangeRequestType;
 use App\Http\Controllers\Customer\ChangeRequestController;
 use App\Http\Controllers\Customer\ContractController;
 use App\Http\Controllers\Customer\ContractFileController;
@@ -45,16 +46,7 @@ Route::prefix('customers/{user}')
         // so it is excluded from the route constraint (404).
         Route::post('contracts/{contractNumber}/change-requests/{type}', [ChangeRequestController::class, 'store'])
             ->whereNumber('contractNumber')
-            ->whereIn('type', [
-                'bank',
-                'billing-address',
-                'delivery-address',
-                'contact-data',
-                'installment',
-                'meter-count',
-                'termination',
-                'revocation',
-            ])
+            ->whereIn('type', ChangeRequestType::formTypeValues())
             ->name('customer.change-requests.store');
 
         Route::get('postfach', [MailboxController::class, 'index'])

@@ -88,11 +88,6 @@ final readonly class Payload
         return $value === null ? null : $this->toFloat($key, $value);
     }
 
-    public function bool(string $key): bool
-    {
-        return $this->toBool($key, $this->requireValue($key));
-    }
-
     /**
      * Loose boolean with PHP `(bool)` cast semantics, null counts as false.
      * Mirrors the old `(boolean) $meter['smart_meter']` handling.
@@ -237,23 +232,6 @@ final readonly class Payload
         }
 
         throw InvalidApiPayloadException::wrongType($this->qualify($key), 'float', $value);
-    }
-
-    private function toBool(string $key, mixed $value): bool
-    {
-        if (is_bool($value)) {
-            return $value;
-        }
-
-        if ($value === 0 || $value === '0') {
-            return false;
-        }
-
-        if ($value === 1 || $value === '1') {
-            return true;
-        }
-
-        throw InvalidApiPayloadException::wrongType($this->qualify($key), 'bool', $value);
     }
 
     private function toDate(string $key, mixed $value): CarbonImmutable

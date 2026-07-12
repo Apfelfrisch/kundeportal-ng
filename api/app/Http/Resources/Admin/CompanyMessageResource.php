@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
+use App\Http\Resources\MailboxFileResource;
 use App\Models\CompanyMessage;
 use App\Models\CompanyUploadedFile;
 use Illuminate\Http\Request;
@@ -40,11 +41,7 @@ final class CompanyMessageResource extends JsonResource
                 'email' => $recipient->email,
             ],
             'files' => $this->message->uploadedFiles
-                ->map(static fn (CompanyUploadedFile $file): array => [
-                    'id' => $file->id,
-                    'name' => $file->name,
-                    'mime_type' => $file->mime_type,
-                ])
+                ->map(static fn (CompanyUploadedFile $file): MailboxFileResource => new MailboxFileResource($file))
                 ->values()
                 ->all(),
         ];

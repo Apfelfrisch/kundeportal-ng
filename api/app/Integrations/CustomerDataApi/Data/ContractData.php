@@ -6,6 +6,7 @@ namespace App\Integrations\CustomerDataApi\Data;
 
 use App\Domain\Pricing\PriceComponentCollection;
 use App\Integrations\Support\Payload;
+use App\Support\TenantConfig;
 use Carbon\CarbonImmutable;
 
 /**
@@ -157,6 +158,15 @@ final readonly class ContractData
     public function isDynamic(): bool
     {
         return $this->priceType === 'dynamic';
+    }
+
+    /**
+     * Old Contract::isDynamic(): the KVS price type AND the tenant's
+     * dynamic-electric-prices feature flag.
+     */
+    public function isDynamicFor(TenantConfig $tenant): bool
+    {
+        return $this->isDynamic() && $tenant->dynamicElectricPrices;
     }
 
     /**

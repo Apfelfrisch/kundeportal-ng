@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Enums\MailLogType;
 use App\Models\User;
 use App\Notifications\Concerns\BuildsTenantMail;
+use App\Support\SpaUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -29,7 +30,7 @@ final class ChangeDataSubmittedNotification extends Notification implements Shou
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = rtrim(config()->string('app.frontend_url'), '/').'/intern/tickets';
+        $url = SpaUrl::to('/intern/tickets');
 
         return $this->tenantMail(MailLogType::ChangeData, 'Neue Änderungsmeldung: '.$this->changeType)
             ->markdown('mail.change-data-submitted', [

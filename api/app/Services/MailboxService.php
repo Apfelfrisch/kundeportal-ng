@@ -120,13 +120,7 @@ final readonly class MailboxService
     {
         $file = CustomerUploadedFile::query()->find($fileId);
 
-        if ($file === null) {
-            throw new NotFoundHttpException(self::FILE_NOT_FOUND_MESSAGE);
-        }
-
-        if ($file->customer_user_id !== $customer->id) {
-            throw new AccessDeniedHttpException(self::FILE_FORBIDDEN_MESSAGE);
-        }
+        $this->assertOwnedFile($file, $customer);
 
         return $file;
     }
@@ -139,6 +133,19 @@ final readonly class MailboxService
     {
         $file = CompanyUploadedFile::query()->find($fileId);
 
+        $this->assertOwnedFile($file, $customer);
+
+        return $file;
+    }
+
+    /**
+     * @phpstan-assert !null $file
+     *
+     * @throws NotFoundHttpException when no such file exists
+     * @throws AccessDeniedHttpException when the file belongs to another customer
+     */
+    private function assertOwnedFile(CompanyUploadedFile|CustomerUploadedFile|null $file, User $customer): void
+    {
         if ($file === null) {
             throw new NotFoundHttpException(self::FILE_NOT_FOUND_MESSAGE);
         }
@@ -146,8 +153,6 @@ final readonly class MailboxService
         if ($file->customer_user_id !== $customer->id) {
             throw new AccessDeniedHttpException(self::FILE_FORBIDDEN_MESSAGE);
         }
-
-        return $file;
     }
 
     /**

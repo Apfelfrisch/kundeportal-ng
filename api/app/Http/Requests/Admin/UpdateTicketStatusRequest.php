@@ -21,16 +21,12 @@ final class UpdateTicketStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', Rule::in(['open', 'in_process', 'processed'])],
+            'status' => ['required', 'string', Rule::in(CustomerMessageStatus::apiStatuses())],
         ];
     }
 
     public function status(): CustomerMessageStatus
     {
-        return match ($this->string('status')->value()) {
-            'open' => CustomerMessageStatus::UnProcessed,
-            'in_process' => CustomerMessageStatus::InProcess,
-            default => CustomerMessageStatus::Processed,
-        };
+        return CustomerMessageStatus::fromApiStatus($this->string('status')->value());
     }
 }

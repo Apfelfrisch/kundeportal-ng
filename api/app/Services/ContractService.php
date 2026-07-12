@@ -62,11 +62,22 @@ final readonly class ContractService
      */
     public function findForUser(User $actingUser, User $customer, int $contractNumber): ContractData
     {
+        $this->ensureUserCanAccess($actingUser, $customer, $contractNumber);
+
+        return $this->find($contractNumber);
+    }
+
+    /**
+     * The access check of {@see findForUser()} without the KVS fetch, for
+     * callers that do not need the contract data itself.
+     *
+     * @throws AccessDeniedHttpException when the target customer has no confirmed assignment and the acting user is no administrator
+     */
+    public function ensureUserCanAccess(User $actingUser, User $customer, int $contractNumber): void
+    {
         if (! $actingUser->isAdministrator() && ! $this->hasConfirmedAssignment($customer, $contractNumber)) {
             throw new AccessDeniedHttpException('Sie haben keinen Zugriff auf diesen Vertrag.');
         }
-
-        return $this->find($contractNumber);
     }
 
     /**
@@ -136,15 +147,7 @@ final readonly class ContractService
      */
     private function adminPageFromLocalUserSearch(?string $name, ?string $email): ContractPageData
     {
-        $userQuery = User::query();
-
-        if ($name !== null) {
-            $userQuery->where('name', 'like', "%{$name}%");
-        }
-
-        if ($email !== null) {
-            $userQuery->where('email', 'like', "%{$email}%");
-        }
+        $userQuery = User::query()->searchNameEmail($name, $email);
 
         $contractNumbers = [];
 

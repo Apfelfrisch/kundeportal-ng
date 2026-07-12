@@ -31,7 +31,6 @@ final readonly class TenantConfig
         public bool $dynamicElectricPrices,
         public bool $ediLoadProfiles,
         public array $salesPartners,
-        public ?string $kvsRoot,
     ) {}
 
     public static function fromConfig(): self
@@ -41,9 +40,6 @@ final readonly class TenantConfig
 
         /** @var array<string, mixed> $app */
         $app = $company['app'] ?? [];
-
-        /** @var array<string, mixed> $kvs */
-        $kvs = $company['kvs'] ?? [];
 
         /** @var array<int|string, string> $partners */
         $partners = config()->array('partner');
@@ -67,7 +63,6 @@ final readonly class TenantConfig
         $mail = $company['mail'] ?? [];
 
         $slug = $company['client'] ?? null;
-        $kvsRoot = $kvs['root'] ?? null;
 
         return new self(
             slug: is_string($slug) ? $slug : '',
@@ -80,7 +75,6 @@ final readonly class TenantConfig
             dynamicElectricPrices: (bool) ($app['dynamic-electric-prices'] ?? false),
             ediLoadProfiles: (bool) ($app['edi-load-profiles'] ?? false),
             salesPartners: $partners,
-            kvsRoot: is_string($kvsRoot) ? $kvsRoot : null,
         );
     }
 

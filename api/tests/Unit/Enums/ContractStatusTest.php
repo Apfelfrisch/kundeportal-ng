@@ -48,16 +48,4 @@ final class ContractStatusTest extends TestCase
 
         ContractStatus::fromKvsId(12);
     }
-
-    public function test_values_and_names(): void
-    {
-        $this->assertSame(
-            ['In Bearbeitung', 'In Belieferung', 'In Kündigung', 'Gekündigt', 'Abgelehnt'],
-            ContractStatus::values(),
-        );
-        $this->assertSame(
-            ['IN_APPLICATION', 'IN_DELIVERY', 'IN_TERMINATION', 'TERMINATED', 'REJECTED'],
-            ContractStatus::names(),
-        );
-    }
 }

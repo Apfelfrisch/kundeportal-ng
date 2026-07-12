@@ -32,7 +32,7 @@ final class BilledLoadProfileController
 
         // Confirmed-assignment (or admin) check — the contract data itself
         // is not needed here.
-        $this->contractService->findForUser($actingUser, $user, $contractNumber);
+        $this->contractService->ensureUserCanAccess($actingUser, $user, $contractNumber);
 
         $day = $this->loadProfileService->billedDay($contractNumber, $this->requestedDate($request));
 

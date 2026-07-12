@@ -11,6 +11,7 @@ use App\Models\CustomerMessage;
 use App\Models\User;
 use App\Notifications\ChangeDataSubmittedNotification;
 use App\Rules\ValidIban;
+use App\Support\SpaUrl;
 use App\Support\TenantConfig;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -143,7 +144,7 @@ final readonly class ChangeRequestService
      */
     public function infoText(User $customer): string
     {
-        $goTo = rtrim(config()->string('app.frontend_url'), '/')."/kunde/{$customer->id}/postfach";
+        $goTo = SpaUrl::to("/kunde/{$customer->id}/postfach");
 
         return '<h2>Deine Änderungen wurden übermittelt – Danke!</h2>'
             .'<p>Wir prüfen deine Angaben und melden uns nur bei Rückfragen bei dir.</p>'

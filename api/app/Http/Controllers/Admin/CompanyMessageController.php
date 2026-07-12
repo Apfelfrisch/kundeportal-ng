@@ -10,6 +10,7 @@ use App\Models\CompanyMessage;
 use App\Models\CompanyUploadedFile;
 use App\Models\User;
 use App\Notifications\NewChatMessageReceivedNotification;
+use App\Support\SpaUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -46,15 +47,10 @@ final class CompanyMessageController
         }
 
         if ($request->filled('name') || $request->filled('email')) {
-            $userQuery = User::query();
-
-            if ($request->filled('name')) {
-                $userQuery->where('name', 'like', '%'.$request->string('name')->value().'%');
-            }
-
-            if ($request->filled('email')) {
-                $userQuery->where('email', 'like', '%'.$request->string('email')->value().'%');
-            }
+            $userQuery = User::query()->searchNameEmail(
+                $request->filled('name') ? $request->string('name')->value() : null,
+                $request->filled('email') ? $request->string('email')->value() : null,
+            );
 
             $query->whereIn('customer_user_id', $userQuery->select('id'));
         }
@@ -123,7 +119,7 @@ final class CompanyMessageController
         // Old app: NewCustomerMessage notification; the link points to the
         // customer's SPA mailbox.
         $customer->notify(new NewChatMessageReceivedNotification(
-            rtrim(config()->string('app.frontend_url'), '/')."/kunde/{$customer->id}/postfach",
+            SpaUrl::to("/kunde/{$customer->id}/postfach"),
         ));
 
         $message->load(['user', 'uploadedFiles']);

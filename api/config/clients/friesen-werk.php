@@ -25,10 +25,6 @@ return [
             'href' => 'https://friesen-werk.de',
             'show' => 'friesen-werk.de',
         ],
-        'kvs' => [
-            'root' => env('KVS_APP_URL'),
-            'customer' => '/kunde/show',
-        ],
         'contact' => [
             'website' => 'https://friesen-werk.de',
             'messenger' => [

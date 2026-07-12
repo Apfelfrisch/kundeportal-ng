@@ -40,7 +40,7 @@ final class ContractResource extends JsonResource
         $contract = $this->contract;
 
         // Old Contract::isDynamic(): KVS price type AND the tenant flag.
-        $isDynamic = $contract->isDynamic() && $this->tenant->dynamicElectricPrices;
+        $isDynamic = $contract->isDynamicFor($this->tenant);
 
         $workingPriceCt = $contract->workingPrice === null ? null : $contract->workingPrice * 100;
 

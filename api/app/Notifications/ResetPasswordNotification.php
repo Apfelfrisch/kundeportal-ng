@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Enums\MailLogType;
 use App\Models\User;
 use App\Notifications\Concerns\BuildsTenantMail;
+use App\Support\SpaUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -25,8 +26,7 @@ final class ResetPasswordNotification extends Notification implements ShouldQueu
 
     public function toMail(User $notifiable): MailMessage
     {
-        $url = rtrim(config()->string('app.frontend_url'), '/')
-            .'/passwort-zuruecksetzen'
+        $url = SpaUrl::to('/passwort-zuruecksetzen')
             .'?token='.$this->token
             .'&email='.urlencode($notifiable->getEmailForPasswordReset());
 

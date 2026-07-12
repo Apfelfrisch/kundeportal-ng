@@ -104,32 +104,28 @@ final readonly class LoadProfileService
 
     private function lastBillingDate(int $contractNumber): ?CarbonImmutable
     {
-        try {
-            return $this->staleCache->remember(
-                "load-profiles:last-billing-date:{$contractNumber}",
-                function () use ($contractNumber): ?CarbonImmutable {
-                    $request = new GetLastBillingDateRequest($contractNumber);
-
-                    return $request->createDtoFromResponse($this->connector->send($request));
-                },
-            );
-        } catch (ContractNotFoundException|CustomerDataApiAuthException|CustomerDataApiRequestFailedException|FatalRequestException) {
-            // Old-controller parity: any unsuccessful response falls back to
-            // yesterday; connection failures without a cached date do too.
-            return null;
-        }
+        return $this->lastDate(
+            "load-profiles:last-billing-date:{$contractNumber}",
+            new GetLastBillingDateRequest($contractNumber),
+        );
     }
 
     private function lastReadingDate(int $contractNumber): ?CarbonImmutable
     {
+        return $this->lastDate(
+            "load-profiles:last-reading-date:{$contractNumber}",
+            new GetLastReadingDateRequest($contractNumber),
+        );
+    }
+
+    private function lastDate(
+        string $cacheKey,
+        GetLastBillingDateRequest|GetLastReadingDateRequest $request,
+    ): ?CarbonImmutable {
         try {
             return $this->staleCache->remember(
-                "load-profiles:last-reading-date:{$contractNumber}",
-                function () use ($contractNumber): ?CarbonImmutable {
-                    $request = new GetLastReadingDateRequest($contractNumber);
-
-                    return $request->createDtoFromResponse($this->connector->send($request));
-                },
+                $cacheKey,
+                fn (): ?CarbonImmutable => $request->createDtoFromResponse($this->connector->send($request)),
             );
         } catch (ContractNotFoundException|CustomerDataApiAuthException|CustomerDataApiRequestFailedException|FatalRequestException) {
             // Old-controller parity: any unsuccessful response falls back to

@@ -98,12 +98,4 @@ final readonly class MeterPointData
 
         return $meterCounts;
     }
-
-    /**
-     * Old MeterPoint::meterCount(): the most recent reading.
-     */
-    public function latestMeterCount(): ?MeterCountData
-    {
-        return $this->meterCountsByReadingDateDesc()[0] ?? null;
-    }
 }

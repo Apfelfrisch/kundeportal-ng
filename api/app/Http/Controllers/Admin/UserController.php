@@ -41,13 +41,10 @@ final readonly class UserController
             $query->where('id', $request->integer('id'));
         }
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%'.$request->string('name')->value().'%');
-        }
-
-        if ($request->filled('email')) {
-            $query->where('email', 'like', '%'.$request->string('email')->value().'%');
-        }
+        $query->searchNameEmail(
+            $request->filled('name') ? $request->string('name')->value() : null,
+            $request->filled('email') ? $request->string('email')->value() : null,
+        );
 
         if ($request->filled('verified')) {
             $request->string('verified')->value() === 'verified'

@@ -26,7 +26,7 @@ final class TicketController
     {
         $request->validate([
             'page' => ['nullable', 'integer', 'min:1'],
-            'status' => ['nullable', 'in:open,in_process,processed'],
+            'status' => ['nullable', 'in:'.implode(',', CustomerMessageStatus::apiStatuses())],
             'name' => ['nullable', 'string'],
             'email' => ['nullable', 'string'],
             'contract_number' => ['nullable', 'string'],
@@ -38,7 +38,7 @@ final class TicketController
             ->with(['user', 'caseWorker']);
 
         if ($request->filled('status')) {
-            $query->where('status', $this->statusFromFilter($request->string('status')->value()));
+            $query->where('status', CustomerMessageStatus::fromApiStatus($request->string('status')->value()));
         }
 
         if ($request->filled('contract_number')) {
@@ -50,15 +50,10 @@ final class TicketController
         }
 
         if ($request->filled('name') || $request->filled('email')) {
-            $userQuery = User::query();
-
-            if ($request->filled('name')) {
-                $userQuery->where('name', 'like', '%'.$request->string('name')->value().'%');
-            }
-
-            if ($request->filled('email')) {
-                $userQuery->where('email', 'like', '%'.$request->string('email')->value().'%');
-            }
+            $userQuery = User::query()->searchNameEmail(
+                $request->filled('name') ? $request->string('name')->value() : null,
+                $request->filled('email') ? $request->string('email')->value() : null,
+            );
 
             $query->whereIn('customer_user_id', $userQuery->select('id'));
         }
@@ -96,14 +91,5 @@ final class TicketController
         return response()->json([
             'data' => new TicketResource($customerMessage),
         ]);
-    }
-
-    private function statusFromFilter(string $filter): CustomerMessageStatus
-    {
-        return match ($filter) {
-            'open' => CustomerMessageStatus::UnProcessed,
-            'in_process' => CustomerMessageStatus::InProcess,
-            default => CustomerMessageStatus::Processed,
-        };
     }
 }
