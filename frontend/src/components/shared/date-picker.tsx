@@ -11,23 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '#/components/ui/popover'
-import { formatDate } from '#/lib/format'
+import { formatDate, parseIsoDate, toIsoDate } from '#/lib/format'
 import { cn } from '#/lib/utils'
-
-/** `yyyy-mm-dd` als lokales Datum (– `new Date(string)` wäre UTC-Mitternacht). */
-function parseIsoDate(value: string): Date {
-  return new Date(
-    Number(value.slice(0, 4)),
-    Number(value.slice(5, 7)) - 1,
-    Number(value.slice(8, 10)),
-  )
-}
-
-/** Lokales Datum → `yyyy-mm-dd` (toISOString würde in UTC kippen). */
-function toIsoDate(date: Date): string {
-  const pad = (part: number) => String(part).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
 
 const GERMAN_DATE_PATTERN = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/
 
@@ -61,32 +46,28 @@ interface CalendarPanelProps {
 /** Gemeinsamer Popover-Kalender beider Varianten (deutsch, Monat/Jahr-Dropdowns). */
 function CalendarPanel({ value, min, max, onSelect }: CalendarPanelProps) {
   const selected = value === undefined ? undefined : parseIsoDate(value)
+  const minDate = min === undefined ? undefined : parseIsoDate(min)
+  const maxDate = max === undefined ? undefined : parseIsoDate(max)
 
   // Tage außerhalb von min/max sperren (Array = ODER-Verknüpfung der Matcher).
   const disabledDays = [
-    ...(min !== undefined ? [{ before: parseIsoDate(min) }] : []),
-    ...(max !== undefined ? [{ after: parseIsoDate(max) }] : []),
+    ...(minDate !== undefined ? [{ before: minDate }] : []),
+    ...(maxDate !== undefined ? [{ after: maxDate }] : []),
   ]
 
   // Navigierbarer Bereich der Monat/Jahr-Dropdowns: ohne explizite Grenzen
   // endet react-day-picker im aktuellen Jahr – künftige Termine (z. B.
   // Kündigungsdatum) wären sonst unerreichbar.
-  const startMonth = min === undefined ? undefined : parseIsoDate(min)
-  const endMonth =
-    max === undefined
-      ? new Date(new Date().getFullYear() + 10, 11)
-      : parseIsoDate(max)
+  const endMonth = maxDate ?? new Date(new Date().getFullYear() + 10, 11)
 
   return (
     <Calendar
       mode="single"
       locale={de}
       selected={selected}
-      defaultMonth={
-        selected ?? (min === undefined ? undefined : parseIsoDate(min))
-      }
+      defaultMonth={selected ?? minDate}
       captionLayout="dropdown"
-      startMonth={startMonth}
+      startMonth={minDate}
       endMonth={endMonth}
       disabled={disabledDays.length > 0 ? disabledDays : undefined}
       onSelect={(day) => {
@@ -98,10 +79,7 @@ function CalendarPanel({ value, min, max, onSelect }: CalendarPanelProps) {
   )
 }
 
-interface DatePickerProps extends Omit<
-  ComponentProps<typeof Button>,
-  'value' | 'onChange' | 'children'
-> {
+interface DatePickerProps {
   /** Ausgewählter Tag als `yyyy-mm-dd`; `undefined` = noch keine Auswahl. */
   value: string | undefined
   onChange: (date: string) => void
@@ -113,6 +91,7 @@ interface DatePickerProps extends Omit<
   min?: string
   /** Spätester wählbarer Tag als `yyyy-mm-dd`. */
   max?: string
+  className?: string
 }
 
 /**
@@ -129,7 +108,6 @@ export function DatePicker({
   min,
   max,
   className,
-  ...buttonProps
 }: DatePickerProps) {
   const [open, setOpen] = useState(false)
   const display = value === undefined ? undefined : formatDate(value)
@@ -140,7 +118,6 @@ export function DatePicker({
         <Button
           variant="outline"
           size="sm"
-          {...buttonProps}
           className={cn(
             'h-8 font-normal',
             display === undefined && 'text-muted-foreground',
@@ -200,9 +177,7 @@ export function DateInput({
   ...inputProps
 }: DateInputProps) {
   const [open, setOpen] = useState(false)
-  const [text, setText] = useState(
-    value === undefined ? '' : formatDate(value),
-  )
+  const [text, setText] = useState(value === undefined ? '' : formatDate(value))
 
   // Externe Wertänderungen (Kalender-Auswahl, form.reset) in den Text
   // spiegeln, ohne die laufende Tastatureingabe zu überschreiben: `committed`

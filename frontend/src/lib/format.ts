@@ -51,6 +51,21 @@ export function formatNumber(value: number): string {
   return kwhFormat.format(value)
 }
 
+/** `yyyy-mm-dd` als lokales Datum (– `new Date(string)` wäre UTC-Mitternacht). */
+export function parseIsoDate(value: string): Date {
+  return new Date(
+    Number(value.slice(0, 4)),
+    Number(value.slice(5, 7)) - 1,
+    Number(value.slice(8, 10)),
+  )
+}
+
+/** Lokales Datum → `yyyy-mm-dd` (toISOString würde in UTC kippen). */
+export function toIsoDate(date: Date): string {
+  const pad = (part: number) => String(part).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
 /** ISO-Datum/Date → `"dd.MM.yyyy"` */
 export function formatDate(value: string | number | Date): string {
   return dateFormat.format(toDate(value))

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { installmentRange, isSingleTariffMeter } from '#/lib/contracts'
-import { formatDate, formatEuro } from '#/lib/format'
+import { formatDate, formatEuro, toIsoDate } from '#/lib/format'
 import type { Contract } from '#/types/api'
 
 /**
@@ -101,10 +101,7 @@ const integerString = (message: string) =>
   z.string().refine((value) => value === '' || /^\d+$/.test(value), message)
 
 function todayIso(): string {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${now.getFullYear()}-${month}-${day}`
+  return toIsoDate(new Date())
 }
 
 /* ------------------------------------------------------------------ */
