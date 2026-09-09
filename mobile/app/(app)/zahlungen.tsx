@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { Landmark, Pencil } from 'lucide-react-native'
+import { ChevronRight, Landmark } from 'lucide-react-native'
 import { Pressable, StyleSheet, View } from 'react-native'
 
 import type { Contract } from '@/api/types'
@@ -26,24 +26,21 @@ function Payment({ contract }: { contract: Contract }) {
   return (
     <>
       <Card gap={0} style={styles.kvCard}>
-        <View style={[styles.bankHead, { borderBottomColor: theme.divider }]}>
-          <View style={[styles.icon, { backgroundColor: theme.iconBg, borderRadius: theme.radius }]}>
-            <Landmark size={22} color={theme.accent} strokeWidth={1.75} />
+        <Pressable
+          onPress={() => router.push('/(app)/bankverbindung-aendern')}
+          accessibilityRole="button"
+          accessibilityLabel="Bankverbindung ändern"
+          style={({ pressed }) => [styles.bankHead, { borderBottomColor: theme.divider }, pressed && { backgroundColor: theme.iconBg }]}
+        >
+          <View style={styles.icon}>
+            <Landmark size={22} color={theme.muted} strokeWidth={1.75} />
           </View>
           <View style={styles.bankText}>
             <Txt variant="strong">{bank.sepa ? 'SEPA-Lastschrift' : 'Überweisung'}</Txt>
             <Txt variant="muted">{bank.sepa ? 'Wird zum Fälligkeitstermin eingezogen' : 'Du überweist den Abschlag selbst'}</Txt>
           </View>
-          <Pressable
-            onPress={() => router.push('/(app)/bankverbindung-aendern')}
-            accessibilityRole="button"
-            accessibilityLabel="Bankverbindung ändern"
-            hitSlop={8}
-            style={({ pressed }) => [styles.edit, { backgroundColor: theme.iconBg, opacity: pressed ? 0.6 : 1 }]}
-          >
-            <Pencil size={16} color={theme.fg} strokeWidth={2} />
-          </Pressable>
-        </View>
+          <ChevronRight size={20} color={theme.faint} />
+        </Pressable>
         <KeyValue label="Kontoinhaber" value={bank.account_owner ?? '–'} />
         <KeyValue label="IBAN" value={bank.iban ? maskIban(bank.iban) : '–'} />
         <KeyValue label="Bank" value={bank.bank ?? '–'} last />
@@ -53,6 +50,7 @@ function Payment({ contract }: { contract: Contract }) {
           label="Monatlicher Abschlag"
           value={installment?.amount_cents == null ? '–' : formatCents(installment.amount_cents)}
           onPress={installment?.amount_cents != null && installment.amount_cents > 0 ? () => router.push('/(app)/abschlag-aendern') : undefined}
+          first
         />
         <KeyValue label="Nächste Fälligkeit" value={installment?.next_payment ? formatDate(installment.next_payment) : '–'} last />
       </Card>
@@ -85,10 +83,19 @@ function Payment({ contract }: { contract: Contract }) {
 
 const styles = StyleSheet.create({
   kvCard: { paddingVertical: 4 },
-  bankHead: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
-  icon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  bankHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginTop: -4,
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  icon: { width: 28, alignItems: 'center', justifyContent: 'center' },
   bankText: { flex: 1, gap: 2 },
-  edit: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   history: { gap: 6 },
   historyLabel: { paddingHorizontal: 4 },
 })

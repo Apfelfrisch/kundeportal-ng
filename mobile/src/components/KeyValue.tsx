@@ -7,6 +7,8 @@ import { useTheme } from '@/theme'
 interface KeyValueProps {
   label: string
   value: string | Array<string>
+  /** Erste/letzte Zeile der Karte: die Hervorhebung reicht dann bis an den Kartenrand. */
+  first?: boolean
   last?: boolean
   /** Kompakte Zeile der Preisaufschlüsselung. */
   compact?: boolean
@@ -14,8 +16,11 @@ interface KeyValueProps {
   onPress?: () => void
 }
 
+/** Vertikaler Innenabstand der Karten, in denen KeyValue-Zeilen liegen. */
+const CARD_PADDING_Y = 4
+
 /** Beschriftung links, Wert rechtsbündig – Zeile einer Detailkarte. */
-export function KeyValue({ label, value, last = false, compact = false, onPress }: KeyValueProps) {
+export function KeyValue({ label, value, first = false, last = false, compact = false, onPress }: KeyValueProps) {
   const theme = useTheme()
   const lines = Array.isArray(value) ? value : [value]
 
@@ -48,12 +53,20 @@ export function KeyValue({ label, value, last = false, compact = false, onPress 
 
   if (onPress === undefined) return <View style={rowStyle}>{content}</View>
 
+  const padding = compact ? 9 : 12
+  const edges = {
+    marginTop: first ? -CARD_PADDING_Y : 0,
+    paddingTop: padding + (first ? CARD_PADDING_Y : 0),
+    marginBottom: last ? -CARD_PADDING_Y : 0,
+    paddingBottom: padding + (last ? CARD_PADDING_Y : 0),
+  }
+
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${lines.join(', ')}`}
-      style={({ pressed }) => [rowStyle, styles.pressable, pressed && { backgroundColor: theme.iconBg }]}
+      style={({ pressed }) => [rowStyle, styles.pressable, edges, pressed && { backgroundColor: theme.iconBg }]}
     >
       {content}
     </Pressable>

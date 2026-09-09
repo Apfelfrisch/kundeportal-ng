@@ -25,6 +25,8 @@ export function Card({ children, soft = false, padding = 16, gap = 12, style }: 
           borderColor: theme.border,
           padding,
           gap,
+          // Gedrückte Zeilen bleiben innerhalb der runden Ecken.
+          overflow: 'hidden',
         },
         style,
       ]}
