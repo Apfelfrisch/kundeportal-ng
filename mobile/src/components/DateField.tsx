@@ -1,6 +1,6 @@
 import { CalendarDays } from 'lucide-react-native'
-import { useState } from 'react'
-import { Modal, Pressable, StyleSheet, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, Modal, PanResponder, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/Button'
@@ -18,16 +18,48 @@ interface DateFieldProps {
   error?: string
 }
 
-/** Datumsfeld: öffnet die Monatsansicht der App in einem Bottom Sheet. */
+const DISMISS_DISTANCE = 100
+
+/** Datumsfeld: öffnet die Monatsansicht der App in einem Bottom Sheet, das sich nach unten wegwischen lässt. */
 export function DateField({ label, value, onChange, maximumDate, minimumDate, error }: DateFieldProps) {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const [open, setOpen] = useState(false)
+  const translateY = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (open) translateY.setValue(0)
+  }, [open, translateY])
+
+  function close() {
+    setOpen(false)
+  }
 
   function select(date: Date) {
     onChange(date)
-    setOpen(false)
+    close()
   }
+
+  const pan = useRef(
+    PanResponder.create({
+      // Erst ab einer klaren Abwärtsbewegung übernehmen, damit Tipps auf Tage und
+      // das seitliche Scrollen der Jahresleiste ungestört bleiben.
+      onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 8 && Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.5,
+      onPanResponderMove: (_event, gesture) => {
+        translateY.setValue(Math.max(0, gesture.dy))
+      },
+      onPanResponderRelease: (_event, gesture) => {
+        if (gesture.dy > DISMISS_DISTANCE || gesture.vy > 0.8) {
+          Animated.timing(translateY, { toValue: 600, duration: 180, useNativeDriver: true }).start(() => setOpen(false))
+        } else {
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start()
+        }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start()
+      },
+    }),
+  ).current
 
   return (
     <View style={styles.wrap}>
@@ -54,19 +86,27 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
           {error}
         </Txt>
       ) : null}
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)} accessibilityLabel="Schließen" />
-        <View
+      <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
+        <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Schließen" />
+        <Animated.View
+          {...pan.panHandlers}
           style={[
             styles.sheet,
-            { backgroundColor: theme.card, borderColor: theme.border, paddingBottom: insets.bottom + 16, borderTopLeftRadius: theme.radius * 2, borderTopRightRadius: theme.radius * 2 },
+            {
+              backgroundColor: theme.card,
+              borderColor: theme.border,
+              paddingBottom: insets.bottom + 16,
+              borderTopLeftRadius: theme.radius * 2,
+              borderTopRightRadius: theme.radius * 2,
+              transform: [{ translateY }],
+            },
           ]}
         >
-          <View style={[styles.handle, { backgroundColor: theme.border }]} />
+          <View style={[styles.handle, { backgroundColor: theme.faint }]} />
           <Txt variant="label">{label}</Txt>
           <Calendar value={value} onChange={select} maximumDate={maximumDate} minimumDate={minimumDate} />
-          <Button label="Abbrechen" variant="outline" onPress={() => setOpen(false)} />
-        </View>
+          <Button label="Abbrechen" variant="outline" onPress={close} />
+        </Animated.View>
       </Modal>
     </View>
   )
