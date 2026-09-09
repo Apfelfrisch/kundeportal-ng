@@ -62,7 +62,7 @@ export function useProfile(userId: number) {
 export function useMarketPrices(userId: number, enabled: boolean) {
   return useQuery({
     queryKey: queryKeys.marketPrices(userId),
-    queryFn: async () => api<MarketPriceDay>(`customers/${userId}/market-prices`),
+    queryFn: async () => (await api<ApiResponse<MarketPriceDay>>(`customers/${userId}/market-prices`)).data,
     enabled,
     staleTime: 5 * 60 * 1000,
     retry: false,
