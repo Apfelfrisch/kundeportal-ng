@@ -50,7 +50,7 @@ function Details({ contract }: { contract: Contract }) {
       <Card padding={0} gap={0}>
         <ListRow icon={Truck} label="Umzug melden" onPress={() => router.push('/(app)/umzug-melden')} />
         <ListRow icon={MapPin} label="Rechnungsadresse ändern" onPress={() => router.push('/(app)/rechnungsadresse-aendern')} />
-        <ListRow icon={FileX} label="Vertrag kündigen" onPress={() => router.push('/(app)/vertrag-kuendigen')} last />
+        <ListRow icon={FileX} label="Vertrag kündigen" onPress={() => router.push('/(app)/vertrag-kuendigen')} danger last />
       </Card>
     </>
   )
