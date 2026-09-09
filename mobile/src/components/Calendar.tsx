@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
@@ -5,6 +6,10 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Txt } from '@/components/Txt'
 import { MONTHS, WEEKDAYS, formatMonth, isSameDay, isWithin, monthGrid, shiftMonth, yearRange } from '@/lib/calendar'
 import { useTheme } from '@/theme'
+
+function tick(): void {
+  void Haptics.selectionAsync().catch(() => undefined)
+}
 
 interface CalendarProps {
   value: Date
@@ -48,7 +53,10 @@ export function Calendar({ value, onChange, minimumDate, maximumDate }: Calendar
               <Pressable
                 key={column}
                 disabled={!enabled}
-                onPress={() => onChange(day)}
+                onPress={() => {
+                  tick()
+                  onChange(day)
+                }}
                 accessibilityRole="button"
                 accessibilityState={{ selected, disabled: !enabled }}
                 style={({ pressed }) => [
@@ -77,11 +85,17 @@ export function Calendar({ value, onChange, minimumDate, maximumDate }: Calendar
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
-        <NavButton disabled={!canGoBack || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, -1))} label="Vorheriger Monat">
+        <NavButton disabled={!canGoBack || mode === 'months'} onPress={() => {
+            tick()
+            setView(shiftMonth(view.year, view.month, -1))
+          }} label="Vorheriger Monat">
           <ChevronLeft size={22} color={canGoBack && mode === 'days' ? theme.accent : theme.faint} />
         </NavButton>
         <Pressable
-          onPress={() => setMode((current) => (current === 'days' ? 'months' : 'days'))}
+          onPress={() => {
+            tick()
+            setMode((current) => (current === 'days' ? 'months' : 'days'))
+          }}
           accessibilityRole="button"
           accessibilityLabel={mode === 'days' ? 'Monat und Jahr wählen' : 'Zurück zur Tagesansicht'}
           hitSlop={8}
@@ -90,7 +104,10 @@ export function Calendar({ value, onChange, minimumDate, maximumDate }: Calendar
           <Txt variant="strong">{formatMonth(view.year, view.month)}</Txt>
           <ChevronDown size={18} color={theme.accent} style={mode === 'months' ? styles.flipped : undefined} />
         </Pressable>
-        <NavButton disabled={!canGoForward || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, 1))} label="Nächster Monat">
+        <NavButton disabled={!canGoForward || mode === 'months'} onPress={() => {
+            tick()
+            setView(shiftMonth(view.year, view.month, 1))
+          }} label="Nächster Monat">
           <ChevronRight size={22} color={canGoForward && mode === 'days' ? theme.accent : theme.faint} />
         </NavButton>
       </View>
@@ -149,7 +166,10 @@ function MonthPicker({ year, month, minimumDate, maximumDate, onSelect }: MonthP
           return (
             <Pressable
               key={entry}
-              onPress={() => setSelectedYear(entry)}
+              onPress={() => {
+                tick()
+                setSelectedYear(entry)
+              }}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
               style={[styles.yearPill, { backgroundColor: active ? theme.accent : theme.iconBg }]}
@@ -169,7 +189,10 @@ function MonthPicker({ year, month, minimumDate, maximumDate, onSelect }: MonthP
             <Pressable
               key={label}
               disabled={!enabled}
-              onPress={() => onSelect(selectedYear, index)}
+              onPress={() => {
+                tick()
+                onSelect(selectedYear, index)
+              }}
               accessibilityRole="button"
               accessibilityState={{ selected: active, disabled: !enabled }}
               style={({ pressed }) => [

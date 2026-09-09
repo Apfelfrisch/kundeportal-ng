@@ -12,7 +12,7 @@ import { PriceGauge } from '@/components/PriceGauge'
 import { PriceStrip } from '@/components/PriceStrip'
 import { Txt } from '@/components/Txt'
 import { latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
-import { formatCents, formatCt, formatDate, formatKwh } from '@/lib/format'
+import { formatCents, formatCt, formatDate, formatDateValue, formatKwh } from '@/lib/format'
 import { priceOverview } from '@/lib/prices'
 import { useUser } from '@/providers/AuthProvider'
 import { useTheme } from '@/theme'
@@ -86,18 +86,21 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
   return (
     <Card>
       <View style={styles.rowBetween}>
-        <Txt variant="label" style={styles.flex}>
-          Aktueller Viertelstundenpreis{overview.slotLabel === null ? '' : ` · ${overview.slotLabel}`}
-        </Txt>
+        <Txt variant="label">Strompreis</Txt>
         {overview.rating === 'cheap' ? <Badge label="günstig" tone="ok" /> : null}
         {overview.rating === 'expensive' ? <Badge label="teuer" tone="open" /> : null}
       </View>
       <View style={styles.priceRow}>
         <PriceGauge fraction={overview.fraction} size={52} />
-        <View style={styles.priceValue}>
-          <Txt variant="number">{overview.current === null ? '–' : formatCt(overview.current, 3).replace(' ct', '')}</Txt>
-          <Txt variant="strong" color="muted">
-            ct/kWh
+        <View style={styles.flex}>
+          <View style={styles.priceValue}>
+            <Txt variant="number">{overview.current === null ? '–' : formatCt(overview.current, 3).replace(' ct', '')}</Txt>
+            <Txt variant="strong" color="muted">
+              ct/kWh
+            </Txt>
+          </View>
+          <Txt variant="muted">
+            {overview.slotLabel === null ? 'Für diese Viertelstunde liegt kein Preis vor.' : `${formatDateValue(new Date())}, ${overview.slotLabel}`}
           </Txt>
         </View>
       </View>
