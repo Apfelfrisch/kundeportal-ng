@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router'
-import { Plus } from 'lucide-react-native'
+import { SquarePen } from 'lucide-react-native'
 import { StyleSheet, View } from 'react-native'
 
 import type { Contract, MeterCount } from '@/api/types'
-import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
+import { ListRow } from '@/components/ListRow'
 import { Txt } from '@/components/Txt'
 import { isSingleTariffMeter, latestMeterCount, primaryMeter, primaryMeterPoint } from '@/lib/contracts'
 import { formatDate, formatKwh } from '@/lib/format'
@@ -42,7 +42,9 @@ function MeterReadings({ contract }: { contract: Contract }) {
             : 'Noch kein Zählerstand vorhanden.'}
         </Txt>
       </Card>
-      <Button label="Zählerstand melden" icon={Plus} onPress={() => router.push('/(app)/zaehlerstand-melden')} />
+      <Card padding={0} gap={0}>
+        <ListRow icon={SquarePen} label="Zählerstand melden" onPress={() => router.push('/(app)/zaehlerstand-melden')} last />
+      </Card>
       {history.length > 0 ? (
         <View style={styles.history}>
           <Txt variant="label" style={styles.historyLabel}>
