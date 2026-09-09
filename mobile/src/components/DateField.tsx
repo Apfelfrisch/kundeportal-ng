@@ -1,8 +1,10 @@
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import { CalendarDays } from 'lucide-react-native'
 import { useState } from 'react'
-import { Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { Button } from '@/components/Button'
+import { Calendar } from '@/components/Calendar'
 import { Txt } from '@/components/Txt'
 import { formatDateValue } from '@/lib/format'
 import { useTheme } from '@/theme'
@@ -16,38 +18,29 @@ interface DateFieldProps {
   error?: string
 }
 
-/**
- * Datumsfeld mit dem nativen Kalender: Android öffnet den Systemdialog,
- * iOS klappt den Inline-Kalender unter dem Feld auf.
- */
+/** Datumsfeld: öffnet die Monatsansicht der App in einem Bottom Sheet. */
 export function DateField({ label, value, onChange, maximumDate, minimumDate, error }: DateFieldProps) {
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
   const [open, setOpen] = useState(false)
 
-  function select(_event: unknown, date: Date) {
+  function select(date: Date) {
     onChange(date)
-  }
-
-  function press() {
-    if (Platform.OS === 'android') {
-      DateTimePickerAndroid.open({ value, mode: 'date', maximumDate, minimumDate, onValueChange: select })
-      return
-    }
-    setOpen((current) => !current)
+    setOpen(false)
   }
 
   return (
     <View style={styles.wrap}>
       <Txt variant="muted">{label}</Txt>
       <Pressable
-        onPress={press}
+        onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${formatDateValue(value)}`}
         style={({ pressed }) => [
           styles.field,
           {
             backgroundColor: theme.outlineBg,
-            borderColor: error === undefined ? (open ? theme.accent : theme.outlineBorder) : theme.danger,
+            borderColor: error === undefined ? theme.outlineBorder : theme.danger,
             borderRadius: theme.radius,
             opacity: pressed ? 0.85 : 1,
           },
@@ -61,21 +54,20 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
           {error}
         </Txt>
       ) : null}
-      {Platform.OS === 'ios' && open ? (
-        <View style={[styles.inline, { backgroundColor: theme.card, borderColor: theme.border, borderRadius: theme.radius }]}>
-          <DateTimePicker
-            value={value}
-            mode="date"
-            display="inline"
-            themeVariant="dark"
-            accentColor={theme.accent}
-            locale="de-DE"
-            maximumDate={maximumDate}
-            minimumDate={minimumDate}
-            onValueChange={select}
-          />
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setOpen(false)} accessibilityLabel="Schließen" />
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: theme.card, borderColor: theme.border, paddingBottom: insets.bottom + 16, borderTopLeftRadius: theme.radius * 2, borderTopRightRadius: theme.radius * 2 },
+          ]}
+        >
+          <View style={[styles.handle, { backgroundColor: theme.border }]} />
+          <Txt variant="label">{label}</Txt>
+          <Calendar value={value} onChange={select} maximumDate={maximumDate} minimumDate={minimumDate} />
+          <Button label="Abbrechen" variant="outline" onPress={() => setOpen(false)} />
         </View>
-      ) : null}
+      </Modal>
     </View>
   )
 }
@@ -92,5 +84,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   value: { fontVariant: ['tabular-nums'] },
-  inline: { borderWidth: 1, padding: 8 },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  sheet: { borderWidth: 1, borderBottomWidth: 0, padding: 16, gap: 12 },
+  handle: { width: 36, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 4 },
 })
