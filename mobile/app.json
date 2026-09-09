@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Kundenportal",
+    "slug": "kundenportal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "de.friesenwerk.kundenportal"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1d1d1b",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "de.friesenwerk.kundenportal"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-secure-store"
+    ],
+    "scheme": "kundenportal",
+    "backgroundColor": "#1d1d1b"
+  }
+}

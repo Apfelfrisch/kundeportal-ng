@@ -1,0 +1,76 @@
+import type { MarketPrice } from '@/api/types'
+
+import { hourRange, priceOverview } from './prices'
+
+function quarterHours(day: string, hourly: Array<number>): Array<MarketPrice> {
+  const prices: Array<MarketPrice> = []
+  hourly.forEach((value, hour) => {
+    for (const minute of [0, 15, 30, 45]) {
+      const hh = String(hour).padStart(2, '0')
+      const mm = String(minute).padStart(2, '0')
+      prices.push({
+        starts_at: `${day}T${hh}:${mm}:00`,
+        ends_at: `${day}T${hh}:${String(minute + 15).padStart(2, '0')}:00`,
+        cent_per_kwh: value,
+      })
+    }
+  })
+  return prices
+}
+
+const now = new Date(2026, 8, 9, 14, 20)
+
+describe('priceOverview', () => {
+  it('averages the quarter hours of today per hour and adds the surcharge', () => {
+    const hourly = Array.from({ length: 24 }, (_, hour) => hour)
+    const overview = priceOverview(quarterHours('2026-09-09', hourly), 10, now)
+
+    expect(overview.hourly).toHaveLength(24)
+    expect(overview.hourly[0]).toBe(10)
+    expect(overview.hourly[23]).toBe(33)
+    expect(overview.currentHour).toBe(14)
+    expect(overview.current).toBe(24)
+    expect(overview.cheapestHour).toBe(0)
+    expect(overview.average).toBe(21.5)
+  })
+
+  it('ignores the neighbouring days of the window', () => {
+    const prices = [
+      ...quarterHours('2026-09-08', Array(24).fill(1)),
+      ...quarterHours('2026-09-10', Array(24).fill(99)),
+    ]
+    const overview = priceOverview(prices, 0, now)
+
+    expect(overview.current).toBeNull()
+    expect(overview.average).toBeNull()
+    expect(overview.cheapestHour).toBeNull()
+    expect(overview.rating).toBeNull()
+  })
+
+  it('rates the current hour against the day average', () => {
+    const cheapDay = Array(24).fill(30)
+    cheapDay[14] = 20
+    expect(priceOverview(quarterHours('2026-09-09', cheapDay), 0, now).rating).toBe('cheap')
+
+    const expensiveDay = Array(24).fill(20)
+    expensiveDay[14] = 30
+    expect(priceOverview(quarterHours('2026-09-09', expensiveDay), 0, now).rating).toBe('expensive')
+
+    expect(priceOverview(quarterHours('2026-09-09', Array(24).fill(25)), 0, now).rating).toBeNull()
+  })
+
+  it('handles partial days', () => {
+    const prices = quarterHours('2026-09-09', [5, 4])
+    const overview = priceOverview(prices, 0, now)
+
+    expect(overview.hourly.filter((value) => value !== null)).toHaveLength(2)
+    expect(overview.cheapestHour).toBe(1)
+    expect(overview.current).toBeNull()
+  })
+})
+
+describe('hourRange', () => {
+  it('formats the hour window', () => {
+    expect(hourRange(14)).toBe('14–15 Uhr')
+  })
+})

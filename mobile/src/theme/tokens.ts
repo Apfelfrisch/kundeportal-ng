@@ -1,0 +1,41 @@
+/**
+ * Farbsatz eines Mandanten. Jeder Screen liest ausschließlich diese Tokens –
+ * ein weiterer Mandant bekommt einen eigenen Satz unter `tenants/`, ohne
+ * dass sich die Screens ändern.
+ */
+export interface ThemeTokens {
+  slug: string
+  /** Seitenhintergrund und (leicht abgesetzte) Kopfzeile. */
+  bg: string
+  header: string
+  /** Kartenfläche und Trennlinien. */
+  card: string
+  border: string
+  /** Text: normal, gedämpft, sehr blass (Chevrons). */
+  fg: string
+  muted: string
+  faint: string
+  /** Akzent für Icons, Links, Hervorhebungen – und dessen Kontrastfarbe. */
+  accent: string
+  accentFg: string
+  iconBg: string
+  /** Balken des Preisverlaufs (nicht aktuelle Stunde). */
+  bar: string
+  /** Primäre Aktion. */
+  btnBg: string
+  btnFg: string
+  btnBorder: string
+  btnRadius: number
+  /** Sekundäre Aktion. */
+  outlineBg: string
+  outlineBorder: string
+  outlineFg: string
+  /** Status-Badges. */
+  okBg: string
+  okFg: string
+  openBg: string
+  openFg: string
+  danger: string
+  /** Eckenradius von Karten und Feldern. */
+  radius: number
+}

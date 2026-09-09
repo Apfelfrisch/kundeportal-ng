@@ -4,8 +4,9 @@ Rewrite des Kundenportals als Monorepo:
 
 - **`api/`** — Laravel 12 (PHP 8.4), reine JSON-API. Externe Stammdaten (Verträge, Rechnungen, Zählpunkte, Lastgänge) kommen aus der KVS/Pebs `customer-data-api` und werden über [Saloon](https://docs.saloon.dev)-Connectoren in strikte readonly-DTOs gemappt — keine Fake-Eloquent-Models mehr. Lokale MySQL-DB nur für Auth, Ticket-/Postfach-Nachrichten, Uploads, Mail-Log und Börsenpreise. PHPStan level max, Pint, PHPUnit.
 - **`frontend/`** — TanStack Start (React) SPA mit TanStack Query, shadcn/ui (Tailwind v4) und Recharts. Deutsche UI, mandantenfähiges Theming (`voltaik-check`, `friesen-werk`).
+- **`mobile/`** — Expo-App (React Native, expo-router, TanStack Query) für den Kundenbereich: Startseite je nach Tarif (aktueller Börsenpreis bzw. „Auf einen Blick“), Profil, Rechnungen, Zählerstände inkl. Melden, Zahlungsmethode, Vertrags- und Tarifdetails. Dunkles Design, ein Farbsatz pro Mandant unter `mobile/src/theme/tenants/`.
 
-Auth: Sanctum SPA-Cookie-Modus (stateful, same-origin über Dev-Proxy bzw. nginx in Produktion).
+Auth: Sanctum SPA-Cookie-Modus (stateful, same-origin über Dev-Proxy bzw. nginx in Produktion). Die App tauscht ihre Zugangsdaten über `POST /api/auth/token` gegen einen Bearer-Token (Sanctum Personal Access Token) und widerruft ihn mit `DELETE /api/auth/token`.
 
 ## Entwicklung
 
@@ -18,12 +19,21 @@ make dev     # api :8000, queue, scheduler, frontend :3000 (proxied /api + /sanc
 
 Dienste: MySQL (:3306), Mailpit UI (http://localhost:8025), MinIO Console (http://localhost:9001, Bucket `customer-api` für Vertragsdokumente).
 
+### App
+
+```bash
+make setup-mobile   # npm install in mobile/, .env aus .env.example
+make mobile         # expo start (Expo Go bzw. Dev-Client)
+```
+
+In `mobile/.env` zeigt `EXPO_PUBLIC_API_URL` auf die laufende API — im Simulator/Emulator oder auf dem Gerät die LAN-IP des Rechners statt `localhost`. `EXPO_PUBLIC_CLIENT` wählt den Mandanten-Farbsatz.
+
 ## Qualitäts-Gates
 
 ```bash
 make stan    # PHPStan level max, keine Baseline
 make lint    # Pint --test, tsc --noEmit, eslint
-make test    # PHPUnit + Vitest
+make test    # PHPUnit + Vitest + Jest (mobile)
 ```
 
 ## Deployment
