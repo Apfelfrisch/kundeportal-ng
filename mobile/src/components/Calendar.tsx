@@ -28,45 +28,7 @@ export function Calendar({ value, onChange, minimumDate, maximumDate }: Calendar
   const canGoBack = minimumDate === undefined || new Date(view.year, view.month, 1) > minimumDate
   const canGoForward = maximumDate === undefined || new Date(view.year, view.month + 1, 1) <= maximumDate
 
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.header}>
-        <NavButton disabled={!canGoBack || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, -1))} label="Vorheriger Monat">
-          <ChevronLeft size={22} color={canGoBack && mode === 'days' ? theme.accent : theme.faint} />
-        </NavButton>
-        <Pressable
-          onPress={() => setMode((current) => (current === 'days' ? 'months' : 'days'))}
-          accessibilityRole="button"
-          accessibilityLabel={mode === 'days' ? 'Monat und Jahr wählen' : 'Zurück zur Tagesansicht'}
-          hitSlop={8}
-          style={styles.title}
-        >
-          <Txt variant="strong">{formatMonth(view.year, view.month)}</Txt>
-          <ChevronDown size={18} color={theme.accent} style={mode === 'months' ? styles.flipped : undefined} />
-        </Pressable>
-        <NavButton disabled={!canGoForward || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, 1))} label="Nächster Monat">
-          <ChevronRight size={22} color={canGoForward && mode === 'days' ? theme.accent : theme.faint} />
-        </NavButton>
-      </View>
-      {mode === 'months' ? (
-        <MonthPicker
-          year={view.year}
-          month={view.month}
-          minimumDate={minimumDate}
-          maximumDate={maximumDate}
-          onSelect={(year, month) => {
-            setView({ year, month })
-            setMode('days')
-          }}
-        />
-      ) : (
-        <DayGrid />
-      )}
-    </View>
-  )
-
-  function DayGrid() {
-    return (
+  const dayGrid = (
       <>
       <View style={styles.row}>
         {WEEKDAYS.map((day) => (
@@ -110,8 +72,45 @@ export function Calendar({ value, onChange, minimumDate, maximumDate }: Calendar
         </View>
       ))}
       </>
-    )
-  }
+  )
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.header}>
+        <NavButton disabled={!canGoBack || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, -1))} label="Vorheriger Monat">
+          <ChevronLeft size={22} color={canGoBack && mode === 'days' ? theme.accent : theme.faint} />
+        </NavButton>
+        <Pressable
+          onPress={() => setMode((current) => (current === 'days' ? 'months' : 'days'))}
+          accessibilityRole="button"
+          accessibilityLabel={mode === 'days' ? 'Monat und Jahr wählen' : 'Zurück zur Tagesansicht'}
+          hitSlop={8}
+          style={styles.title}
+        >
+          <Txt variant="strong">{formatMonth(view.year, view.month)}</Txt>
+          <ChevronDown size={18} color={theme.accent} style={mode === 'months' ? styles.flipped : undefined} />
+        </Pressable>
+        <NavButton disabled={!canGoForward || mode === 'months'} onPress={() => setView(shiftMonth(view.year, view.month, 1))} label="Nächster Monat">
+          <ChevronRight size={22} color={canGoForward && mode === 'days' ? theme.accent : theme.faint} />
+        </NavButton>
+      </View>
+      {mode === 'months' ? (
+        <MonthPicker
+          year={view.year}
+          month={view.month}
+          minimumDate={minimumDate}
+          maximumDate={maximumDate}
+          onSelect={(year, month) => {
+            setView({ year, month })
+            setMode('days')
+          }}
+        />
+      ) : (
+        dayGrid
+      )}
+    </View>
+  )
+
 }
 
 interface MonthPickerProps {
