@@ -24,6 +24,7 @@ export default function AppLayout() {
         <Stack.Screen name="zaehlerstand-melden" options={{ title: 'Zählerstand melden', presentation: 'modal' }} />
         <Stack.Screen name="zahlungen" options={{ title: 'Zahlungen' }} />
         <Stack.Screen name="abschlag-aendern" options={{ title: 'Abschlag anpassen', presentation: 'modal' }} />
+        <Stack.Screen name="bankverbindung-aendern" options={{ title: 'Bankverbindung ändern', presentation: 'modal' }} />
         <Stack.Screen name="vertragsdetails" options={{ title: 'Vertragsdetails' }} />
         <Stack.Screen name="tarifdetails" options={{ title: 'Tarifdetails' }} />
         <Stack.Screen name="vertrag-wechseln" options={{ title: 'Vertrag wechseln', presentation: 'modal' }} />

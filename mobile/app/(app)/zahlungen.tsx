@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
-import { Landmark } from 'lucide-react-native'
-import { StyleSheet, View } from 'react-native'
+import { Landmark, Pencil } from 'lucide-react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 import type { Contract } from '@/api/types'
 import { Card } from '@/components/Card'
@@ -34,6 +34,15 @@ function Payment({ contract }: { contract: Contract }) {
             <Txt variant="strong">{bank.sepa ? 'SEPA-Lastschrift' : 'Überweisung'}</Txt>
             <Txt variant="muted">{bank.sepa ? 'Wird zum Fälligkeitstermin eingezogen' : 'Du überweist den Abschlag selbst'}</Txt>
           </View>
+          <Pressable
+            onPress={() => router.push('/(app)/bankverbindung-aendern')}
+            accessibilityRole="button"
+            accessibilityLabel="Bankverbindung ändern"
+            hitSlop={8}
+            style={({ pressed }) => [styles.edit, { backgroundColor: theme.iconBg, opacity: pressed ? 0.6 : 1 }]}
+          >
+            <Pencil size={16} color={theme.fg} strokeWidth={2} />
+          </Pressable>
         </View>
         <KeyValue label="Kontoinhaber" value={bank.account_owner ?? '–'} />
         <KeyValue label="IBAN" value={bank.iban ? maskIban(bank.iban) : '–'} />
@@ -70,9 +79,6 @@ function Payment({ contract }: { contract: Contract }) {
           </Card>
         </View>
       ) : null}
-      <Txt variant="small" style={styles.note}>
-        Eine neue Bankverbindung hinterlegst du im Kundenportal im Browser.
-      </Txt>
     </>
   )
 }
@@ -82,7 +88,7 @@ const styles = StyleSheet.create({
   bankHead: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   icon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   bankText: { flex: 1, gap: 2 },
+  edit: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   history: { gap: 6 },
   historyLabel: { paddingHorizontal: 4 },
-  note: { lineHeight: 18, paddingHorizontal: 4 },
 })

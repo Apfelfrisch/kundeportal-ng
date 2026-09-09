@@ -114,6 +114,29 @@ export function useSubmitInstallment(userId: number, contractNumber: number) {
   })
 }
 
+export interface BankInput {
+  iban: string
+  bank: string
+  bank_account_owner: string
+  sepa: boolean
+  change_all_contracts: boolean
+}
+
+export function useSubmitBank(userId: number, contractNumber: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: BankInput) =>
+      api<ChangeRequestResponse>(`customers/${userId}/contracts/${contractNumber}/change-requests/bank`, {
+        method: 'POST',
+        body: input,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contract(userId, contractNumber) })
+    },
+  })
+}
+
 export function useUpdateEmail(userId: number) {
   const queryClient = useQueryClient()
 
