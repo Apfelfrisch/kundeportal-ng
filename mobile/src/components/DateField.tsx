@@ -79,9 +79,9 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
                 accessibilityRole="button"
                 accessibilityLabel="Schließen"
                 hitSlop={8}
-                style={({ pressed }) => [styles.closeButton, { backgroundColor: pressed ? theme.iconBg : 'transparent' }]}
+                style={({ pressed }) => [styles.closeButton, { backgroundColor: theme.iconBg, opacity: pressed ? 0.6 : 1 }]}
               >
-                <X size={22} color={theme.muted} strokeWidth={2} />
+                <X size={18} color={theme.fg} strokeWidth={2.25} />
               </Pressable>
             </View>
             <Calendar value={value} onChange={select} maximumDate={maximumDate} minimumDate={minimumDate} />
@@ -118,5 +118,5 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-  closeButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, marginRight: -10 },
+  closeButton: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 16 },
 })
