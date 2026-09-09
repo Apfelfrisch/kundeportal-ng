@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AccountSetupController;
+use App\Http\Controllers\Auth\ApiTokenController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ContractConfirmationController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -24,6 +25,15 @@ Route::prefix('auth')->group(function (): void {
 
     Route::get('session', [AuthenticatedSessionController::class, 'show'])
         ->name('session');
+
+    // Mobile app: credentials → bearer token (and revocation of that token).
+    Route::post('token', [ApiTokenController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('token.store');
+
+    Route::delete('token', [ApiTokenController::class, 'destroy'])
+        ->middleware('auth:sanctum')
+        ->name('token.destroy');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->middleware('throttle:6,1')
