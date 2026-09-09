@@ -16,8 +16,8 @@ import { useContractContext } from '@/providers/ContractProvider'
 import { useTheme } from '@/theme'
 
 /**
- * Startseite „Mein Bereich“: Kopf mit Vertrag, darunter je nach Tarif die
- * Preis- oder die Auf-einen-Blick-Karte, dann die Liste der Unterseiten.
+ * Startseite: Vertragsnummer als Titel, darunter je nach Tarif die Preis-
+ * oder die Auf-einen-Blick-Karte, dann die Liste der Unterseiten.
  */
 export default function StartScreen() {
   const user = useUser()
@@ -33,7 +33,7 @@ export default function StartScreen() {
     <View style={[styles.wrap, { backgroundColor: theme.bg }]}>
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Txt variant="muted">Hallo {firstName}</Txt>
-        <Txt variant="title">Mein Bereich</Txt>
+        <Txt variant="title">{contract.data === undefined ? 'Dein Vertrag' : `Vertrag ${contract.data.contract_number}`}</Txt>
         {contract.data !== undefined ? (
           <View style={styles.contractLine}>
             <Txt variant="muted" numberOfLines={1} style={styles.contractText}>

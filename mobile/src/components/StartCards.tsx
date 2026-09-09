@@ -7,6 +7,7 @@ import type { Contract } from '@/api/types'
 import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
+import { PriceGauge } from '@/components/PriceGauge'
 import { PriceStrip } from '@/components/PriceStrip'
 import { Txt } from '@/components/Txt'
 import { latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
@@ -77,29 +78,37 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
 
   const surcharge = prices.data.tariff_costs?.total_ct ?? contract.prices.calculated_dynamic_working_price_ct ?? 0
   const overview = priceOverview(prices.data.prices, surcharge)
+  const cheapest = overview.cheapestHour === null ? null : overview.hourly[overview.cheapestHour]
 
   return (
     <Card>
       <View style={styles.rowBetween}>
-        <Txt variant="label">Aktueller Strompreis · {hourRange(overview.currentHour)}</Txt>
+        <Txt variant="label" style={styles.flex}>
+          Aktueller Viertelstundenpreis{overview.slotLabel === null ? '' : ` · ${overview.slotLabel}`}
+        </Txt>
         {overview.rating === 'cheap' ? <Badge label="günstig" tone="ok" /> : null}
         {overview.rating === 'expensive' ? <Badge label="teuer" tone="open" /> : null}
       </View>
       <View style={styles.priceRow}>
-        <Txt variant="number">{overview.current === null ? '–' : formatCt(overview.current, 1).replace(' ct', '')}</Txt>
-        <Txt variant="strong" color="muted">
-          ct/kWh
-        </Txt>
-        {overview.average !== null ? (
-          <Txt variant="muted" style={styles.average}>
-            Ø heute {formatCt(overview.average, 1)}
+        <PriceGauge fraction={overview.fraction} size={52} />
+        <View style={styles.priceValue}>
+          <Txt variant="number">{overview.current === null ? '–' : formatCt(overview.current, 3).replace(' ct', '')}</Txt>
+          <Txt variant="strong" color="muted">
+            ct/kWh
           </Txt>
-        ) : null}
+        </View>
       </View>
       <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} />
+      {overview.min !== null && overview.max !== null ? (
+        <View style={styles.rowBetween}>
+          <Txt variant="muted">Tagestief {formatCt(overview.min, 2)}</Txt>
+          <Txt variant="muted">Ø {formatCt(overview.average ?? 0, 2)}</Txt>
+          <Txt variant="muted">Tageshoch {formatCt(overview.max, 2)}</Txt>
+        </View>
+      ) : null}
       <Txt variant="muted">
-        {overview.cheapestHour !== null && overview.hourly[overview.cheapestHour] != null
-          ? `Günstigste Stunde ${hourRange(overview.cheapestHour)} · ${formatCt(overview.hourly[overview.cheapestHour] ?? 0, 1)}`
+        {overview.cheapestHour !== null && cheapest != null
+          ? `Günstigste Stunde ${hourRange(overview.cheapestHour)} · ${formatCt(cheapest, 2)}`
           : 'Für heute liegen noch keine Preise vor.'}
       </Txt>
       <Txt variant="small">Börsenpreis plus fester Tarifaufschlag, netto.</Txt>
@@ -112,6 +121,7 @@ const styles = StyleSheet.create({
   stat: { flex: 1, gap: 2 },
   statValue: { fontVariant: ['tabular-nums'] },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  average: { marginLeft: 'auto' },
+  flex: { flex: 1 },
+  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  priceValue: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
 })

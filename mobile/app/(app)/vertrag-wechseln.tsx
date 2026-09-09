@@ -39,9 +39,9 @@ export default function VertragWechselnScreen() {
               accessibilityState={{ selected: active }}
             >
               <View style={styles.text}>
-                <Txt>{entry.tariff ?? 'Stromvertrag'}</Txt>
+                <Txt>Vertrag {entry.contract_number}</Txt>
                 <Txt variant="muted" numberOfLines={1}>
-                  {[`Nr. ${entry.contract_number}`, addressLine(entry.delivery_address), entry.status.label].filter((part) => part).join(' · ')}
+                  {[entry.tariff, addressLine(entry.delivery_address), entry.status.label].filter((part) => part).join(' · ')}
                 </Txt>
               </View>
               {active ? <Check size={20} color={theme.accent} /> : null}
