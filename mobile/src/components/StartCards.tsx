@@ -103,14 +103,9 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
       </View>
       <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} />
       <View style={styles.toggleRow}>
-        <View style={styles.flex}>
-          <Txt variant="strong">Zusätzliche Preisbestandteile</Txt>
-          <Txt variant="small">
-            {withComponents
-              ? `Börsenpreis plus fester Tarifaufschlag von ${formatCt(components, 2)}/kWh, netto.`
-              : 'Reiner Börsenpreis (EPEX Spot), netto.'}
-          </Txt>
-        </View>
+        <Txt variant="strong" style={styles.flex}>
+          Zusätzliche Preisbestandteile
+        </Txt>
         <Switch
           value={withComponents}
           onValueChange={setWithComponents}
