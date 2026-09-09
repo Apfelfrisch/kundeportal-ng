@@ -1,18 +1,19 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { Alert, StyleSheet, Switch, View } from 'react-native'
+import { Alert, StyleSheet, View } from 'react-native'
 
-import { firstApiErrorMessage, isApiError } from '@/api/client'
+import { firstApiErrorMessage } from '@/api/client'
 import { useSubmitBank } from '@/api/queries'
 import type { Contract } from '@/api/types'
 import { Button } from '@/components/Button'
 import { ContractScreen } from '@/components/ContractScreen'
 import { Field } from '@/components/Field'
+import { ToggleRow } from '@/components/ToggleRow'
 import { Txt } from '@/components/Txt'
+import { fieldErrorsFrom } from '@/lib/forms'
 import { groupIban, isValidIban } from '@/lib/iban'
 import { useUser } from '@/providers/AuthProvider'
 import { useContractContext } from '@/providers/ContractProvider'
-import { useTheme } from '@/theme'
 
 export default function BankverbindungAendernScreen() {
   return <ContractScreen>{(contract) => <BankForm contract={contract} />}</ContractScreen>
@@ -21,7 +22,6 @@ export default function BankverbindungAendernScreen() {
 function BankForm({ contract }: { contract: Contract }) {
   const user = useUser()
   const router = useRouter()
-  const theme = useTheme()
   const { contracts } = useContractContext()
   const submit = useSubmitBank(user.id, contract.contract_number)
   const severalContracts = (contracts.data?.length ?? 0) > 1
@@ -55,13 +55,9 @@ function BankForm({ contract }: { contract: Contract }) {
         { text: 'OK', onPress: () => router.back() },
       ])
     } catch (caught) {
-      if (isApiError(caught) && caught.errors !== undefined) {
-        const fieldErrors: Record<string, string> = {}
-        for (const [field, messages] of Object.entries(caught.errors)) fieldErrors[field] = messages[0] ?? ''
-        setErrors(fieldErrors)
-      } else {
-        Alert.alert('Übermittlung fehlgeschlagen', firstApiErrorMessage(caught))
-      }
+      const fieldErrors = fieldErrorsFrom(caught)
+      if (fieldErrors !== null) setErrors(fieldErrors)
+      else Alert.alert('Übermittlung fehlgeschlagen', firstApiErrorMessage(caught))
     }
   }
 
@@ -83,10 +79,9 @@ function BankForm({ contract }: { contract: Contract }) {
         hint="Wir dürfen die Abschläge direkt von diesem Konto einziehen."
         value={sepa}
         onChange={setSepa}
-        theme={theme}
       />
       {severalContracts ? (
-        <ToggleRow label="Für alle Verträge übernehmen" value={allContracts} onChange={setAllContracts} theme={theme} />
+        <ToggleRow label="Für alle Verträge übernehmen" value={allContracts} onChange={setAllContracts} />
       ) : null}
       <Button label="Bankverbindung ändern" onPress={() => void send()} loading={submit.isPending} disabled={!complete} />
       <Txt variant="small" style={styles.note}>
@@ -96,28 +91,7 @@ function BankForm({ contract }: { contract: Contract }) {
   )
 }
 
-function ToggleRow({ label, hint, value, onChange, theme }: { label: string; hint?: string; value: boolean; onChange: (value: boolean) => void; theme: ReturnType<typeof useTheme> }) {
-  return (
-    <View style={styles.toggleRow}>
-      <View style={styles.toggleText}>
-        <Txt variant="strong">{label}</Txt>
-        {hint !== undefined ? <Txt variant="small">{hint}</Txt> : null}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        trackColor={{ false: theme.bar, true: theme.accent }}
-        thumbColor={value ? theme.accentFg : theme.muted}
-        ios_backgroundColor={theme.bar}
-        accessibilityLabel={label}
-      />
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   form: { gap: 16 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  toggleText: { flex: 1, gap: 2 },
   note: { lineHeight: 18 },
 })

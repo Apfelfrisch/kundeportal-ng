@@ -25,6 +25,9 @@ export default function AppLayout() {
         <Stack.Screen name="zahlungen" options={{ title: 'Zahlungen' }} />
         <Stack.Screen name="abschlag-aendern" options={{ title: 'Abschlag anpassen', presentation: 'modal' }} />
         <Stack.Screen name="bankverbindung-aendern" options={{ title: 'Bankverbindung ändern', presentation: 'modal' }} />
+        <Stack.Screen name="umzug-melden" options={{ title: 'Umzug melden', presentation: 'modal' }} />
+        <Stack.Screen name="rechnungsadresse-aendern" options={{ title: 'Rechnungsadresse ändern', presentation: 'modal' }} />
+        <Stack.Screen name="vertrag-kuendigen" options={{ title: 'Vertrag kündigen', presentation: 'modal' }} />
         <Stack.Screen name="vertragsdetails" options={{ title: 'Vertragsdetails' }} />
         <Stack.Screen name="tarifdetails" options={{ title: 'Tarifdetails' }} />
         <Stack.Screen name="vertrag-wechseln" options={{ title: 'Vertrag wechseln', presentation: 'modal' }} />

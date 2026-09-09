@@ -1,9 +1,12 @@
+import { useRouter } from 'expo-router'
+import { FileX, MapPin, Truck } from 'lucide-react-native'
 import { StyleSheet } from 'react-native'
 
 import type { Contract } from '@/api/types'
 import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
 import { KeyValue } from '@/components/KeyValue'
+import { ListRow } from '@/components/ListRow'
 import { Txt } from '@/components/Txt'
 import { addressLines, contactName, primaryMeterPoint } from '@/lib/contracts'
 import { formatDate, formatKwh } from '@/lib/format'
@@ -13,6 +16,7 @@ export default function VertragsdetailsScreen() {
 }
 
 function Details({ contract }: { contract: Contract }) {
+  const router = useRouter()
   const meterPoint = primaryMeterPoint(contract)
   const delivery = addressLines(meterPoint)
   const billing = addressLines(contract.billing_address)
@@ -43,14 +47,15 @@ function Details({ contract }: { contract: Contract }) {
         <KeyValue label="Vertragspartner" value={contactName(contract.billing_contact) || '–'} />
         <KeyValue label="Rechnungsadresse" value={billing.length === 0 ? '–' : billing} last />
       </Card>
-      <Txt variant="small" style={styles.note}>
-        Umzug, Kündigung oder andere Änderungen am Vertrag beantragst du im Kundenportal im Browser.
-      </Txt>
+      <Card padding={0} gap={0}>
+        <ListRow icon={Truck} label="Umzug melden" onPress={() => router.push('/(app)/umzug-melden')} />
+        <ListRow icon={MapPin} label="Rechnungsadresse ändern" onPress={() => router.push('/(app)/rechnungsadresse-aendern')} />
+        <ListRow icon={FileX} label="Vertrag kündigen" onPress={() => router.push('/(app)/vertrag-kuendigen')} last />
+      </Card>
     </>
   )
 }
 
 const styles = StyleSheet.create({
   kvCard: { paddingVertical: 4 },
-  note: { lineHeight: 18, paddingHorizontal: 4 },
 })

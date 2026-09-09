@@ -137,6 +137,24 @@ export function useSubmitBank(userId: number, contractNumber: number) {
   })
 }
 
+/** Formulare der Änderungswünsche, die die App anbietet (Routen-Segment der API). */
+export type ChangeRequestType = 'delivery-address' | 'billing-address' | 'termination'
+
+export function useSubmitChangeRequest(userId: number, contractNumber: number, type: ChangeRequestType) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: Record<string, unknown>) =>
+      api<ChangeRequestResponse>(`customers/${userId}/contracts/${contractNumber}/change-requests/${type}`, {
+        method: 'POST',
+        body: input,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contract(userId, contractNumber) })
+    },
+  })
+}
+
 export function useUpdateEmail(userId: number) {
   const queryClient = useQueryClient()
 
