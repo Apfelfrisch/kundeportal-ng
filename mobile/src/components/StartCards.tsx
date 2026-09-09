@@ -99,13 +99,6 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
         </View>
       </View>
       <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} />
-      {overview.min !== null && overview.max !== null ? (
-        <View style={styles.rowBetween}>
-          <Txt variant="muted">Tagestief {formatCt(overview.min, 2)}</Txt>
-          <Txt variant="muted">Ø {formatCt(overview.average ?? 0, 2)}</Txt>
-          <Txt variant="muted">Tageshoch {formatCt(overview.max, 2)}</Txt>
-        </View>
-      ) : null}
       <Txt variant="muted">
         {overview.cheapestHour !== null && cheapest != null
           ? `Günstigste Stunde ${hourRange(overview.cheapestHour)} · ${formatCt(cheapest, 2)}`
