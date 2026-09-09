@@ -1,15 +1,11 @@
-import * as Haptics from 'expo-haptics'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Txt } from '@/components/Txt'
 import { MONTHS, WEEKDAYS, formatMonth, isSameDay, isWithin, monthGrid, shiftMonth, yearRange } from '@/lib/calendar'
+import { tick } from '@/lib/haptics'
 import { useTheme } from '@/theme'
-
-function tick(): void {
-  void Haptics.selectionAsync().catch(() => undefined)
-}
 
 interface CalendarProps {
   value: Date

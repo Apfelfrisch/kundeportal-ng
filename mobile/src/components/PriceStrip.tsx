@@ -1,10 +1,10 @@
-import * as Haptics from 'expo-haptics'
 import { useRef, useState } from 'react'
 import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
 
 import { useScrollLock } from '@/components/Screen'
 import { Txt } from '@/components/Txt'
 import { formatCt } from '@/lib/format'
+import { tick } from '@/lib/haptics'
 import { hourRange } from '@/lib/prices'
 import { useTheme } from '@/theme'
 
@@ -38,7 +38,7 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
     // Ein kurzes Tick je Balkenwechsel, wie beim Drehen eines Rasters.
     if (hour !== null && hour !== lastHour.current) {
       lastHour.current = hour
-      void Haptics.selectionAsync().catch(() => undefined)
+      tick()
     }
   }
 
