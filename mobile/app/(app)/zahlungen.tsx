@@ -1,7 +1,9 @@
+import { useRouter } from 'expo-router'
 import { Landmark } from 'lucide-react-native'
 import { StyleSheet, View } from 'react-native'
 
 import type { Contract } from '@/api/types'
+import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
 import { KeyValue } from '@/components/KeyValue'
@@ -9,12 +11,13 @@ import { Txt } from '@/components/Txt'
 import { formatCents, formatDate, maskIban } from '@/lib/format'
 import { useTheme } from '@/theme'
 
-export default function ZahlungsmethodeScreen() {
+export default function ZahlungenScreen() {
   return <ContractScreen>{(contract) => <Payment contract={contract} />}</ContractScreen>
 }
 
 function Payment({ contract }: { contract: Contract }) {
   const theme = useTheme()
+  const router = useRouter()
   const bank = contract.bank
   const installment = contract.installment
   const payments = [...contract.payments]
@@ -44,6 +47,9 @@ function Payment({ contract }: { contract: Contract }) {
         />
         <KeyValue label="Nächste Fälligkeit" value={installment?.next_payment ? formatDate(installment.next_payment) : '–'} last />
       </Card>
+      {installment?.amount_cents != null && installment.amount_cents > 0 ? (
+        <Button label="Abschlag anpassen" variant="outline" onPress={() => router.push('/(app)/abschlag-aendern')} />
+      ) : null}
       {payments.length > 0 ? (
         <View style={styles.history}>
           <Txt variant="label" style={styles.historyLabel}>
@@ -68,7 +74,7 @@ function Payment({ contract }: { contract: Contract }) {
         </View>
       ) : null}
       <Txt variant="small" style={styles.note}>
-        Eine neue Bankverbindung oder einen anderen Abschlag beantragst du im Kundenportal im Browser.
+        Eine neue Bankverbindung hinterlegst du im Kundenportal im Browser.
       </Txt>
     </>
   )

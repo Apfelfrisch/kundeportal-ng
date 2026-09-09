@@ -10,7 +10,7 @@ import { ListRow } from '@/components/ListRow'
 import { CurrentPriceCard, GlanceCard } from '@/components/StartCards'
 import { Txt } from '@/components/Txt'
 import { addressLine, latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
-import { formatCt, formatDate, formatEuro, maskIban } from '@/lib/format'
+import { formatCents, formatCt, formatDate, formatEuro, maskIban } from '@/lib/format'
 import { useUser } from '@/providers/AuthProvider'
 import { useContractContext } from '@/providers/ContractProvider'
 import { useTheme } from '@/theme'
@@ -97,9 +97,14 @@ function StartContent({ contract }: { contract: Contract }) {
         />
         <ListRow
           icon={CreditCard}
-          label="Zahlungsmethode"
-          hint={bank.iban ? `${bank.sepa ? 'SEPA-Lastschrift' : 'Überweisung'} · ${maskIban(bank.iban)}` : 'Keine Bankverbindung hinterlegt'}
-          onPress={() => router.push('/(app)/zahlungsmethode')}
+          label="Zahlungen"
+          hint={[
+            contract.installment?.amount_cents == null ? null : `Abschlag ${formatCents(contract.installment.amount_cents)}`,
+            bank.iban ? `${bank.sepa ? 'SEPA' : 'Überweisung'} · ${maskIban(bank.iban)}` : null,
+          ]
+            .filter((part) => part !== null)
+            .join(' · ') || 'Keine Zahlungsdaten hinterlegt'}
+          onPress={() => router.push('/(app)/zahlungen')}
         />
         <ListRow
           icon={FileText}

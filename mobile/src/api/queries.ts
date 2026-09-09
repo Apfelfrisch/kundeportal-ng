@@ -92,6 +92,28 @@ export function useSubmitMeterCount(userId: number, contractNumber: number) {
   })
 }
 
+export interface InstallmentInput {
+  /** Gewünschter Abschlag in ganzen Euro. */
+  installment: number
+  /** `yyyy-mm-dd`, nicht in der Vergangenheit. */
+  effective_from: string
+}
+
+export function useSubmitInstallment(userId: number, contractNumber: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: InstallmentInput) =>
+      api<ChangeRequestResponse>(
+        `customers/${userId}/contracts/${contractNumber}/change-requests/installment`,
+        { method: 'POST', body: input },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contract(userId, contractNumber) })
+    },
+  })
+}
+
 export function useUpdateEmail(userId: number) {
   const queryClient = useQueryClient()
 

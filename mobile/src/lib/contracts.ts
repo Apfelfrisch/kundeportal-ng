@@ -52,3 +52,21 @@ export function initials(name: string): string {
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('')
 }
+
+/**
+ * Zulässiger Wunschabschlag: ±20 % des aktuellen Abschlags, gerundet –
+ * identisch zur Backend-Regel (`customer-portal.installment.range`).
+ */
+export function installmentRange(contract: Contract): { current: number; min: number; max: number } {
+  const currentEuros = (contract.installment?.amount_cents ?? 0) / 100
+  return {
+    current: Math.round(currentEuros),
+    min: Math.round(currentEuros * 0.8),
+    max: Math.round(currentEuros * 1.2),
+  }
+}
+
+/** Erster Tag des Folgemonats – Vorbelegung für „gültig ab“. */
+export function firstOfNextMonth(now: Date = new Date()): Date {
+  return new Date(now.getFullYear(), now.getMonth() + 1, 1)
+}
