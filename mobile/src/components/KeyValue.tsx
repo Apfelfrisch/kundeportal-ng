@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native'
+import { ChevronRight } from 'lucide-react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Txt } from '@/components/Txt'
 import { useTheme } from '@/theme'
@@ -9,21 +10,17 @@ interface KeyValueProps {
   last?: boolean
   /** Kompakte Zeile der Preisaufschlüsselung. */
   compact?: boolean
+  /** Macht die Zeile zum Menüeintrag mit Chevron. */
+  onPress?: () => void
 }
 
 /** Beschriftung links, Wert rechtsbündig – Zeile einer Detailkarte. */
-export function KeyValue({ label, value, last = false, compact = false }: KeyValueProps) {
+export function KeyValue({ label, value, last = false, compact = false, onPress }: KeyValueProps) {
   const theme = useTheme()
   const lines = Array.isArray(value) ? value : [value]
 
-  return (
-    <View
-      style={[
-        styles.row,
-        { paddingVertical: compact ? 9 : 12 },
-        { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider },
-      ]}
-    >
+  const content = (
+    <>
       <Txt variant={compact ? 'muted' : 'muted'} style={[styles.label, compact && { fontSize: 13 }]}>
         {label}
       </Txt>
@@ -39,7 +36,27 @@ export function KeyValue({ label, value, last = false, compact = false }: KeyVal
           </Txt>
         ))}
       </View>
-    </View>
+      {onPress !== undefined ? <ChevronRight size={20} color={theme.faint} style={styles.chevron} /> : null}
+    </>
+  )
+
+  const rowStyle = [
+    styles.row,
+    { paddingVertical: compact ? 9 : 12 },
+    { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider },
+  ]
+
+  if (onPress === undefined) return <View style={rowStyle}>{content}</View>
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${lines.join(', ')}`}
+      style={({ pressed }) => [rowStyle, styles.pressable, pressed && { backgroundColor: theme.iconBg }]}
+    >
+      {content}
+    </Pressable>
   )
 }
 
@@ -56,7 +73,9 @@ export function GroupHeader({ title, total }: { title: string; total: string }) 
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 16 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 16 },
+  pressable: { marginHorizontal: -16, paddingHorizontal: 16 },
+  chevron: { marginLeft: -8 },
   label: { flexShrink: 0 },
   value: { flex: 1, alignItems: 'flex-end' },
   valueText: { textAlign: 'right', fontVariant: ['tabular-nums'] },

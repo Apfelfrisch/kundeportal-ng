@@ -3,7 +3,6 @@ import { Landmark } from 'lucide-react-native'
 import { StyleSheet, View } from 'react-native'
 
 import type { Contract } from '@/api/types'
-import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
 import { KeyValue } from '@/components/KeyValue'
@@ -44,12 +43,10 @@ function Payment({ contract }: { contract: Contract }) {
         <KeyValue
           label="Monatlicher Abschlag"
           value={installment?.amount_cents == null ? '–' : formatCents(installment.amount_cents)}
+          onPress={installment?.amount_cents != null && installment.amount_cents > 0 ? () => router.push('/(app)/abschlag-aendern') : undefined}
         />
         <KeyValue label="Nächste Fälligkeit" value={installment?.next_payment ? formatDate(installment.next_payment) : '–'} last />
       </Card>
-      {installment?.amount_cents != null && installment.amount_cents > 0 ? (
-        <Button label="Abschlag anpassen" variant="outline" onPress={() => router.push('/(app)/abschlag-aendern')} />
-      ) : null}
       {payments.length > 0 ? (
         <View style={styles.history}>
           <Txt variant="label" style={styles.historyLabel}>
