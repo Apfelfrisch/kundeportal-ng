@@ -1,17 +1,4 @@
-import { maskIban, parseGermanDate, toIsoDate } from './format'
-
-describe('parseGermanDate', () => {
-  it('converts a valid German date to ISO', () => {
-    expect(parseGermanDate('01.07.2026')).toBe('2026-07-01')
-    expect(parseGermanDate(' 9.9.2026 ')).toBe('2026-09-09')
-  })
-
-  it('rejects malformed and impossible dates', () => {
-    expect(parseGermanDate('2026-07-01')).toBeNull()
-    expect(parseGermanDate('31.02.2026')).toBeNull()
-    expect(parseGermanDate('')).toBeNull()
-  })
-})
+import { maskIban, toIsoDate } from './format'
 
 describe('toIsoDate', () => {
   it('pads month and day', () => {

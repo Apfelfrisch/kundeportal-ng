@@ -68,23 +68,6 @@ export function formatDateValue(date: Date): string {
   return dateFormat.format(date)
 }
 
-/**
- * `"dd.MM.yyyy"` (Formulareingabe) → `yyyy-mm-dd`; null bei ungültiger
- * Eingabe oder nicht existierendem Datum.
- */
-export function parseGermanDate(value: string): string | null {
-  const match = /^\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\s*$/.exec(value)
-  if (match === null) return null
-  const day = Number(match[1])
-  const month = Number(match[2])
-  const year = Number(match[3])
-  const date = new Date(year, month - 1, day)
-  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-    return null
-  }
-  return toIsoDate(date)
-}
-
 /** `"DE69284500000021025564"` → `"DE69 2845 0000 0021 0255 64"` */
 export function formatIban(value: string): string {
   const compact = value.replace(/\s+/g, '').toUpperCase()

@@ -26,7 +26,8 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker"
     ],
     "scheme": "kundenportal",
     "backgroundColor": "#1d1d1b"

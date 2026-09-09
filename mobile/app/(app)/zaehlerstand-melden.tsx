@@ -8,10 +8,11 @@ import type { Contract } from '@/api/types'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
+import { DateField } from '@/components/DateField'
 import { Field } from '@/components/Field'
 import { Txt } from '@/components/Txt'
 import { isSingleTariffMeter, latestMeterCount, primaryMeter, primaryMeterPoint } from '@/lib/contracts'
-import { formatDate, formatDateValue, formatKwh, parseGermanDate } from '@/lib/format'
+import { formatDate, formatKwh, toIsoDate } from '@/lib/format'
 import { useUser } from '@/providers/AuthProvider'
 
 export default function ZaehlerstandMeldenScreen() {
@@ -30,7 +31,7 @@ function MeterCountForm({ contract }: { contract: Contract }) {
   const [count, setCount] = useState('')
   const [countHt, setCountHt] = useState('')
   const [countNt, setCountNt] = useState('')
-  const [readOn, setReadOn] = useState(formatDateValue(new Date()))
+  const [readOn, setReadOn] = useState(() => new Date())
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   function parseCount(value: string): number | null {
@@ -41,11 +42,7 @@ function MeterCountForm({ contract }: { contract: Contract }) {
 
   async function send() {
     const nextErrors: Record<string, string> = {}
-    const input: MeterCountInput = { read_on: '' }
-
-    const isoDate = parseGermanDate(readOn)
-    if (isoDate === null) nextErrors.read_on = 'Bitte gib das Ablesedatum als TT.MM.JJJJ an.'
-    else input.read_on = isoDate
+    const input: MeterCountInput = { read_on: toIsoDate(readOn) }
 
     if (singleTariff) {
       const value = parseCount(count)
@@ -119,14 +116,7 @@ function MeterCountForm({ contract }: { contract: Contract }) {
             />
           </>
         )}
-        <Field
-          label="Abgelesen am"
-          value={readOn}
-          onChangeText={setReadOn}
-          keyboardType="numbers-and-punctuation"
-          placeholder="TT.MM.JJJJ"
-          error={errors.read_on}
-        />
+        <DateField label="Abgelesen am" value={readOn} onChange={setReadOn} maximumDate={new Date()} error={errors.read_on} />
         <Button label="Zählerstand senden" onPress={() => void send()} loading={submit.isPending} />
         <Txt variant="small" style={styles.note}>
           Nur die Stellen vor dem Komma eingeben. Der Stand wird als Änderungswunsch an uns übermittelt.
