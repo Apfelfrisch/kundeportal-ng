@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { ArrowLeftRight, CreditCard, FileText, Gauge, Receipt, Tag, User } from 'lucide-react-native'
+import { ArrowLeftRight, Banknote, CreditCard, FileText, Gauge, Receipt, SquarePen, Tag, User } from 'lucide-react-native'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -77,6 +77,17 @@ function StartContent({ contract }: { contract: Contract }) {
   return (
     <>
       {contract.is_dynamic ? <CurrentPriceCard contract={contract} /> : <GlanceCard contract={contract} />}
+      <Card padding={0} gap={0}>
+        <ListRow
+          icon={SquarePen}
+          label="Zählerstand melden"
+          onPress={() => router.push('/(app)/zaehlerstand-melden')}
+          last={!(contract.installment?.amount_cents != null && contract.installment.amount_cents > 0)}
+        />
+        {contract.installment?.amount_cents != null && contract.installment.amount_cents > 0 ? (
+          <ListRow icon={Banknote} label="Abschlag ändern" onPress={() => router.push('/(app)/abschlag-aendern')} last />
+        ) : null}
+      </Card>
       <Card padding={0} gap={0}>
         <ListRow icon={User} label="Profil" hint={user.email} onPress={() => router.push('/(app)/profil')} />
         <ListRow

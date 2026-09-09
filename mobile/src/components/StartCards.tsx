@@ -1,12 +1,9 @@
-import { Plus } from 'lucide-react-native'
-import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { StyleSheet, Switch, View } from 'react-native'
 
 import { useMarketPrices } from '@/api/queries'
 import type { Contract } from '@/api/types'
 import { Badge } from '@/components/Badge'
-import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { PriceGauge } from '@/components/PriceGauge'
 import { PriceStrip } from '@/components/PriceStrip'
@@ -17,9 +14,8 @@ import { priceOverview } from '@/lib/prices'
 import { useUser } from '@/providers/AuthProvider'
 import { useTheme } from '@/theme'
 
-/** Startseite ohne dynamischen Tarif: Abschlag, letzter Zählerstand, Melden. */
+/** Startseite ohne dynamischen Tarif: Abschlag und letzter Zählerstand. */
 export function GlanceCard({ contract }: { contract: Contract }) {
-  const router = useRouter()
   const installment = contract.installment
   const reading = latestMeterCount(primaryMeterPoint(contract))
 
@@ -38,7 +34,6 @@ export function GlanceCard({ contract }: { contract: Contract }) {
           sub={reading?.reading_date ? `am ${formatDate(reading.reading_date)}` : 'noch kein Stand'}
         />
       </View>
-      <Button label="Zählerstand melden" icon={Plus} onPress={() => router.push('/(app)/zaehlerstand-melden')} />
     </Card>
   )
 }
