@@ -1,4 +1,4 @@
-import { isWithin, monthGrid, shiftMonth } from './calendar'
+import { isWithin, monthGrid, shiftMonth, yearRange } from './calendar'
 
 describe('monthGrid', () => {
   it('starts weeks on Monday and pads the edges', () => {
@@ -35,5 +35,18 @@ describe('isWithin', () => {
     expect(isWithin(new Date(2026, 8, 9, 23, 59), undefined, max)).toBe(true)
     expect(isWithin(new Date(2026, 8, 10, 0, 1), undefined, max)).toBe(false)
     expect(isWithin(new Date(2026, 8, 1), new Date(2026, 8, 2), max)).toBe(false)
+  })
+})
+
+describe('yearRange', () => {
+  it('is bounded by minimum and maximum dates', () => {
+    expect(yearRange(2026, new Date(2024, 0, 1), new Date(2026, 8, 9))).toEqual([2024, 2025, 2026])
+  })
+
+  it('spans ten years back and one ahead without bounds', () => {
+    const years = yearRange(2026, undefined, undefined)
+    const now = new Date().getFullYear()
+    expect(years[0]).toBe(Math.min(2026, now) - 10)
+    expect(years[years.length - 1]).toBe(Math.max(2026, now) + 1)
   })
 })

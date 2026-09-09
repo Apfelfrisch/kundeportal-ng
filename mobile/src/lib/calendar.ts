@@ -2,6 +2,8 @@
 
 export const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] as const
 
+export const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'] as const
+
 const monthFormat = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' })
 
 export function formatMonth(year: number, month: number): string {
@@ -46,4 +48,16 @@ export function isWithin(date: Date, minimum: Date | undefined, maximum: Date | 
   if (minimum !== undefined && day < startOfDay(minimum).getTime()) return false
   if (maximum !== undefined && day > startOfDay(maximum).getTime()) return false
   return true
+}
+
+/**
+ * Wählbare Jahre der Schnellauswahl: der erlaubte Bereich, sonst zehn
+ * Jahre zurück und ein Jahr voraus um das angezeigte Jahr.
+ */
+export function yearRange(year: number, minimum: Date | undefined, maximum: Date | undefined): Array<number> {
+  const from = minimum?.getFullYear() ?? Math.min(year, new Date().getFullYear()) - 10
+  const to = maximum?.getFullYear() ?? Math.max(year, new Date().getFullYear()) + 1
+  const years: Array<number> = []
+  for (let entry = from; entry <= to; entry += 1) years.push(entry)
+  return years
 }
