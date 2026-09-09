@@ -1,4 +1,4 @@
-import DateTimePicker, { DateTimePickerAndroid, type DateTimePickerEvent } from '@react-native-community/datetimepicker'
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import { CalendarDays } from 'lucide-react-native'
 import { useState } from 'react'
 import { Platform, Pressable, StyleSheet, View } from 'react-native'
@@ -24,14 +24,13 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
   const theme = useTheme()
   const [open, setOpen] = useState(false)
 
-  function handleChange(event: DateTimePickerEvent, date?: Date) {
-    if (Platform.OS === 'android') setOpen(false)
-    if (event.type === 'set' && date !== undefined) onChange(date)
+  function select(_event: unknown, date: Date) {
+    onChange(date)
   }
 
   function press() {
     if (Platform.OS === 'android') {
-      DateTimePickerAndroid.open({ value, mode: 'date', maximumDate, minimumDate, onChange: handleChange })
+      DateTimePickerAndroid.open({ value, mode: 'date', maximumDate, minimumDate, onValueChange: select })
       return
     }
     setOpen((current) => !current)
@@ -73,7 +72,7 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
             locale="de-DE"
             maximumDate={maximumDate}
             minimumDate={minimumDate}
-            onChange={handleChange}
+            onValueChange={select}
           />
         </View>
       ) : null}
