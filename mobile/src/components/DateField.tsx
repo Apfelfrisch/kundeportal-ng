@@ -1,9 +1,8 @@
-import { CalendarDays } from 'lucide-react-native'
+import { CalendarDays, X } from 'lucide-react-native'
 import { useState } from 'react'
 import { Modal, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/components/Button'
 import { Calendar } from '@/components/Calendar'
 import { Txt } from '@/components/Txt'
 import { formatDateValue } from '@/lib/format'
@@ -59,22 +58,34 @@ export function DateField({ label, value, onChange, maximumDate, minimumDate, er
         </Txt>
       ) : null}
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
-        <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Schließen" />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: theme.card,
-              borderColor: theme.border,
-              paddingBottom: insets.bottom + 16,
-              borderTopLeftRadius: theme.radius * 2,
-              borderTopRightRadius: theme.radius * 2,
-            },
-          ]}
-        >
-          <Txt variant="label">{label}</Txt>
-          <Calendar value={value} onChange={select} maximumDate={maximumDate} minimumDate={minimumDate} />
-          <Button label="Abbrechen" variant="outline" onPress={close} />
+        <View style={styles.modalRoot}>
+          <Pressable style={styles.above} onPress={close} accessibilityLabel="Schließen" />
+          <View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: theme.card,
+                paddingBottom: insets.bottom + 16,
+                borderTopLeftRadius: theme.radius * 2,
+                borderTopRightRadius: theme.radius * 2,
+                shadowColor: '#000000',
+              },
+            ]}
+          >
+            <View style={styles.sheetHeader}>
+              <Txt variant="label">{label}</Txt>
+              <Pressable
+                onPress={close}
+                accessibilityRole="button"
+                accessibilityLabel="Schließen"
+                hitSlop={8}
+                style={({ pressed }) => [styles.closeButton, { backgroundColor: pressed ? theme.iconBg : 'transparent' }]}
+              >
+                <X size={22} color={theme.muted} strokeWidth={2} />
+              </Pressable>
+            </View>
+            <Calendar value={value} onChange={select} maximumDate={maximumDate} minimumDate={minimumDate} />
+          </View>
         </View>
       </Modal>
     </View>
@@ -93,6 +104,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   value: { fontVariant: ['tabular-nums'] },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-  sheet: { borderWidth: 1, borderBottomWidth: 0, padding: 16, gap: 12 },
+  modalRoot: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'transparent' },
+  above: { flex: 1 },
+  sheet: {
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    gap: 8,
+    // Abhebung ohne Abdunkeln des restlichen Bildschirms.
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -6 },
+    elevation: 12,
+  },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
+  closeButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, marginRight: -10 },
 })
