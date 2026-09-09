@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import * as Haptics from 'expo-haptics'
+import { useRef, useState } from 'react'
 import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
 
 import { useScrollLock } from '@/components/Screen'
@@ -28,10 +29,17 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
   const [tooltipWidth, setTooltipWidth] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [touchX, setTouchX] = useState(0)
+  const lastHour = useRef<number | null>(null)
 
   function track(event: GestureResponderEvent) {
+    const hour = hourAt(event)
     setTouchX(event.nativeEvent.locationX)
-    setSelected(hourAt(event))
+    setSelected(hour)
+    // Ein kurzes Tick je Balkenwechsel, wie beim Drehen eines Rasters.
+    if (hour !== null && hour !== lastHour.current) {
+      lastHour.current = hour
+      void Haptics.selectionAsync().catch(() => undefined)
+    }
   }
 
   function start(event: GestureResponderEvent) {
@@ -42,6 +50,7 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
   function end() {
     lockScroll(false)
     setSelected(null)
+    lastHour.current = null
   }
   const known = hourly.filter((value): value is number => value !== null)
   const max = known.length === 0 ? 0 : Math.max(...known)
