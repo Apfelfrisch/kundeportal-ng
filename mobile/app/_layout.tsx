@@ -1,12 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import * as SystemUI from 'expo-system-ui'
+import { Appearance } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { Loading } from '@/components/States'
 import { Fill } from '@/components/Screen'
 import { AuthProvider, useAuth } from '@/providers/AuthProvider'
 import { theme } from '@/theme'
+
+// Nur dunkel: Auch native Dialoge (Datumsauswahl, Alerts) folgen dem
+// Night-Mode der Activity, den setColorScheme auf Android setzt.
+Appearance.setColorScheme('dark')
+void SystemUI.setBackgroundColorAsync(theme.bg)
 
 const queryClient = new QueryClient({
   defaultOptions: {
