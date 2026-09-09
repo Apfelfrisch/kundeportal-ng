@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
 
+import { useScrollLock } from '@/components/Screen'
 import { Txt } from '@/components/Txt'
 import { formatCt } from '@/lib/format'
 import { hourRange } from '@/lib/prices'
@@ -17,14 +18,25 @@ const TOOLTIP_WIDTH = 132
 const TOOLTIP_HEIGHT = 40
 
 /**
- * Tagesverlauf als 24 Balken, aktuelle Stunde in Mandantenfarbe. Beim
- * Tippen oder Darüberwischen erscheint der Preis der Stunde als Tooltip
- * über dem Balken.
+ * Tagesverlauf als 24 Balken, aktuelle Stunde in Mandantenfarbe. Solange
+ * ein Finger auf dem Streifen liegt, zeigt ein Tooltip den Preis der
+ * berührten Stunde; der Screen scrollt in dieser Zeit nicht.
  */
 export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps) {
   const theme = useTheme()
+  const lockScroll = useScrollLock()
   const [width, setWidth] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
+
+  function start(event: GestureResponderEvent) {
+    lockScroll(true)
+    setSelected(hourAt(event))
+  }
+
+  function end() {
+    lockScroll(false)
+    setSelected(null)
+  }
   const known = hourly.filter((value): value is number => value !== null)
   const max = known.length === 0 ? 0 : Math.max(...known)
 
@@ -47,8 +59,10 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
         onStartShouldSetResponder={() => true}
         onMoveShouldSetResponder={() => true}
         onResponderTerminationRequest={() => false}
-        onResponderGrant={(event) => setSelected(hourAt(event))}
+        onResponderGrant={start}
         onResponderMove={(event) => setSelected(hourAt(event))}
+        onResponderRelease={end}
+        onResponderTerminate={end}
         style={[styles.touchArea, { paddingTop: TOOLTIP_HEIGHT + 8 }]}
         accessibilityLabel="Stundenpreise des Tages"
       >
