@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
-import { StyleSheet, View } from 'react-native'
+import { useState } from 'react'
+import { StyleSheet, Switch, View } from 'react-native'
 
 import { useMarketPrices } from '@/api/queries'
 import type { Contract } from '@/api/types'
@@ -12,8 +13,9 @@ import { PriceStrip } from '@/components/PriceStrip'
 import { Txt } from '@/components/Txt'
 import { latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
 import { formatCents, formatCt, formatDate, formatKwh } from '@/lib/format'
-import { hourRange, priceOverview } from '@/lib/prices'
+import { priceOverview } from '@/lib/prices'
 import { useUser } from '@/providers/AuthProvider'
+import { useTheme } from '@/theme'
 
 /** Startseite ohne dynamischen Tarif: Abschlag, letzter Zählerstand, Melden. */
 export function GlanceCard({ contract }: { contract: Contract }) {
@@ -56,7 +58,9 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
 /** Startseite mit dynamischem Tarif: Preis der laufenden Stunde und Tagesverlauf. */
 export function CurrentPriceCard({ contract }: { contract: Contract }) {
   const user = useUser()
+  const theme = useTheme()
   const prices = useMarketPrices(user.id, contract.is_dynamic)
+  const [withComponents, setWithComponents] = useState(true)
 
   if (prices.isPending) {
     return (
@@ -76,9 +80,8 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
     )
   }
 
-  const surcharge = prices.data.tariff_costs?.total_ct ?? contract.prices.calculated_dynamic_working_price_ct ?? 0
-  const overview = priceOverview(prices.data.prices, surcharge)
-  const cheapest = overview.cheapestHour === null ? null : overview.hourly[overview.cheapestHour]
+  const components = prices.data.tariff_costs?.total_ct ?? contract.prices.calculated_dynamic_working_price_ct ?? 0
+  const overview = priceOverview(prices.data.prices, withComponents ? components : 0)
 
   return (
     <Card>
@@ -99,12 +102,24 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
         </View>
       </View>
       <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} />
-      <Txt variant="muted">
-        {overview.cheapestHour !== null && cheapest != null
-          ? `Günstigste Stunde ${hourRange(overview.cheapestHour)} · ${formatCt(cheapest, 2)}`
-          : 'Für heute liegen noch keine Preise vor.'}
-      </Txt>
-      <Txt variant="small">Börsenpreis plus fester Tarifaufschlag, netto.</Txt>
+      <View style={styles.toggleRow}>
+        <View style={styles.flex}>
+          <Txt variant="strong">Zusätzliche Preisbestandteile</Txt>
+          <Txt variant="small">
+            {withComponents
+              ? `Börsenpreis plus fester Tarifaufschlag von ${formatCt(components, 2)}/kWh, netto.`
+              : 'Reiner Börsenpreis (EPEX Spot), netto.'}
+          </Txt>
+        </View>
+        <Switch
+          value={withComponents}
+          onValueChange={setWithComponents}
+          trackColor={{ false: theme.bar, true: theme.accent }}
+          thumbColor={withComponents ? theme.accentFg : theme.muted}
+          ios_backgroundColor={theme.bar}
+          accessibilityLabel="Zusätzliche Preisbestandteile einrechnen"
+        />
+      </View>
     </Card>
   )
 }
@@ -117,4 +132,5 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   priceValue: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
 })
