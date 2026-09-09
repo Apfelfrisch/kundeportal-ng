@@ -33,7 +33,7 @@ export default function VertragWechselnScreen() {
               android_ripple={{ color: theme.iconBg }}
               style={[
                 styles.row,
-                { borderBottomWidth: index === contracts.data.length - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.border },
+                { borderBottomWidth: index === contracts.data.length - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider },
               ]}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}

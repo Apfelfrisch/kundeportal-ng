@@ -10,6 +10,7 @@ export const friesenWerk: ThemeTokens = {
   header: '#222222',
   card: '#2a2a2a',
   border: '#333333',
+  divider: '#444444',
   fg: '#ffffff',
   muted: '#cccccc',
   faint: '#777777',

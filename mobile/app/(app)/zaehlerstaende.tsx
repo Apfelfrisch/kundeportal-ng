@@ -64,7 +64,7 @@ function HistoryRow({ entry, singleTariff, last }: { entry: MeterCount; singleTa
   const source = [entry.reading_kind?.label, entry.reading_type?.label].filter(Boolean).join(' · ')
 
   return (
-    <View style={[styles.row, { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.border }]}>
+    <View style={[styles.row, { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider }]}>
       <View style={styles.rowText}>
         <Txt variant="strong">{formatDate(entry.reading_date)}</Txt>
         {source !== '' ? <Txt variant="muted">{source}</Txt> : null}

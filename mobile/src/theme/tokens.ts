@@ -8,9 +8,10 @@ export interface ThemeTokens {
   /** Seitenhintergrund und (leicht abgesetzte) Kopfzeile. */
   bg: string
   header: string
-  /** Kartenfläche und Trennlinien. */
+  /** Kartenfläche, Kartenrand und Trennlinien innerhalb einer Karte. */
   card: string
   border: string
+  divider: string
   /** Text: normal, gedämpft, sehr blass (Chevrons). */
   fg: string
   muted: string

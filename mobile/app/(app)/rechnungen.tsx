@@ -60,7 +60,7 @@ function InvoiceRow({ invoice, last }: { invoice: Invoice; last: boolean }) {
       : formatDate(invoice.invoice_date)
 
   return (
-    <View style={[styles.row, { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.border }]}>
+    <View style={[styles.row, { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider }]}>
       <View style={styles.rowText}>
         <Txt variant="strong">Rechnung {invoice.invoice_number ?? '–'}</Txt>
         <View style={styles.meta}>

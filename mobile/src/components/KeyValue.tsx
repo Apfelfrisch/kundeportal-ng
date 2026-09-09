@@ -21,7 +21,7 @@ export function KeyValue({ label, value, last = false, compact = false }: KeyVal
       style={[
         styles.row,
         { paddingVertical: compact ? 9 : 12 },
-        { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.border },
+        { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.divider },
       ]}
     >
       <Txt variant={compact ? 'muted' : 'muted'} style={[styles.label, compact && { fontSize: 13 }]}>

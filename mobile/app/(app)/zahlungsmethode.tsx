@@ -24,7 +24,7 @@ function Payment({ contract }: { contract: Contract }) {
   return (
     <>
       <Card gap={0} style={styles.kvCard}>
-        <View style={[styles.bankHead, { borderBottomColor: theme.border }]}>
+        <View style={[styles.bankHead, { borderBottomColor: theme.divider }]}>
           <View style={[styles.icon, { backgroundColor: theme.iconBg, borderRadius: theme.radius }]}>
             <Landmark size={22} color={theme.accent} strokeWidth={1.75} />
           </View>

@@ -16,7 +16,7 @@ interface ListRowProps {
   last?: boolean
 }
 
-/** Navigationszeile: Icon-Kachel, Titel, Hinweiszeile, Chevron. */
+/** Navigationszeile: einfarbiges Icon, Titel, Hinweiszeile, Chevron. */
 export function ListRow({ icon: Icon, label, hint, onPress, danger = false, last = false }: ListRowProps) {
   const theme = useTheme()
 
@@ -26,14 +26,14 @@ export function ListRow({ icon: Icon, label, hint, onPress, danger = false, last
       android_ripple={{ color: theme.iconBg }}
       style={({ pressed }) => [
         styles.row,
-        { borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.border },
+        { borderBottomWidth: last ? 0 : 1, borderBottomColor: theme.divider },
         pressed && { backgroundColor: theme.iconBg },
       ]}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <View style={[styles.icon, { backgroundColor: theme.iconBg, borderRadius: theme.radius }]}>
-        <Icon size={22} color={danger ? theme.danger : theme.accent} strokeWidth={1.75} />
+      <View style={styles.icon}>
+        <Icon size={22} color={danger ? theme.danger : theme.muted} strokeWidth={1.75} />
       </View>
       <View style={styles.text}>
         <Txt color={danger ? 'danger' : 'fg'}>{label}</Txt>
@@ -53,10 +53,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    minHeight: 64,
+    minHeight: 60,
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
-  icon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 28, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },
 })
