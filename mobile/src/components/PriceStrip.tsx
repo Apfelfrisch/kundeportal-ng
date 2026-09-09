@@ -14,8 +14,7 @@ interface PriceStripProps {
   height?: number
 }
 
-const TOOLTIP_WIDTH = 132
-const TOOLTIP_HEIGHT = 40
+const TOOLTIP_HEIGHT = 36
 
 /**
  * Tagesverlauf als 24 Balken, aktuelle Stunde in Mandantenfarbe. Solange
@@ -26,11 +25,18 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
   const theme = useTheme()
   const lockScroll = useScrollLock()
   const [width, setWidth] = useState(0)
+  const [tooltipWidth, setTooltipWidth] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
+  const [touchX, setTouchX] = useState(0)
+
+  function track(event: GestureResponderEvent) {
+    setTouchX(event.nativeEvent.locationX)
+    setSelected(hourAt(event))
+  }
 
   function start(event: GestureResponderEvent) {
     lockScroll(true)
-    setSelected(hourAt(event))
+    track(event)
   }
 
   function end() {
@@ -48,9 +54,8 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
   }
 
   const value = selected === null ? null : (hourly[selected] ?? null)
-  const barWidth = width / 24
-  const tooltipLeft =
-    selected === null ? 0 : Math.min(Math.max(0, (selected + 0.5) * barWidth - TOOLTIP_WIDTH / 2), Math.max(0, width - TOOLTIP_WIDTH))
+  // Der Tooltip folgt dem Finger und bleibt innerhalb des Streifens.
+  const tooltipLeft = Math.min(Math.max(0, touchX - tooltipWidth / 2), Math.max(0, width - tooltipWidth))
 
   return (
     <View style={styles.wrap}>
@@ -60,7 +65,7 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
         onMoveShouldSetResponder={() => true}
         onResponderTerminationRequest={() => false}
         onResponderGrant={start}
-        onResponderMove={(event) => setSelected(hourAt(event))}
+        onResponderMove={track}
         onResponderRelease={end}
         onResponderTerminate={end}
         style={[styles.touchArea, { paddingTop: TOOLTIP_HEIGHT + 8 }]}
@@ -74,12 +79,13 @@ export function PriceStrip({ hourly, currentHour, height = 48 }: PriceStripProps
           })}
         </View>
         {selected !== null ? (
-          <View pointerEvents="none" style={[styles.tooltip, { left: tooltipLeft, backgroundColor: theme.fg, borderRadius: theme.radius }]}>
-            <Txt variant="small" color={theme.bg}>
-              {hourRange(selected)}
-            </Txt>
-            <Txt variant="strong" color={theme.bg} style={styles.tooltipValue}>
-              {value === null ? '–' : formatCt(value, 2)}
+          <View
+            pointerEvents="none"
+            onLayout={(event: LayoutChangeEvent) => setTooltipWidth(event.nativeEvent.layout.width)}
+            style={[styles.tooltip, { left: tooltipLeft, opacity: tooltipWidth === 0 ? 0 : 1, backgroundColor: theme.fg, borderRadius: theme.radius }]}
+          >
+            <Txt variant="strong" color={theme.bg} numberOfLines={1} style={styles.tooltipText}>
+              {hourRange(selected)} · {value === null ? '–' : formatCt(value, 2)}
             </Txt>
           </View>
         ) : null}
@@ -103,14 +109,12 @@ const styles = StyleSheet.create({
   tooltip: {
     position: 'absolute',
     top: 0,
-    width: TOOLTIP_WIDTH,
     height: TOOLTIP_HEIGHT,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
   },
-  tooltipValue: { fontVariant: ['tabular-nums'] },
+  tooltipText: { fontVariant: ['tabular-nums'], fontSize: 14 },
   axis: { flexDirection: 'row', justifyContent: 'space-between' },
   axisLabel: { fontSize: 11, fontVariant: ['tabular-nums'] },
 })
