@@ -1,0 +1,8 @@
+{
+    "data": [
+        {"from": "2025-06-01", "usage_kwh": 12.5, "legal_ct": 115.75, "supplier_ct": 25, "stock_exchange_ct": 102.66, "supplier_base_ct": 1, "legal_base_ct": 4, "price_ct_kwh": 18.9},
+        {"from": "2025-06-02", "usage_kwh": 8, "legal_ct": 74.08, "supplier_ct": 16, "stock_exchange_ct": -3.2, "price_ct_kwh": 10.86},
+        {"from": "2025-06-03", "usage_kwh": 0, "legal_ct": 0, "supplier_ct": 0, "stock_exchange_ct": 0, "price_ct_kwh": 12.5},
+        {"from": "2025-06-30", "usage_kwh": 4, "legal_ct": 37.04, "supplier_ct": 8, "stock_exchange_ct": 30}
+    ]
+}

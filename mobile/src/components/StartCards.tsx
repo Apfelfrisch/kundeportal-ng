@@ -9,7 +9,7 @@ import { PriceGauge } from '@/components/PriceGauge'
 import { PriceStrip } from '@/components/PriceStrip'
 import { Txt } from '@/components/Txt'
 import { latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
-import { formatCents, formatCt, formatDate, formatDateValue, formatKwh } from '@/lib/format'
+import { formatCents, formatCtValue, formatDate, formatDateValue, formatKwh } from '@/lib/format'
 import { priceOverview } from '@/lib/prices'
 import { useUser } from '@/providers/AuthProvider'
 import { useTheme } from '@/theme'
@@ -89,7 +89,7 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
         <PriceGauge fraction={overview.fraction} size={52} />
         <View style={styles.flex}>
           <View style={styles.priceValue}>
-            <Txt variant="number">{overview.current === null ? '–' : formatCt(overview.current, 3).replace(' ct', '')}</Txt>
+            <Txt variant="number">{overview.current === null ? '–' : formatCtValue(overview.current, 3)}</Txt>
             <Txt variant="strong" color="muted">
               ct/kWh
             </Txt>

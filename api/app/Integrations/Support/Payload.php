@@ -88,6 +88,13 @@ final readonly class Payload
         return $value === null ? null : $this->toFloat($key, $value);
     }
 
+    public function optionalFloat(string $key): ?float
+    {
+        $value = $this->data[$key] ?? null;
+
+        return $value === null ? null : $this->toFloat($key, $value);
+    }
+
     /**
      * Loose boolean with PHP `(bool)` cast semantics, null counts as false.
      * Mirrors the old `(boolean) $meter['smart_meter']` handling.

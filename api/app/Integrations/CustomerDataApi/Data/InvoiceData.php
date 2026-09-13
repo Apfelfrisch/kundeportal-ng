@@ -22,6 +22,11 @@ final readonly class InvoiceData
         public ?string $filename,
         public ?string $completeFilePath,
         public ?CarbonImmutable $canceledAt,
+        /** Last day of the invoiced period (inclusive). */
+        public ?CarbonImmutable $invoiceUntil = null,
+        /** Net amount in cents. */
+        public ?int $amountCents = null,
+        public ?int $taxAmountCents = null,
     ) {}
 
     /**
@@ -44,6 +49,9 @@ final readonly class InvoiceData
             filename: $payload->nullableString('filename'),
             completeFilePath: $payload->nullableString('complete_file_path'),
             canceledAt: $payload->nullableDate('canceled_at'),
+            invoiceUntil: $payload->optionalDate('invoice_until'),
+            amountCents: $payload->optionalInt('amount'),
+            taxAmountCents: $payload->optionalInt('tax_amount'),
         );
     }
 }

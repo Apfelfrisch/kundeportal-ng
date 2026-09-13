@@ -20,7 +20,9 @@ export default function AppLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="profil" options={{ title: 'Profil' }} />
         <Stack.Screen name="rechnungen" options={{ title: 'Rechnungen' }} />
+        <Stack.Screen name="rechnung" options={{ title: 'Rechnung' }} />
         <Stack.Screen name="zaehlerstaende" options={{ title: 'Zählerstände' }} />
+        <Stack.Screen name="verbrauch" options={{ title: 'Verbrauch' }} />
         <Stack.Screen name="zaehlerstand-melden" options={{ title: 'Zählerstand melden', presentation: 'modal' }} />
         <Stack.Screen name="zahlungen" options={{ title: 'Zahlungen' }} />
         <Stack.Screen name="abschlag-aendern" options={{ title: 'Abschlag anpassen', presentation: 'modal' }} />

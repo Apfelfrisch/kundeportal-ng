@@ -28,18 +28,43 @@ export function formatCents(cents: number): string {
   return formatEuro(cents / 100)
 }
 
+// Intl.NumberFormat ist teuer im Aufbau – je Stellenzahl nur einmal.
+const ctFormats = new Map<number, Intl.NumberFormat>()
+
+function ctFormat(digits: number): Intl.NumberFormat {
+  let format = ctFormats.get(digits)
+  if (format === undefined) {
+    format = new Intl.NumberFormat('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits })
+    ctFormats.set(digits, format)
+  }
+  return format
+}
+
 /** `32.456` → `"32,46 ct"`; Nachkommastellen per `digits` steuerbar. */
 export function formatCt(value: number, digits = 2): string {
-  const format = new Intl.NumberFormat('de-DE', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  })
-  return `${format.format(value)} ct`
+  return `${ctFormat(digits).format(value)} ct`
 }
 
 /** `1234.5` → `"1.234,5 kWh"` */
 export function formatKwh(value: number): string {
   return `${kwhFormat.format(value)} kWh`
+}
+
+/** Zahl ohne Einheit für Achsen und große Summen: `1234.5` → `"1.234,5"`. */
+export function formatKwhValue(value: number): string {
+  return kwhFormat.format(value)
+}
+
+const euroValueFormat = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+/** `28.5` → `"28,50"` */
+export function formatEuroValue(value: number): string {
+  return euroValueFormat.format(value)
+}
+
+/** `32.456` → `"32,46"` */
+export function formatCtValue(value: number, digits = 2): string {
+  return ctFormat(digits).format(value)
 }
 
 /** `yyyy-mm-dd` als lokales Datum (`new Date(string)` wäre UTC-Mitternacht). */
@@ -61,6 +86,11 @@ export function toIsoDate(date: Date): string {
 export function formatDate(value: string | null | undefined): string {
   if (value === null || value === undefined || value === '') return '–'
   return dateFormat.format(parseIsoDate(value))
+}
+
+/** `"01.05.2026 – 31.05.2026"`; fehlt ein Ende, nur der Anfang. */
+export function formatDateRange(from: string | null | undefined, until: string | null | undefined): string {
+  return until ? `${formatDate(from)} – ${formatDate(until)}` : formatDate(from)
 }
 
 /** Lokales Datum → `"dd.MM.yyyy"` (Formularvorbelegung). */

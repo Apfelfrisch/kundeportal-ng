@@ -117,7 +117,12 @@ export interface Invoice {
   invoice_number: string | null
   invoice_date: string | null
   invoice_from: string | null
+  /** Letzter Tag des Abrechnungszeitraums (inklusive). */
+  invoice_until: string | null
   consumption: number | null
+  /** Netto- und Steuerbetrag in Eurocent. */
+  amount_cents: number | null
+  tax_amount_cents: number | null
   canceled_at: string | null
 }
 
@@ -222,6 +227,52 @@ export interface MarketPriceDay {
   navigation: { prev_date: string; next_date: string | null }
   /** Fester Tarifaufschlag (ct/kWh) ohne Börsenanteil; null ohne dynamischen Vertrag. */
   tariff_costs: { total_ct: number; components: Record<string, number> } | null
+}
+
+export type UsagePeriod = 'day' | 'month' | 'year'
+
+/**
+ * Ein Balken des Verbrauchsdiagramms (Stunde, Tag oder Monat): abgerechneter
+ * und noch nicht abgerechneter Verbrauch zusammen, Kosten in Cent netto für
+ * den ganzen Balken – Arbeitspreis-Anteile und anteilige Grundpreise
+ * getrennt. `unbilled_*` ist der vorläufige Anteil (Lastgang ×
+ * Börsenpreis); `has_data = false` markiert eine Lücke ohne Werte.
+ */
+export interface UsageBucket {
+  from: string
+  until: string
+  has_data: boolean
+  usage_kwh: number
+  unbilled_kwh: number
+  cost_ct: number
+  unbilled_ct: number
+  legal_ct: number
+  supplier_ct: number
+  stock_exchange_ct: number
+  legal_base_ct: number
+  supplier_base_ct: number
+  /** Verbrauchsgewichteter Arbeitspreis in ct/kWh; null ohne Verbrauch. */
+  average_ct_kwh: number | null
+  /** Einfacher Durchschnitt des Arbeitspreises über die Viertelstunden – die Preislinie; null ohne Werte. */
+  price_ct_kwh: number | null
+}
+
+/** GET /api/customers/{user}/contracts/{contract}/usage (BilledUsageResource). */
+export interface UsageWindow {
+  /** Balkengröße: Tag in Stunden, Monat in Tagen, Jahr in Monaten. */
+  period: UsagePeriod
+  /** Erster und letzter Tag des Zeitraums (`yyyy-mm-dd`); `from` ist auch der Wert der Zeitraum-Tabs. */
+  from: string
+  until: string
+  /** Spanne mit Werten (abgerechnet oder vorläufig); null ohne jeden Wert. */
+  available: { from: string; until: string } | null
+  totals: UsageBucket
+  buckets: Array<UsageBucket>
+  /**
+   * Rechnungen, die den Zeitraum lückenlos abdecken – dann gilt deren
+   * Nettobetrag statt der viertelstundengenauen Summe. Null sonst.
+   */
+  invoiced: { amount_cents: number; consumption_kwh: number; invoice_numbers: Array<string> } | null
 }
 
 /** 201-Antwort eines Änderungsformulars. */

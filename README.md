@@ -4,7 +4,7 @@ Rewrite des Kundenportals als Monorepo:
 
 - **`api/`** — Laravel 12 (PHP 8.4), reine JSON-API. Externe Stammdaten (Verträge, Rechnungen, Zählpunkte, Lastgänge) kommen aus der KVS/Pebs `customer-data-api` und werden über [Saloon](https://docs.saloon.dev)-Connectoren in strikte readonly-DTOs gemappt — keine Fake-Eloquent-Models mehr. Lokale MySQL-DB nur für Auth, Ticket-/Postfach-Nachrichten, Uploads, Mail-Log und Börsenpreise. PHPStan level max, Pint, PHPUnit.
 - **`frontend/`** — TanStack Start (React) SPA mit TanStack Query, shadcn/ui (Tailwind v4) und Recharts. Deutsche UI, mandantenfähiges Theming (`voltaik-check`, `friesen-werk`).
-- **`mobile/`** — Expo-App (React Native, expo-router, TanStack Query) für den Kundenbereich: Startseite je nach Tarif (aktueller Börsenpreis bzw. „Auf einen Blick“), Profil, Rechnungen, Zählerstände inkl. Melden, Zahlungsmethode, Vertrags- und Tarifdetails. Dunkles Design, ein Farbsatz pro Mandant unter `mobile/src/theme/tenants/`.
+- **`mobile/`** — Expo-App (React Native, expo-router, TanStack Query) für den Kundenbereich: Startseite je nach Tarif (aktueller Börsenpreis bzw. „Auf einen Blick“), Profil, Rechnungen, Zählerstände inkl. Melden, Verbrauch (abgerechnete plus noch nicht abgerechnete Lastgänge je Tag/Monat/Jahr mit Kostensplit inkl. anteiliger Grundpreise, nur dynamische Tarife), Zahlungsmethode, Vertrags- und Tarifdetails. Dunkles Design, ein Farbsatz pro Mandant unter `mobile/src/theme/tenants/`.
 
 Auth: Sanctum SPA-Cookie-Modus (stateful, same-origin über Dev-Proxy bzw. nginx in Produktion). Die App tauscht ihre Zugangsdaten über `POST /api/auth/token` gegen einen Bearer-Token (Sanctum Personal Access Token) und widerruft ihn mit `DELETE /api/auth/token`.
 
@@ -26,7 +26,38 @@ make setup-mobile   # npm install in mobile/, .env aus .env.example
 make mobile         # expo start (Expo Go bzw. Dev-Client)
 ```
 
-In `mobile/.env` zeigt `EXPO_PUBLIC_API_URL` auf die laufende API — im Simulator/Emulator oder auf dem Gerät die LAN-IP des Rechners statt `localhost`. `EXPO_PUBLIC_CLIENT` wählt den Mandanten-Farbsatz.
+Die App braucht die laufende API (`make dev`) und spricht sie ausschließlich
+über `/api/*` mit Bearer-Token an — kein Cookie, kein CSRF, kein CORS
+(`php artisan serve --host=0.0.0.0` lauscht bereits auf allen Interfaces).
+Seed-Login: `kunde@example.com` / `password`.
+
+#### `.env` der API (`api/.env`) für die App
+
+| Variable | Zweck für die App |
+| --- | --- |
+| `APP_URL` | Muss die Adresse sein, unter der die App die API erreicht (z. B. `http://192.168.1.10:8000`). Signierte URLs und Mail-Links werden damit gebaut. |
+| `CLIENT` | Mandant (`voltaik-check` \| `friesen-werk`). Muss zu `EXPO_PUBLIC_CLIENT` passen — `GET /api/tenant` liefert Name, Kontakt und Feature-Flags, die App zeigt die Startseite je nach Flag `dynamic-electric-prices` (aus `config/clients/{slug}.php`). |
+| `CUSTOMER_DATA_API_URL`, `CUSTOMER_DATA_API_ROOT`, `CUSTOMER_DATA_API_TOKEN` | KVS/Pebs `customer-data-api`. Ohne diese Werte sind Verträge, Rechnungen, Zählerstände, Zahlungsmethode und Tarifdetails leer bzw. die Requests schlagen fehl. |
+| `MARKETPARTNER_API_URL`, `MARKETPARTNER_API_TOKEN` | Börsenpreise für die Startseite bei `friesen-werk`. Der Fetch läuft über den Scheduler (`app:fetch-market-prices`, alle 10 Minuten) und nur bei aktivem Flag `dynamic-electric-prices`; ohne Token bleibt `GET /api/customers/{id}/market-prices` leer. |
+| `MAIL_*`, `QUEUE_CONNECTION` | Änderungsformulare (Umzug, Rechnungsadresse, Bankverbindung, Abschlag, Zählerstand, Kündigung) erzeugen ein Ticket und eine Firmen-Mail über die Queue — `make dev` startet Queue-Worker und Scheduler mit, Mails landen in Mailpit. |
+| `SANCTUM_TOKEN_PREFIX` | Optional, Präfix für die Personal Access Tokens (Secret-Scanning). |
+
+Nicht benötigt für die App: `SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`,
+`FRONTEND_URL` (nur SPA/Cookie-Session und Mail-Links) sowie `CUSTOMER_API_S3_*`
+(die App listet Rechnungen nur, lädt keine PDFs).
+
+#### `.env` der App (`mobile/.env`)
+
+| Variable | Zweck |
+| --- | --- |
+| `EXPO_PUBLIC_API_URL` | Basis-URL der API **ohne** `/api`, z. B. `http://192.168.1.10:8000`. Im Simulator/Emulator und auf dem Gerät die LAN-IP des Rechners statt `localhost` (Android-Emulator alternativ `http://10.0.2.2:8000`). Der Wert wird beim Bundling eingebacken — nach einer Änderung `expo start --clear`. |
+| `EXPO_PUBLIC_CLIENT` | Mandanten-Slug wie `CLIENT` der API; wählt den Farbsatz unter `mobile/src/theme/tenants/`. |
+
+Der Token liegt im `expo-secure-store` und wird beim Start über
+`GET /api/auth/session` geprüft. Eine `401`-Antwort irgendeines Requests
+verwirft ihn lokal (Login-Screen); „Abmelden" widerruft ihn per
+`DELETE /api/auth/token`. `POST /api/auth/token` ist auf 10 Versuche pro
+Minute gedrosselt.
 
 ## Qualitäts-Gates
 

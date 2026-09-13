@@ -1,0 +1,6 @@
+{
+    "data": [
+        {"from": "2025-06-30", "usage_kwh": 6, "legal_ct": 55.56, "supplier_ct": 12, "stock_exchange_ct": 45},
+        {"from": "2025-07-01", "usage_kwh": 3, "legal_ct": 27.78, "supplier_ct": 6, "stock_exchange_ct": 20}
+    ]
+}

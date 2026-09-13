@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Charts\BilledLoadProfileController;
 use App\Http\Controllers\Charts\EdiLoadProfileController;
 use App\Http\Controllers\Charts\MarketPriceController;
+use App\Http\Controllers\Charts\UsageController;
 use Illuminate\Support\Facades\Route;
 
 // Chart data endpoints — market prices and billed/EDI load profiles,
@@ -21,6 +22,11 @@ Route::prefix('customers/{user}')
             ->whereNumber('contractNumber')
             ->middleware('feature:dynamic-electric-prices')
             ->name('customer.billed-load-profiles.show');
+
+        Route::get('contracts/{contractNumber}/usage', UsageController::class)
+            ->whereNumber('contractNumber')
+            ->middleware('feature:dynamic-electric-prices')
+            ->name('customer.usage.show');
 
         Route::get('contracts/{contractNumber}/edi-load-profiles', EdiLoadProfileController::class)
             ->whereNumber('contractNumber')

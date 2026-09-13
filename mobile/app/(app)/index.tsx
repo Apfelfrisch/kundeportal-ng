@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { ArrowLeftRight, Banknote, CreditCard, FileText, Gauge, Receipt, SquarePen, Tag, User } from 'lucide-react-native'
+import { ArrowLeftRight, Banknote, ChartColumn, CreditCard, FileText, Gauge, Receipt, SquarePen, Tag, User } from 'lucide-react-native'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -8,6 +8,7 @@ import { Card } from '@/components/Card'
 import { ContractScreen } from '@/components/ContractScreen'
 import { ListRow } from '@/components/ListRow'
 import { CurrentPriceCard, GlanceCard } from '@/components/StartCards'
+import { UsageMonthCard } from '@/components/UsageMonthCard'
 import { Txt } from '@/components/Txt'
 import { addressLine, latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
 import { formatCents, formatCt, formatDate, formatEuro, maskIban } from '@/lib/format'
@@ -77,6 +78,7 @@ function StartContent({ contract }: { contract: Contract }) {
   return (
     <>
       {contract.is_dynamic ? <CurrentPriceCard contract={contract} /> : <GlanceCard contract={contract} />}
+      {contract.is_dynamic ? <UsageMonthCard contract={contract} /> : null}
       <Card padding={0} gap={0}>
         <ListRow
           icon={SquarePen}
@@ -106,6 +108,14 @@ function StartContent({ contract }: { contract: Contract }) {
           hint={reading?.reading_date ? `Zuletzt gemeldet am ${formatDate(reading.reading_date)}` : 'Noch kein Zählerstand'}
           onPress={() => router.push('/(app)/zaehlerstaende')}
         />
+        {contract.is_dynamic ? (
+          <ListRow
+            icon={ChartColumn}
+            label="Verbrauch"
+            hint="Abgerechnete Werte je Tag, Monat und Jahr"
+            onPress={() => router.push('/(app)/verbrauch')}
+          />
+        ) : null}
         <ListRow
           icon={CreditCard}
           label="Zahlungen"

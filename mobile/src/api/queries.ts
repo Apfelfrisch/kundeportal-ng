@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from './client'
 import type {
@@ -10,6 +10,8 @@ import type {
   Profile,
   ProfileResponse,
   Tenant,
+  UsagePeriod,
+  UsageWindow,
 } from './types'
 
 /** Query-Keys und Hooks des Kundenbereichs – alle Daten laufen über TanStack Query. */
@@ -21,7 +23,12 @@ export const queryKeys = {
     ['customers', userId, 'contracts', contractNumber] as const,
   profile: (userId: number) => ['customers', userId, 'profile'] as const,
   marketPrices: (userId: number) => ['customers', userId, 'market-prices'] as const,
+  usage: (userId: number, contractNumber: number, params: UsageParams) =>
+    ['customers', userId, 'contracts', contractNumber, 'usage', params] as const,
 }
+
+/** Kalenderzeitraum (`date` null = der mit den neuesten Werten) oder eigener Zeitraum, `until` inklusive. */
+export type UsageParams = { period: UsagePeriod; date: string | null } | { from: string; until: string }
 
 export function useTenant() {
   return useQuery({
@@ -66,6 +73,34 @@ export function useMarketPrices(userId: number, enabled: boolean) {
     enabled,
     staleTime: 5 * 60 * 1000,
     retry: false,
+  })
+}
+
+/**
+ * Verbrauch eines Zeitraums. Als Options-Objekt, damit Nachbar-Zeiträume
+ * mit derselben Definition vorgeladen werden können.
+ */
+export function usageQueryOptions(userId: number, contractNumber: number, params: UsageParams) {
+  const query = 'period' in params ? { period: params.period, date: params.date ?? undefined } : params
+
+  return queryOptions({
+    queryKey: queryKeys.usage(userId, contractNumber, params),
+    queryFn: async () =>
+      (await api<ApiResponse<UsageWindow>>(`customers/${userId}/contracts/${contractNumber}/usage`, { query })).data,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+}
+
+/**
+ * Beim Wechsel von Zeitraum oder Tab bleibt die vorige Antwort sichtbar,
+ * bis die neue da ist. Nur für dynamische Verträge (`enabled` von außen).
+ */
+export function useUsage(userId: number, contractNumber: number, params: UsageParams, enabled: boolean) {
+  return useQuery({
+    ...usageQueryOptions(userId, contractNumber, params),
+    enabled,
+    placeholderData: keepPreviousData,
   })
 }
 

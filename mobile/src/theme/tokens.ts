@@ -22,6 +22,12 @@ export interface ThemeTokens {
   iconBg: string
   /** Balken des Preisverlaufs (nicht aktuelle Stunde). */
   bar: string
+  /** Verbrauchsdiagramm: Verbrauchsbalken, die drei Kostenanteile, Preislinie. */
+  chartUsage: string
+  chartExchange: string
+  chartSupplier: string
+  chartLegal: string
+  chartLine: string
   /** Primäre Aktion. */
   btnBg: string
   btnFg: string

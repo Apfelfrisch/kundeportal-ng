@@ -26,7 +26,10 @@ final class InvoiceResource extends JsonResource
             'invoice_number' => $this->invoice->invoiceNumber,
             'invoice_date' => $this->invoice->invoiceDate?->toDateString(),
             'invoice_from' => $this->invoice->invoiceFrom?->toDateString(),
+            'invoice_until' => $this->invoice->invoiceUntil?->toDateString(),
             'consumption' => $this->invoice->consumption,
+            'amount_cents' => $this->invoice->amountCents,
+            'tax_amount_cents' => $this->invoice->taxAmountCents,
             'canceled_at' => $this->invoice->canceledAt?->toDateString(),
         ];
     }
