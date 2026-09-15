@@ -1,6 +1,6 @@
 import type { MarketPrice } from '@/api/types'
 
-import { hourRange, priceOverview } from './prices'
+import { hourRange, priceOverview, priceTicks } from './prices'
 
 function quarterHours(day: string, hourly: Array<number>, offsets: Array<number> = [0, 0, 0, 0]): Array<MarketPrice> {
   const prices: Array<MarketPrice> = []
@@ -95,5 +95,19 @@ describe('priceOverview', () => {
 describe('hourRange', () => {
   it('formats the hour window', () => {
     expect(hourRange(14)).toBe('14–15 Uhr')
+  })
+})
+
+describe('priceTicks', () => {
+  it('rundet auf Stufen 1, 2 oder 5 mal Zehnerpotenz und endet unter dem Maximum', () => {
+    expect(priceTicks(32)).toEqual([0, 10, 20, 30])
+    expect(priceTicks(40.5)).toEqual([0, 20, 40])
+    expect(priceTicks(40)).toEqual([0, 20, 40])
+    expect(priceTicks(0.28)).toEqual([0, 0.1, 0.2])
+    expect(priceTicks(9)).toEqual([0, 5])
+  })
+
+  it('liefert nur die Nulllinie ohne positive Werte', () => {
+    expect(priceTicks(0)).toEqual([0])
   })
 })

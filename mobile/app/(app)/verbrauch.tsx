@@ -39,7 +39,10 @@ function Usage({ contract }: { contract: Contract }) {
   const usage = useUsage(user.id, contract.contract_number, { period, date }, contract.is_dynamic)
   const settled = usage.isFetching || usage.isPlaceholderData ? null : (usage.data ?? null)
   const contractNumber = contract.contract_number
-  const options = useMemo(() => periodOptions(period, usage.data?.available ?? null), [period, usage.data?.available])
+  // Tage nur aus dem angezeigten Monat: Ohne Auswahl liefert die API den
+  // neuesten Tag, nach einem Monats-Tab dessen ersten Tag.
+  const shown = usage.data?.from ?? null
+  const options = useMemo(() => periodOptions(period, usage.data?.available ?? null, shown), [period, usage.data?.available, shown])
 
   useEffect(() => {
     if (settled === null) return

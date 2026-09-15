@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useRef, useState } from 'react'
 import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
-import Svg, { Line, Polyline, Rect } from 'react-native-svg'
+import Svg, { Line, Path, Rect } from 'react-native-svg'
 
 import type { UsageBucket, UsagePeriod } from '@/api/types'
 import { useScrollLock } from '@/components/Screen'
@@ -8,7 +8,7 @@ import { Txt } from '@/components/Txt'
 import { SHARE_COLORS } from '@/lib/chartColors'
 import { formatCt, formatCtValue, formatEuro, formatEuroValue, formatKwh, formatKwhValue } from '@/lib/format'
 import { tick } from '@/lib/haptics'
-import { axisLabels, bucketLabel, niceMax, stackedSegments, tooltipPrice, type UsageUnit } from '@/lib/usage'
+import { axisLabels, bucketLabel, niceMax, smoothPath, stackedSegments, tooltipPrice, type Point, type UsageUnit } from '@/lib/usage'
 import { useTheme } from '@/theme'
 
 interface UsageChartProps {
@@ -17,13 +17,12 @@ interface UsageChartProps {
   buckets: ReadonlyArray<UsageBucket>
   /** Höhe der Zeichenfläche (Standard 200). */
   height?: number
-  /** Achsentitel „kWh“/„€“ und „ct/kWh“ über dem Diagramm. */
-  axisTitles?: boolean
 }
 
 const DEFAULT_PLOT_HEIGHT = 200
 const TOOLTIP_HEIGHT = 36
-const AXIS_WIDTH = 44
+const AXIS_WIDTH = 48
+const AXIS_GAP = 10
 const PROVISIONAL_OPACITY = 0.45
 const DIM_OPACITY = 0.45
 
@@ -36,7 +35,7 @@ const DIM_OPACITY = 0.45
  * zeigt den berührten Balken im Detail; der Screen scrollt in dieser Zeit
  * nicht.
  */
-export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT_PLOT_HEIGHT, axisTitles = true }: UsageChartProps) {
+export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT_PLOT_HEIGHT }: UsageChartProps) {
   const theme = useTheme()
   const lockScroll = useScrollLock()
   const [width, setWidth] = useState(0)
@@ -57,14 +56,14 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
     const y = (amount: number, max: number): number => plotHeight - Math.min(plotHeight, Math.max(0, (amount / max) * plotHeight))
 
     // Die Preislinie läuft nur durch Balken mit Werten – jede Lücke beginnt einen neuen Abschnitt.
-    const runs: Array<Array<string>> = [[]]
+    const runs: Array<Array<Point>> = [[]]
     buckets.forEach((bucket, index) => {
       const run = runs[runs.length - 1] ?? []
       if (bucket.price_ct_kwh === null) {
         if (run.length > 0) runs.push([])
         return
       }
-      run.push(`${center(index)},${y(bucket.price_ct_kwh, rightMax)}`)
+      run.push({ x: center(index), y: y(bucket.price_ct_kwh, rightMax) })
     })
 
     const bars = buckets.map((bucket, index) => {
@@ -83,7 +82,7 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
       return { x, total: 0, provisional: 0, segments }
     })
 
-    return { leftMax, rightMax, runs: runs.filter((run) => run.length > 1), bars, labels: axisLabels(period, buckets) }
+    return { leftMax, rightMax, runs: runs.filter((run) => run.length > 1).map(smoothPath), bars, labels: axisLabels(period, buckets) }
     // slot und barWidth folgen aus width und count, value aus unit.
   }, [buckets, unit, width, period, plotHeight])
 
@@ -122,8 +121,7 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
     return [
       bucketLabel(period, bucket),
       formatLeft(value(bucket)),
-      price === null ? null : `${formatCt(price, 1)}/kWh`,
-      bucket.unbilled_kwh > 0 ? 'vorläufig' : null,
+      price === null ? null : formatCt(price, 1),
     ]
       .filter((part) => part !== null)
       .join(' · ')
@@ -131,20 +129,18 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
 
   return (
     <View style={styles.wrap}>
-      {axisTitles ? (
-        <View style={styles.axisRow}>
-          <Txt variant="small" style={styles.axisTitle}>
-            {unit === 'kwh' ? 'kWh' : '€'}
-          </Txt>
-          <Txt variant="small" style={[styles.axisTitle, styles.right]}>
-            ct/kWh
-          </Txt>
-        </View>
-      ) : null}
+      <View style={styles.unitRow}>
+        <Txt variant="small" style={[styles.unit, styles.axis]}>
+          {unit === 'kwh' ? 'kWh' : '€'}
+        </Txt>
+        <Txt variant="small" style={[styles.unit, styles.axis, styles.axisRight]}>
+          ct
+        </Txt>
+      </View>
       <View style={styles.plotRow}>
         <View style={[styles.axis, { height: plotHeight }]}>
           {[geometry.leftMax, geometry.leftMax / 2, 0].map((amount, index) => (
-            <Txt key={index} variant="small" style={styles.axisLabel}>
+            <Txt key={index} variant="small" style={styles.axisLabel} numberOfLines={1}>
               {unit === 'kwh' ? formatKwhValue(amount) : formatEuroValue(amount)}
             </Txt>
           ))}
@@ -164,13 +160,15 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
           {width > 0 ? (
             <Svg width={width} height={plotHeight} pointerEvents="none">
               {[0, 0.5, 1].map((fraction) => (
+                // Eine feine Linie je Achsenschritt, wie im Preisverlauf: Grundlinie
+                // in Rahmenfarbe, die Stufen darüber in Trennlinienfarbe.
                 <Line
                   key={fraction}
                   x1={0}
                   x2={width}
                   y1={plotHeight - fraction * plotHeight}
                   y2={plotHeight - fraction * plotHeight}
-                  stroke={theme.border}
+                  stroke={fraction === 0 ? theme.border : theme.divider}
                   strokeWidth={StyleSheet.hairlineWidth}
                 />
               ))}
@@ -211,7 +209,7 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
                 ))
               })}
               {geometry.runs.map((run, index) => (
-                <Polyline key={index} points={run.join(' ')} fill="none" stroke={theme.chartLine} strokeWidth={1.5} strokeLinejoin="round" />
+                <Path key={index} d={run} fill="none" stroke={theme.chartLine} strokeWidth={1.5} strokeLinecap="round" />
               ))}
             </Svg>
           ) : null}
@@ -232,7 +230,7 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
         </View>
         <View style={[styles.axis, styles.axisRight, { height: plotHeight }]}>
           {[geometry.rightMax, geometry.rightMax / 2, 0].map((amount, index) => (
-            <Txt key={index} variant="small" style={styles.axisLabel}>
+            <Txt key={index} variant="small" style={styles.axisLabel} numberOfLines={1}>
               {formatCtValue(amount, 0)}
             </Txt>
           ))}
@@ -251,13 +249,14 @@ export function UsageChart({ period, unit, buckets, height: plotHeight = DEFAULT
 
 const styles = StyleSheet.create({
   wrap: { gap: 6 },
-  axisRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  axisTitle: { fontSize: 11 },
-  right: { textAlign: 'right' },
+  // Einheit je Achse über den Werten, bündig mit der Achsenspalte und mit etwas Abstand zu den Zahlen.
+  unitRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  unit: { fontSize: 11, textAlign: 'center' },
   plotRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  axis: { width: AXIS_WIDTH, justifyContent: 'space-between', paddingRight: 6 },
-  axisRight: { paddingRight: 0, paddingLeft: 6 },
-  axisLabel: { fontSize: 11, fontVariant: ['tabular-nums'], lineHeight: 12 },
+  axis: { width: AXIS_WIDTH, justifyContent: 'space-between', paddingRight: AXIS_GAP },
+  axisRight: { paddingRight: 0, paddingLeft: AXIS_GAP },
+  // Werte und Einheit mittig in derselben Spalte, damit die Einheit genau über den Zahlen steht.
+  axisLabel: { fontSize: 11, fontVariant: ['tabular-nums'], lineHeight: 12, textAlign: 'center' },
   plot: { flex: 1 },
   // Liegt in der Zeichenfläche – ein reservierter Streifen darüber hätte nur dafür Platz gekostet.
   tooltip: {

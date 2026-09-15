@@ -52,7 +52,7 @@ export function UsageMonthCard({ contract }: { contract: Contract }) {
                 {data.totals.unbilled_kwh > 0 ? ' · teils vorläufig' : ''}
               </Txt>
             </View>
-            <UsageChart period={data.period} unit="kwh" buckets={data.buckets} height={110} axisTitles={false} />
+            <UsageChart period={data.period} unit="kwh" buckets={data.buckets} height={110} />
           </>
         )}
       </Card>

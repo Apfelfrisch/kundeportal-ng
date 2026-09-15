@@ -7,7 +7,6 @@ import type { ThemeTokens } from '../tokens'
 export const friesenWerk: ThemeTokens = {
   slug: 'friesen-werk',
   bg: '#1d1d1b',
-  header: '#222222',
   card: '#2a2a2a',
   border: '#333333',
   divider: '#444444',

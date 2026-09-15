@@ -1,5 +1,6 @@
 import Svg, { Circle, Path } from 'react-native-svg'
 
+import { priceColor, priceColorFaint } from '@/lib/priceColor'
 import { useTheme } from '@/theme'
 
 interface PriceGaugeProps {
@@ -11,8 +12,6 @@ interface PriceGaugeProps {
 const SEGMENTS = 36
 const START_ANGLE = 135
 const SWEEP = 270
-const HUE_START = 143
-const HUE_END = 0
 
 function point(cx: number, cy: number, radius: number, angle: number): { x: number; y: number } {
   const rad = (angle * Math.PI) / 180
@@ -23,10 +22,6 @@ function arc(cx: number, cy: number, radius: number, from: number, to: number): 
   const a = point(cx, cy, radius, from)
   const b = point(cx, cy, radius, to)
   return `M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}`
-}
-
-function hueAt(position: number): number {
-  return HUE_START + (HUE_END - HUE_START) * position
 }
 
 /**
@@ -52,7 +47,7 @@ export function PriceGauge({ fraction, size = 48 }: PriceGaugeProps) {
           <Path
             key={index}
             d={arc(center, center, radius, from, Math.min(to, START_ANGLE + SWEEP))}
-            stroke={lit ? `hsl(${hueAt(position)}, 70%, 55%)` : `hsl(${hueAt(position)}, 30%, 27%)`}
+            stroke={lit ? priceColor(position) : priceColorFaint(position)}
             strokeWidth={stroke}
             fill="none"
           />
@@ -63,7 +58,7 @@ export function PriceGauge({ fraction, size = 48 }: PriceGaugeProps) {
           cx={marker.x}
           cy={marker.y}
           r={size * (4.5 / 48)}
-          fill={`hsl(${hueAt(fraction)}, 70%, 55%)`}
+          fill={priceColor(fraction)}
           stroke={theme.card}
           strokeWidth={size * (2 / 48)}
         />

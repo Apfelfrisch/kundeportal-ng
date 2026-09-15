@@ -108,3 +108,19 @@ export function priceOverview(
 export function hourRange(hour: number): string {
   return `${hour}–${hour + 1} Uhr`
 }
+
+/**
+ * Runde Achsenstufen von 0 bis höchstens `max` (Schritt 1·10ⁿ, 2·10ⁿ oder
+ * 5·10ⁿ, etwa drei bis vier Stufen). Die Achse endet an der letzten Stufe
+ * unter dem Tageshoch, nicht an der nächsten darüber; `[0]` ohne positive
+ * Werte.
+ */
+export function priceTicks(max: number): Array<number> {
+  if (!(max > 0)) return [0]
+  const raw = max / 4
+  const magnitude = 10 ** Math.floor(Math.log10(raw))
+  const step = [1, 2, 5, 10].map((factor) => factor * magnitude).find((candidate) => candidate > raw) ?? magnitude * 10
+  const ticks: Array<number> = []
+  for (let level = 0; level <= max + 1e-9; level += step) ticks.push(Math.round(level * 1e6) / 1e6)
+  return ticks
+}

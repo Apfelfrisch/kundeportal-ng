@@ -5,9 +5,8 @@
  */
 export interface ThemeTokens {
   slug: string
-  /** Seitenhintergrund und (leicht abgesetzte) Kopfzeile. */
+  /** Seitenhintergrund, auch der Kopfzeile. */
   bg: string
-  header: string
   /** Kartenfläche, Kartenrand und Trennlinien innerhalb einer Karte. */
   card: string
   border: string

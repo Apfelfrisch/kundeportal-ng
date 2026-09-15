@@ -1,19 +1,16 @@
 import { Stack } from 'expo-router'
 
+import { ScreenHeader } from '@/components/ScreenHeader'
 import { ContractProvider } from '@/providers/ContractProvider'
 import { theme } from '@/theme'
 
-/** Angemeldeter Bereich: Startseite ohne Kopfzeile, Unterseiten mit Zurück. */
+/** Angemeldeter Bereich: Startseite ohne Kopfzeile, Unterseiten mit kompakter Kopfzeile und Zurück. */
 export default function AppLayout() {
   return (
     <ContractProvider>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: theme.header },
-          headerTintColor: theme.accent,
-          headerTitleStyle: { color: theme.fg, fontWeight: '600', fontSize: 17 },
-          headerShadowVisible: false,
-          headerBackButtonDisplayMode: 'minimal',
+          header: (props) => <ScreenHeader {...props} />,
           contentStyle: { backgroundColor: theme.bg },
         }}
       >

@@ -8,7 +8,9 @@ import {
   niceMax,
   periodOptions,
   periodTitle,
+  smoothPath,
   stackedSegments,
+  wholePercents,
   tooltipPrice,
   usageNote,
 } from './usage'
@@ -38,6 +40,18 @@ describe('periodOptions', () => {
     const options = periodOptions('day', { from: '2025-06-29', until: '2025-07-02' })
     expect(options.map((option) => option.date)).toEqual(['2025-06-29', '2025-06-30', '2025-07-01', '2025-07-02'])
     expect(options[0]?.label).toBe('29. Jun')
+  })
+
+  it('limits days to the month of the shown day, clamped to the span', () => {
+    const june = periodOptions('day', { from: '2025-05-20', until: '2025-07-02' }, '2025-06-10')
+    expect(june).toHaveLength(30)
+    expect(june[0]?.date).toBe('2025-06-01')
+    expect(june[29]?.date).toBe('2025-06-30')
+    expect(periodOptions('day', { from: '2025-05-20', until: '2025-07-02' }, '2025-07-01').map((option) => option.date)).toEqual([
+      '2025-07-01',
+      '2025-07-02',
+    ])
+    expect(periodOptions('day', { from: '2025-05-20', until: '2025-07-02' }, '2025-08-01')).toEqual([])
   })
 
   it('lists months by their first day and adds the year across years', () => {
@@ -88,6 +102,41 @@ describe('labels', () => {
   })
 })
 
+describe('smoothPath', () => {
+  it('returns an empty path for fewer than two points', () => {
+    expect(smoothPath([])).toBe('')
+    expect(smoothPath([{ x: 0, y: 0 }])).toBe('')
+  })
+
+  it('starts at the first point and ends with a curve to the last', () => {
+    const path = smoothPath([
+      { x: 0, y: 10 },
+      { x: 10, y: 0 },
+      { x: 20, y: 10 },
+    ])
+    expect(path.startsWith('M0,10 C')).toBe(true)
+    expect(path.endsWith(' 20,10')).toBe(true)
+    expect(path.split('C')).toHaveLength(3)
+  })
+
+  it('does not overshoot at a peak', () => {
+    // The tangent is zero where the direction changes, so the control points around the peak sit at its height.
+    expect(smoothPath([
+      { x: 0, y: 10 },
+      { x: 10, y: 0 },
+      { x: 20, y: 10 },
+    ])).toBe('M0,10 C3.33,6.67 6.67,0 10,0 C13.33,0 16.67,6.67 20,10')
+  })
+
+  it('stays straight on a straight line', () => {
+    expect(smoothPath([
+      { x: 0, y: 0 },
+      { x: 10, y: 5 },
+      { x: 20, y: 10 },
+    ])).toBe('M0,0 C3.33,1.67 6.67,3.33 10,5 C13.33,6.67 16.67,8.33 20,10')
+  })
+})
+
 describe('niceMax', () => {
   it('rounds up to a friendly axis maximum', () => {
     expect(niceMax(575.55)).toBe(600)
@@ -106,17 +155,25 @@ describe('costSplit', () => {
     expect(split.share).toEqual({ exchange: 0.5, supplier: 1 / 6, legal: 1 / 3 })
   })
 
-  it('stacks only positive segments and scales them down to a reduced total', () => {
+  it('rounds shares to whole percents that add up to 100', () => {
+    // 49.6 + 44.6 + 5.8 → naiv 50 + 45 + 6 = 101
+    expect(wholePercents({ exchange: 0.496, legal: 0.446, supplier: 0.058 })).toEqual({ exchange: 50, legal: 44, supplier: 6 })
+    expect(wholePercents({ exchange: 1 / 3, legal: 1 / 3, supplier: 1 / 3 })).toEqual({ exchange: 34, legal: 33, supplier: 33 })
+    expect(wholePercents({ exchange: 0, legal: 0, supplier: 0 })).toEqual({ exchange: 0, legal: 0, supplier: 0 })
+    expect(wholePercents(costSplit(bucket('2025-06-10T00:00:00')).share)).toEqual({ exchange: 50, legal: 33, supplier: 17 })
+  })
+
+  it('stacks only positive segments with the supplier share on top and scales them down to a reduced total', () => {
     expect(stackedSegments(bucket('2025-06-10T00:00:00'))).toEqual([
       { key: 'exchange', ct: 150 },
-      { key: 'supplier', ct: 50 },
       { key: 'legal', ct: 100 },
+      { key: 'supplier', ct: 50 },
     ])
     // Negativer Börsenpreis: 100 + 50 - 30 = 120 Gesamtkosten
     const negative = bucket('2025-06-10T00:00:00', { stock_exchange_ct: -30, cost_ct: 120 })
     expect(stackedSegments(negative)).toEqual([
-      { key: 'supplier', ct: 40 },
       { key: 'legal', ct: 80 },
+      { key: 'supplier', ct: 40 },
     ])
     expect(stackedSegments(bucket('2025-06-10T00:00:00', { has_data: false, cost_ct: 0, legal_ct: 0, supplier_ct: 0, stock_exchange_ct: 0 }))).toEqual([])
   })

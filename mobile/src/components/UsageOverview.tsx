@@ -24,7 +24,7 @@ interface UsageOverviewProps {
 }
 
 /**
- * Summenkarte, Diagramm und Kostenaufteilung eines Verbrauchszeitraums –
+ * Summenkarte, Diagramm und (in €) Kostenaufteilung eines Verbrauchszeitraums –
  * auf der Verbrauchsseite wie in der Rechnungsansicht.
  */
 export function UsageOverview({ data, unit, busy = false, busyLabel, title, legend = true }: UsageOverviewProps) {
@@ -65,12 +65,12 @@ export function UsageOverview({ data, unit, busy = false, busyLabel, title, lege
           </View>
         ) : null}
       </View>
-      {totals.has_data ? (
+      {unit === 'eur' && totals.has_data ? (
         <View style={stale}>
           <CostSplitCard totals={totals} />
         </View>
       ) : null}
-      {legend ? <ChartLegendCard /> : null}
+      {legend ? <ChartLegendCard unit={unit} /> : null}
     </View>
   )
 }

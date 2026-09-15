@@ -39,14 +39,29 @@ function monthShort(month: number): string {
 }
 
 /**
- * Alle Tage, Monate bzw. Jahre der abgerechneten Spanne, älteste zuerst.
- * Ohne Spanne gibt es keine Tabs.
+ * Die Tage, Monate bzw. Jahre der abgerechneten Spanne, älteste zuerst.
+ * Ohne Spanne gibt es keine Tabs. Tage gibt es nur aus dem Monat von
+ * `selected` (dem angezeigten Zeitraum) – ohne Auswahl aus dem ganzen
+ * Zeitraum.
  */
-export function periodOptions(period: UsagePeriod, available: { from: string; until: string } | null): Array<PeriodOption> {
+export function periodOptions(
+  period: UsagePeriod,
+  available: { from: string; until: string } | null,
+  selected: string | null = null,
+): Array<PeriodOption> {
   if (available === null) return []
 
-  const from = parseIsoDate(available.from)
-  const until = parseIsoDate(available.until)
+  let from = parseIsoDate(available.from)
+  let until = parseIsoDate(available.until)
+
+  if (period === 'day' && selected !== null) {
+    const month = parseIsoDate(selected)
+    const first = new Date(month.getFullYear(), month.getMonth(), 1)
+    const last = new Date(month.getFullYear(), month.getMonth() + 1, 0)
+    if (first > from) from = first
+    if (last < until) until = last
+  }
+
   if (until < from) return []
 
   const options: Array<PeriodOption> = []
@@ -115,12 +130,65 @@ export function niceMax(value: number): number {
   return Math.round(nice * base * 1e6) / 1e6
 }
 
+export interface Point {
+  x: number
+  y: number
+}
+
+/**
+ * SVG-Pfad als weiche Kurve durch die Punkte (monotone kubische Interpolation
+ * nach Fritsch–Carlson): Die Linie bleibt zwischen zwei Punkten immer
+ * zwischen deren Werten, schwingt also nicht über Spitzen hinaus. Weniger als
+ * zwei Punkte ergeben einen leeren Pfad.
+ */
+export function smoothPath(points: ReadonlyArray<Point>): string {
+  if (points.length < 2) return ''
+  const count = points.length
+  const slopes: Array<number> = []
+  for (let index = 0; index < count - 1; index += 1) {
+    const from = points[index] as Point
+    const to = points[index + 1] as Point
+    const dx = to.x - from.x
+    slopes.push(dx === 0 ? 0 : (to.y - from.y) / dx)
+  }
+
+  // Tangente je Punkt: an den Enden die Sekantensteigung, dazwischen das
+  // harmonische Mittel der Nachbarn – null, sobald die Richtung wechselt.
+  const tangents = points.map((_, index) => {
+    if (index === 0) return slopes[0] as number
+    if (index === count - 1) return slopes[count - 2] as number
+    const before = slopes[index - 1] as number
+    const after = slopes[index] as number
+    if (before * after <= 0) return 0
+    return (2 * before * after) / (before + after)
+  })
+
+  const first = points[0] as Point
+  const parts = [`M${round(first.x)},${round(first.y)}`]
+  for (let index = 0; index < count - 1; index += 1) {
+    const from = points[index] as Point
+    const to = points[index + 1] as Point
+    const third = (to.x - from.x) / 3
+    const c1x = from.x + third
+    const c1y = from.y + third * (tangents[index] as number)
+    const c2x = to.x - third
+    const c2y = to.y - third * (tangents[index + 1] as number)
+    parts.push(`C${round(c1x)},${round(c1y)} ${round(c2x)},${round(c2y)} ${round(to.x)},${round(to.y)}`)
+  }
+  return parts.join(' ')
+}
+
+function round(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
 export type CostShare = 'exchange' | 'supplier' | 'legal'
 
+/** Reihenfolge in Aufteilung und Balken (von unten nach oben) – unser Aufschlag steht immer zuletzt bzw. ganz oben. */
 export const COST_SHARES: ReadonlyArray<{ key: CostShare; label: string }> = [
   { key: 'exchange', label: 'Börsenpreis' },
-  { key: 'supplier', label: 'Unser Aufschlag' },
   { key: 'legal', label: 'Abgaben/Umlagen' },
+  { key: 'supplier', label: 'Unser Aufschlag' },
 ]
 
 export interface CostSplit {
@@ -147,9 +215,32 @@ export function costSplit(bucket: UsageBucket): CostSplit {
 }
 
 /**
- * Segmente eines gestapelten Kostenbalkens in Cent (nur positive Anteile).
- * Drückt ein negativer Anteil die Summe, werden die Segmente so skaliert,
- * dass der Balken die tatsächlichen Gesamtkosten zeigt.
+ * Anteile als ganze Prozent, die zusammen 100 ergeben (Hare-Niemeyer):
+ * Erst abrunden, dann die fehlenden Punkte an die größten Reste vergeben.
+ * Ohne Anteile (alles 0) bleiben alle bei 0.
+ */
+export function wholePercents(share: Record<CostShare, number>): Record<CostShare, number> {
+  const keys = COST_SHARES.map(({ key }) => key)
+  const exact = keys.map((key) => share[key] * 100)
+  const floored = exact.map((value) => Math.floor(value))
+  const total = Math.round(exact.reduce((sum, value) => sum + value, 0))
+  let missing = total - floored.reduce((sum, value) => sum + value, 0)
+  const byRemainder = keys
+    .map((_, index) => index)
+    .sort((a, b) => (exact[b] as number) - (floored[b] as number) - ((exact[a] as number) - (floored[a] as number)))
+  for (const index of byRemainder) {
+    if (missing <= 0) break
+    floored[index] = (floored[index] as number) + 1
+    missing -= 1
+  }
+  return Object.fromEntries(keys.map((key, index) => [key, floored[index]])) as Record<CostShare, number>
+}
+
+/**
+ * Segmente eines gestapelten Kostenbalkens in Cent (nur positive Anteile),
+ * von unten nach oben in der Reihenfolge von COST_SHARES. Drückt ein
+ * negativer Anteil die Summe, werden die Segmente so skaliert, dass der
+ * Balken die tatsächlichen Gesamtkosten zeigt.
  */
 export function stackedSegments(bucket: UsageBucket): Array<{ key: CostShare; ct: number }> {
   const { ct } = costSplit(bucket)
@@ -188,13 +279,6 @@ export function invoicedNote(invoiced: NonNullable<UsageWindow['invoiced']>): st
   const numbers = invoiced.invoice_numbers
   const label = numbers.length === 1 ? `Rechnung ${numbers[0]}` : `${numbers.length} Rechnungen`
   return `Nettobetrag laut ${label} (${formatKwh(invoiced.consumption_kwh)} abgerechnet). Der Verlauf unten ist viertelstundengenau und kann in der Summe leicht abweichen.`
-}
-
-const percentFormat = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 })
-
-/** `0.12345` → `"12 %"` */
-export function formatPercent(share: number): string {
-  return `${percentFormat.format(share * 100)} %`
 }
 
 /** Preis im Tooltip: gewichtet, wenn verbraucht wurde, sonst der Zeitraumdurchschnitt. */

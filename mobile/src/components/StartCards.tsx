@@ -1,18 +1,16 @@
 import { useState } from 'react'
-import { StyleSheet, Switch, View } from 'react-native'
+import { StyleSheet, View, type NativeSyntheticEvent, type TextLayoutEventData } from 'react-native'
 
 import { useMarketPrices } from '@/api/queries'
 import type { Contract } from '@/api/types'
-import { Badge } from '@/components/Badge'
 import { Card } from '@/components/Card'
 import { PriceGauge } from '@/components/PriceGauge'
 import { PriceStrip } from '@/components/PriceStrip'
 import { Txt } from '@/components/Txt'
 import { latestMeterCount, primaryMeterPoint } from '@/lib/contracts'
-import { formatCents, formatCtValue, formatDate, formatDateValue, formatKwh } from '@/lib/format'
-import { priceOverview } from '@/lib/prices'
+import { formatCents, formatCtValue, formatDate, formatKwh } from '@/lib/format'
+import { hourRange, priceOverview } from '@/lib/prices'
 import { useUser } from '@/providers/AuthProvider'
-import { useTheme } from '@/theme'
 
 /** Startseite ohne dynamischen Tarif: Abschlag und letzter Zählerstand. */
 export function GlanceCard({ contract }: { contract: Contract }) {
@@ -50,17 +48,29 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
   )
 }
 
-/** Startseite mit dynamischem Tarif: Preis der laufenden Stunde und Tagesverlauf. */
+/**
+ * Startseite mit dynamischem Tarif: Preis der laufenden Viertelstunde und
+ * Tagesverlauf, immer inklusive der zusätzlichen Preisbestandteile (der
+ * Schalter dafür gehört auf die Börsenpreis-Seite).
+ */
 export function CurrentPriceCard({ contract }: { contract: Contract }) {
   const user = useUser()
-  const theme = useTheme()
   const prices = useMarketPrices(user.id, contract.is_dynamic)
-  const [withComponents, setWithComponents] = useState(true)
+  // Passt „Heutiger Strompreis“ nicht neben Ring und Preis in eine Zeile,
+  // bleibt nur „Strompreis“ stehen.
+  const [shortLabel, setShortLabel] = useState(false)
+  // Stunde unter dem Finger auf dem Tagesverlauf: solange gesetzt, zeigt die
+  // Kopfzeile deren Preis statt des Preises der laufenden Viertelstunde.
+  const [selectedHour, setSelectedHour] = useState<number | null>(null)
+
+  function checkLabelWidth(event: NativeSyntheticEvent<TextLayoutEventData>) {
+    if (!shortLabel && event.nativeEvent.lines.length > 1) setShortLabel(true)
+  }
 
   if (prices.isPending) {
     return (
       <Card>
-        <Txt variant="label">Aktueller Strompreis</Txt>
+        <Txt variant="label">Heutiger Strompreis</Txt>
         <Txt variant="muted">Preise werden geladen …</Txt>
       </Card>
     )
@@ -69,61 +79,53 @@ export function CurrentPriceCard({ contract }: { contract: Contract }) {
   if (prices.isError) {
     return (
       <Card>
-        <Txt variant="label">Aktueller Strompreis</Txt>
+        <Txt variant="label">Heutiger Strompreis</Txt>
         <Txt variant="muted">Die Börsenpreise sind gerade nicht verfügbar.</Txt>
       </Card>
     )
   }
 
   const components = prices.data.tariff_costs?.total_ct ?? contract.prices.calculated_dynamic_working_price_ct ?? 0
-  const overview = priceOverview(prices.data.prices, withComponents ? components : 0)
+  const overview = priceOverview(prices.data.prices, components)
+  const selectedValue = selectedHour === null ? null : (overview.hourly[selectedHour] ?? null)
+  const shown = selectedHour === null ? overview.current : selectedValue
+  const fraction = selectedHour === null ? overview.fraction : dayFraction(selectedValue, overview.min, overview.max)
 
   return (
-    <Card>
-      <View style={styles.rowBetween}>
-        <Txt variant="label">Strompreis</Txt>
-        {overview.rating === 'cheap' ? <Badge label="günstig" tone="ok" /> : null}
-        {overview.rating === 'expensive' ? <Badge label="teuer" tone="open" /> : null}
-      </View>
-      <View style={styles.priceRow}>
-        <PriceGauge fraction={overview.fraction} size={52} />
-        <View style={styles.flex}>
+    <Card gap={4}>
+      <View style={styles.headerRow}>
+        <Txt variant="label" style={styles.flex} onTextLayout={checkLabelWidth}>
+          {selectedHour !== null ? hourRange(selectedHour) : shortLabel ? 'Strompreis' : 'Heutiger Strompreis'}
+        </Txt>
+        <View style={styles.priceRow}>
+          <PriceGauge fraction={fraction} size={28} />
           <View style={styles.priceValue}>
-            <Txt variant="number">{overview.current === null ? '–' : formatCtValue(overview.current, 3)}</Txt>
-            <Txt variant="strong" color="muted">
-              ct/kWh
+            <Txt variant="heading" style={styles.priceNumber}>
+              {shown === null ? '–' : formatCtValue(shown, 3)}
             </Txt>
+            <Txt variant="small">ct/kWh</Txt>
           </View>
-          <Txt variant="muted">
-            {overview.slotLabel === null ? 'Für diese Viertelstunde liegt kein Preis vor.' : `${formatDateValue(new Date())}, ${overview.slotLabel}`}
-          </Txt>
         </View>
       </View>
-      <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} />
-      <View style={styles.toggleRow}>
-        <Txt variant="strong" style={styles.flex}>
-          Zusätzliche Preisbestandteile
-        </Txt>
-        <Switch
-          value={withComponents}
-          onValueChange={setWithComponents}
-          trackColor={{ false: theme.bar, true: theme.accent }}
-          thumbColor={withComponents ? theme.accentFg : theme.muted}
-          ios_backgroundColor={theme.bar}
-          accessibilityLabel="Zusätzliche Preisbestandteile einrechnen"
-        />
-      </View>
+      {overview.current === null && selectedHour === null ? <Txt variant="muted">Für diese Viertelstunde liegt kein Preis vor.</Txt> : null}
+      <PriceStrip hourly={overview.hourly} currentHour={overview.currentHour} height={72} onSelect={setSelectedHour} />
     </Card>
   )
+}
+
+/** Lage eines Stundenpreises zwischen Tagestief (0) und Tageshoch (1). */
+function dayFraction(value: number | null, min: number | null, max: number | null): number | null {
+  if (value === null || min === null || max === null) return null
+  return max > min ? Math.min(1, Math.max(0, (value - min) / (max - min))) : 0.5
 }
 
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', gap: 12 },
   stat: { flex: 1, gap: 2 },
   statValue: { fontVariant: ['tabular-nums'] },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   flex: { flex: 1 },
-  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  priceValue: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 0 },
+  priceValue: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
+  priceNumber: { fontVariant: ['tabular-nums'] },
 })

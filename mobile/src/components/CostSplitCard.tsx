@@ -5,13 +5,14 @@ import { Card } from '@/components/Card'
 import { Txt } from '@/components/Txt'
 import { formatEuro } from '@/lib/format'
 import { SHARE_COLORS } from '@/lib/chartColors'
-import { COST_SHARES, costSplit, formatPercent } from '@/lib/usage'
+import { COST_SHARES, costSplit, wholePercents } from '@/lib/usage'
 import { useTheme } from '@/theme'
 
 /** Aufteilung der Kosten des Zeitraums in Börsenpreis, Aufschlag und Abgaben. */
 export function CostSplitCard({ totals }: { totals: UsageBucket }) {
   const theme = useTheme()
   const split = costSplit(totals)
+  const percents = wholePercents(split.share)
 
   return (
     <Card gap={14}>
@@ -20,7 +21,7 @@ export function CostSplitCard({ totals }: { totals: UsageBucket }) {
           <View key={key} style={styles.entry}>
             <View style={styles.legend}>
               <View style={[styles.swatch, { backgroundColor: SHARE_COLORS[key] }]} />
-              <Txt variant="strong">{formatPercent(split.share[key])}</Txt>
+              <Txt variant="strong">{percents[key]} %</Txt>
             </View>
             <Txt variant="small" numberOfLines={1}>
               {label}
