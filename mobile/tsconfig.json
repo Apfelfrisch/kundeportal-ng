@@ -10,7 +10,8 @@
     },
     "types": [
       "jest"
-    ]
+    ],
+    "jsx": "react"
   },
   "include": [
     "**/*.ts",
