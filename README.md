@@ -125,6 +125,52 @@ ergänzt werden), Mobile-Detect-Serverweiche (responsive Navigation im SPA).
 - [ ] friesen-werk: Börsenpreise, Abrechnung, Lastgänge (Flag-Gating prüfen)
 - [ ] Mails in Mailpit: Absender, Anrede/Grußformel des Mandanten, Links
 
+## Bekannte Lücken ggü. der alten Anwendung
+
+Durch einen manuellen Vergleich mit `kundenportal` identifizierte Funktionen,
+die noch fehlen oder sich verhalten anders verhalten. Vor einem
+Produktivgang durchgehen und bewusst entscheiden (nachbauen oder als
+akzeptierte Abweichung dokumentieren).
+
+**Sicherheit / Daten**
+- [ ] `customer_messages.data` ist unverschlüsselt (JSON-Cast), im alten
+      Portal per `EncryptedArrayFields`-Cast feldweise mit dem APP_KEY
+      verschlüsselt (IBAN, Adressen, Kontaktdaten liegen aktuell im
+      Klartext in der DB).
+- [ ] Kein Schutz vor versehentlicher APP_KEY-Rotation in Produktion (alt:
+      `KeyGenerateCommand`-Override), wird erst mit obigem Punkt relevant.
+- [ ] IP-Beschränkung für den Admin-/Intern-Bereich (alt: `RestrictAdminIp`
+      + `config('admin.allowed_ips')`) nicht portiert.
+
+**Fachprozesse**
+- [ ] Automatisches Anlegen von Benutzerkonten + Einladungsmail für neue
+      Verträge ohne Zuordnung (alt: `app:sync-contract-index` +
+      `app:create-missing-user-accounts`, täglich per Scheduler). Aktuell
+      nur manuell über „Benutzer anlegen“ möglich.
+- [ ] „System-Todos“ (alt: `Todo`-Model, Dashboard-Widget „Offene Todos“,
+      Erledigt-Markieren) komplett nicht portiert.
+
+**Admin-Bedienbarkeit**
+- [ ] Mailverkehr-Log pro Benutzer einsehbar (`UserMailLog` wird weiterhin
+      geschrieben, aber nirgends angezeigt, weder API-Endpoint noch UI).
+- [ ] Vertrag einem Benutzer zuweisen per E-Mail-Suche mit Autocomplete
+      (alt: `datalist` über bestehende Nutzer); neu nur per numerischer
+      Benutzer-ID.
+- [ ] Ticket-Filter „Bearbeiter“ als Dropdown mit Namen aller Admins; neu
+      nur Freitext-Eingabe der Bearbeiter-ID.
+- [ ] Schnelllinks „Kundenblatt“ / „Vertragsblatt“ / externer KVS-Link aus
+      Ticket- und Ausgang-Listen heraus.
+- [ ] Direktnachricht an einen Kunden aus Vertrags-, Benutzer- oder
+      Ticket-Zeile heraus (aktuell nur zentral über das Postfach möglich).
+- [ ] Filter „Setup-Mail erhalten“ in der Benutzerübersicht.
+- [ ] „Vertragszuweisung entfernen“ ist nur noch auf der Benutzerseite
+      verfügbar, nicht mehr direkt aus der Vertragsliste heraus.
+
+**Mobile App** (Web-Frontend und API decken bereits alle 8 Formulare ab)
+- [ ] Änderungsformular Kontaktdaten
+- [ ] Änderungsformular Widerruf
+- [ ] Postfach/Chat-Screen inkl. Datei-Upload
+
 ## Architektur-Konventionen (api/)
 
 - Jede Klasse `final`, jede Datei `declare(strict_types=1)`.
